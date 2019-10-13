@@ -1,0 +1,95 @@
+#instal stunnel (true/false)
+stunnel_install: 'true'
+
+#Redis Files Driectory
+redis_rmp: redis-5.0.5-1.el7.remi.x86_64.rpm
+
+#redis new directories
+redis_folder_dir: "/etc/redis"
+redis_log_dir: "/var/log/redis"
+redis_dump_dir: "/opt/redis"
+
+#redis *.conf installation directory
+redis_conf_dir: "/etc/redis.conf"
+redis_sentinel_dir: "/etc/redis-sentinel.conf"
+
+#redis standart directory
+redis_conf_new_dir: "/etc/redis/redis.conf"
+redis_sentinel_new__dir: "/etc/redis/redis-sentinel.conf"
+redis_shutdown_dir: "/etc/redis/redis-shutdown.conf"
+
+#redis service
+redis_service_dir: "/usr/lib/systemd/system/redis.service"
+redis_sentinel_service_dir: "/usr/lib/systemd/system/redis-sentinel.service"
+
+#sentinel directories
+sentinal_pid: "/var/run/redis-sentinel.pid"
+sentinel_dir: "/tmp"
+
+#Redis template
+redis_jinja_template: "redis.conf.j2"
+redis_jinja_shutdown: "redis-shutdown.conf.j2"
+redis_jinja_service: "redis.service.j2"
+redis_sentinel_jinja_service: "redis-sentinel.service.j2"
+
+#Sentinel Template
+sentinel_jinja_template: "redis-sentinel.conf.j2"
+sentinel__dir: "/etc/redis/redis-sentinel.conf"
+
+#redis.conf configurations
+tcp_backlog: 65535
+supervised: systemd
+pidfile: "/var/run/redis_{{ port_redis }}.pid"
+logfile: "/var/log/redis/redis_{{ port_redis }}.log"
+dbfilename: "dump_{{ port_redis }}.rdb"
+dir: "/opt/redis"
+min_replicas_to_write: 1
+min_replicas_max_lag: 10
+daemonize: "yes"
+maxclients: 300000
+maxmemory: 12gb
+maxmemory_policy: volatile-lru
+appendonly: "yes"
+appendfsync: everysec
+replicaof: "{{ bind }} {{ redis_master_port }}"
+replicaof_stunnel: "{{ redis_master }} {{ redis_master_port }}"
+LimitNOFILE: 300000
+auth_password: wzBdwbRz3nK5AUiw6xL553dorhbGsYpfH7sgf5MT
+
+r1: rename-command FLUSHDB 4fjMzktwYv
+r2: rename-command FLUSHALL GDXCEvHb2H
+r3: rename-command KEYS FQvJGOss8p
+r4: rename-command PEXPIRE N5avoEhCsU
+r5: rename-command CONFIG 6zrJvH72ym
+r6: rename-command SHUTDOWN uGjOwccaxY
+r7: rename-command BGREWRITEAOF 6oQkx4sEEh
+r8: rename-command BGSAVE a8103IIPgY
+r9: rename-command SAVE fY7cLDdl8v
+r10: rename-command SPOP R6EXalC6Xi
+r11: rename-command SREM Y2Wy0GHgrD
+r12: rename-command RENAME Og6Cw3FkzD
+r13: rename-command DEBUG jnrP08vYra
+r14: rename-command EXPIRE kF5u0uXLbR
+
+#Service Shutdown commands
+shutdown: shutdown
+pass: uGjOwccaxY
+
+#Sentinel Configurations
+logfile_sentinel: "/var/log/redis/sentinel_{{ port_sentinel }}.log"
+sentinel_reconfig_sentinel_deny_scripts_reconfig: "yes"
+sentinel_monitor: "{{ bind }} {{ redis_master_port }} 2"
+sentinel_monitor2: "{{ redis_master }} {{ redis_master_port }} 2"
+sentinel_down_after_milliseconds_mymaster: 5000
+sentinel_failover_timeout_mymaster: 10000
+sentinel_parallel_syncs_mymaster: 2
+
+s1: sentinel rename-command mymaster SAVE fY7cLDdl8v
+s2: sentinel rename-command mymaster EXPIRE kF5u0uXLbR
+s3: sentinel rename-command mymaster SREM Y2Wy0GHgrD
+s4: sentinel rename-command mymaster RENAME Og6Cw3FkzD
+s5: sentinel rename-command mymaster FLUSHALL GDXCEvHb2H
+s6: sentinel rename-command mymaster SHUTDOWN uGjOwccaxY
+s7: sentinel rename-command mymaster FLUSHDB 4fjMzktwYv
+s8: sentinel rename-command mymaster BGREWRITEAOF 6oQkx4sEEh
+s9: sentinel rename-command mymaster KEYS FQvJGOss8p

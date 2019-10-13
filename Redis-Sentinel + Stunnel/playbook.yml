@@ -1,0 +1,6 @@
+---
+- name: Install Redis-Sentinel
+  hosts: target1,target2,target3
+  roles:
+    - redis_install
+    - {role: stunnel, when: stunnel_install }

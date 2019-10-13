@@ -1,0 +1,133 @@
+---
+#Disable Firewall Service
+- name: Stop and disable firewalld.
+  service:
+    name: firewalld
+    state: stopped
+    enabled: False
+
+#Best Practise Disable Selinux
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+#Best Practise Disable OS SWAP
+- name: Disable swapoff
+  shell: swapoff -a
+
+- name: Disable swapoff permanently
+  replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+  register: swap_ch
+    #backup: yes
+
+#Reboot Machine if swap changed
+- name: Reboot immediately if there was a change.
+  shell: "sleep 5 && reboot"
+  async: 10 # Do not care for 10 sec
+  poll: 0 # Fire & Forget
+  when: swap_ch is changed
+
+- name: Wait for the reboot to complete if there was a change.
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5 # Do not check for at least 5 sec
+    timeout: 300
+  when: swap_ch is changed
+
+#copy redis rpm file
+- name: Copy redis RPM to /opt
+  copy:
+    src: "{{ redis_rmp }}"
+    dest: "{{ redis_rmp }}"
+
+#install Redis on Nexus
+- name: install Redis
+  yum:
+    name: "{{ redis_rmp }}"
+    state: present
+
+#Create ande set permission folder for redis
+- name: Create Redis Directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: redis
+    group: redis
+    mode: '0775'
+  with_items:
+    - "{{ redis_folder_dir }}"
+    - "{{ redis_log_dir }}"
+    - "{{ redis_dump_dir }}"
+
+#Exist and move file
+- name: Check Exist Files
+  stat: path="{{ redis_conf_dir }}"
+  register: file
+
+#Move redis File New Directory
+- name: Move Redis File
+  command: mv "{{ item }}" "{{ redis_folder_dir }}"
+  with_items:
+    - "{{ redis_conf_dir }}"
+    - "{{ redis_sentinel_dir }}"
+  when: file.stat.exists
+
+#Deploy temaplate to Redis directory
+- name: Copy Redis Templates
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+      - src: "{{ redis_jinja_template }}"
+        dest: "{{ redis_conf_new_dir }}"
+      - src: "{{ redis_jinja_shutdown }}"
+        dest: "{{ redis_shutdown_dir }}"
+      - src: "{{ sentinel_jinja_template }}"
+        dest: "{{ sentinel__dir }}"
+      - src: "{{ redis_sentinel_jinja_service }}"
+        dest: "{{ redis_sentinel_service_dir }}"
+      - src: "{{ redis_jinja_service }}"
+        dest: "{{ redis_service_dir }}"
+
+#Set permission Recursively change ownership of a Redis Files
+- name: Recursively change ownership of a Redis Files
+  file:
+    path: "{{ item }}"
+    mode: '0644'
+    owner: redis
+    group: redis
+  with_items:
+    - "{{ redis_conf_new_dir }}"
+    - "{{ redis_sentinel_new__dir }}"
+
+#Best Practise Copy disable-thp to /etc/init.d/
+- name: Copy disable-thp to /etc/init.d/
+  copy:
+    src: disable-thp
+    dest: "/etc/init.d/disable-thp"
+    mode: 0700
+
+#Best Practise edit configuration /etc/sysctl.conf
+- sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  loop:
+    - { name: 'vm.overcommit_memory', value: '1' }
+    - { name: 'net.ipv4.tcp_max_syn_backlog', value: '65535' }
+    - { name: 'net.core.somaxconn', value: '65535' }
+
+#Start Redis Service
+- name: Start Redis Services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    daemon_reload: yes
+    state: started
+  with_items:
+    - redis
+    - redis-sentinel
+  when: "{{ stunnel_install }} | bool == false"

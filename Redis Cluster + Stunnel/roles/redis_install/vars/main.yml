@@ -1,0 +1,82 @@
+#instal stunnel (true/false)
+stunnel_install: 'false'
+
+#Redis Files Driectory
+redis_rmp: redis-5.0.5-1.el7.remi.x86_64.rpm
+
+#redis new directories
+redis_folder_dir: "/etc/redis"
+redis_log_dir: "/var/log/redis"
+redis_dump_dir1: "/opt/redis/{{ port_redis1 }}"
+redis_dump_dir2: "/opt/redis/{{ port_redis2 }}"
+
+#redis *.conf installation directory
+redis_conf_dir: "/etc/redis.conf"
+redis_sentinel_dir: "/etc/redis-sentinel.conf"
+
+#redis standart directory
+redis_conf_new_dir1: "/etc/redis/redis_{{ port_redis1 }}.conf"
+redis_conf_new_dir2: "/etc/redis/redis_{{ port_redis2 }}.conf"
+redis_shutdown_dir: "/etc/redis/redis-shutdown.conf"
+
+#redis service
+redis_service_dir1: "/usr/lib/systemd/system/redis_{{ port_redis1 }}.service"
+redis_service_dir2: "/usr/lib/systemd/system/redis_{{ port_redis2 }}.service"
+
+#Redis template
+redis_jinja_template1: "redis.conf.j2"
+redis_jinja_template2: "redis.conf2.j2"
+redis_jinja_shutdown: "redis-shutdown.conf.j2"
+redis_jinja_service1: "redis.service.j2"
+redis_jinja_service2: "redis.service2.j2"
+
+#Cluster configurations
+cluster_enabled: "yes"
+cluster_config_file1: "nodes-{{ port_redis1 }}.conf"
+cluster_config_file2: "nodes-{{ port_redis2 }}.conf"
+Cluster_node_timeout: 5000
+
+#redis.conf configurations
+tcp_backlog: 65535
+supervised: systemd
+
+pidfile1: "/var/run/redis_{{ port_redis1 }}.pid"
+logfile1: "/var/log/redis/redis_{{ port_redis1 }}.log"
+
+pidfile2: "/var/run/redis_{{ port_redis2 }}.pid"
+logfile2: "/var/log/redis/redis_{{ port_redis2 }}.log"
+
+dbfilename1: "dump_{{ port_redis1 }}.rdb"
+dbfilename2: "dump_{{ port_redis2 }}.rdb"
+
+dir1: "/opt/redis/{{ port_redis1 }}"
+dir2: "/opt/redis/{{ port_redis2 }}"
+min_replicas_to_write: 1
+min_replicas_max_lag: 10
+daemonize: "yes"
+maxclients: 30000
+maxmemory: 12gb
+maxmemory_policy: volatile-lru
+appendonly: "yes"
+appendfsync: everysec
+LimitNOFILE: 300000
+auth_password: wzBdwbRz3nK5AUiw6xL553dorhbGsYpfH7sgf5MT
+
+r1: rename-command FLUSHDB 4fjMzktwYv
+r2: rename-command FLUSHALL GDXCEvHb2H
+r3: rename-command KEYS FQvJGOss8p
+r4: rename-command PEXPIRE N5avoEhCsU
+r5: rename-command CONFIG 6zrJvH72ym
+r6: rename-command SHUTDOWN uGjOwccaxY
+r7: rename-command BGREWRITEAOF 6oQkx4sEEh
+r8: rename-command BGSAVE a8103IIPgY
+r9: rename-command SAVE fY7cLDdl8v
+r10: rename-command SPOP R6EXalC6Xi
+r11: rename-command SREM Y2Wy0GHgrD
+r12: rename-command RENAME Og6Cw3FkzD
+r13: rename-command DEBUG jnrP08vYra
+r14: rename-command EXPIRE kF5u0uXLbR
+
+#Service Shutdown commands
+shutdown: shutdown
+pass: uGjOwccaxY

@@ -1,0 +1,8 @@
+galaxy_info:
+  author: Oktay Savdi
+  description: Redis Cluster + Stunnel installation
+  company: your company (optional)
+  license: license (GPL-2.0-or-later, MIT, etc)
+  min_ansible_version: 2.8.5
+  galaxy_tags: [redis,cluster,stunnel,redis-cluster]
+dependencies: []

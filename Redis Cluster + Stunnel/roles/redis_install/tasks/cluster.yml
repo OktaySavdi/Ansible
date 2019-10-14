@@ -1,0 +1,9 @@
+---
+- name: Run Redis Cluster Commands
+  hosts: target1
+  tasks:
+    - shell: "printf 'yes' | redis-cli --cluster create {{ server1 }}:{{ port_redis1 }} {{ server1 }}:{{ port_redis2 }} {{ server2 }}:{{ port_redis3 }} {{ server2 }}:{{ port_redis4 }} {{ server3 }}:{{ port_redis5 }} {{ server3 }}:{{ port_redis6 }} --cluster-replicas 1 -a {{ auth_password }}"
+      when: "{{ stunnel_install }} | bool == false"
+
+    - shell: "printf 'yes' | redis-cli --cluster create {{ bind }}:{{ port_redis1 }} {{ bind }}:{{ port_redis2 }} {{ bind }}:{{ port_redis3 }} {{ bind }}:{{ port_redis4 }} {{ bind }}:{{ port_redis5 }} {{ bind }}:{{ port_redis6 }} --cluster-replicas 1 -a {{ auth_password }}"
+      when: "{{ stunnel_install }} | bool == true"

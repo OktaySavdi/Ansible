@@ -1,0 +1,144 @@
+target1 ansible_host=10.10.10.10 ansible_ssh_pass=Abc123
+target2 ansible_host=10.10.10.11 ansible_ssh_pass=Abc123
+target3 ansible_host=10.10.10.12 ansible_ssh_pass=Abc123
+
+[master]
+target1
+
+[master:vars]
+bind=127.0.0.1
+port_redis1="6101"
+port_redis2="6102"
+port_redis3="6103"
+port_redis4="6104"
+port_redis5="6105"
+port_redis6="6106"
+
+#define server for cluster
+server1="10.10.10.10"
+server2="10.10.10.11"
+server3="10.10.10.12"
+
+inbound_worker_accept1 = 10.10.10.10:6101
+inbound_worker_connect1 = 127.0.0.1:6101
+
+inbound_worker_accept2 = 10.10.10.10:6102
+inbound_worker_connect2 = 127.0.0.1:6102
+
+inbound_gossip_accept1 = 10.10.10.10:16101
+inbound_gossip_connect1 = 127.0.0.1:16101
+
+inbound_gossip_accept2 = 10.10.10.10:16102
+inbound_gossip_connect2 = 127.0.0.1:16102
+
+outbound_worker_accept1 = 127.0.0.1:6103
+outbound_worker_connect1 = 10.10.10.11:6103
+
+outbound_worker_accept2 = 127.0.0.1:6104
+outbound_worker_connect2 =  10.10.10.11:6104
+
+outbound_worker_accept3 = 127.0.0.1:6105
+outbound_worker_connect3 = 10.10.10.12:6105
+
+outbound_worker_accept4 = 127.0.0.1:6106
+outbound_worker_connect4 = 10.10.10.12:6106
+
+outbound_gossip_accept1 = 127.0.0.1:16103
+outbound_gossip_connect1 = 10.10.10.11:16103
+
+outbound_gossip_accept2 = 127.0.0.1:16104
+outbound_gossip_connect2 = 10.10.10.11:16104
+
+outbound_gossip_accept3 = 127.0.0.1:16105
+outbound_gossip_connect3 = 10.10.10.12:16105
+
+outbound_gossip_accept4 = 127.0.0.1:16106
+outbound_gossip_connect4 = 10.10.10.12:16106
+
+[slave1]
+target2
+
+[slave1:vars]
+bind=127.0.0.1
+port_redis1="6103"
+port_redis2="6104"
+
+inbound_worker_accept1 = 10.10.10.11:6103
+inbound_worker_connect1 = 127.0.0.1:6103
+
+inbound_worker_accept2 = 10.10.10.11:6104
+inbound_worker_connect2 = 127.0.0.1:6104
+
+inbound_gossip_accept1 = 10.10.10.11:16103
+inbound_gossip_connect1 = 127.0.0.1:16103
+
+inbound_gossip_accept2 = 10.10.10.11:16104
+inbound_gossip_connect2 = 127.0.0.1:16104
+
+outbound_worker_accept1 = 127.0.0.1:6101
+outbound_worker_connect1 = 10.10.10.10:6101
+
+outbound_worker_accept2 = 127.0.0.1:6102
+outbound_worker_connect2 = 10.10.10.10:6102
+
+outbound_worker_accept3 = 127.0.0.1:6105
+outbound_worker_connect3 = 10.10.10.12:6105
+
+outbound_worker_accept4 = 127.0.0.1:6106
+outbound_worker_connect4 = 10.10.10.12:6106
+
+outbound_gossip_accept1 = 127.0.0.1:16101
+outbound_gossip_connect1 = 10.10.10.10:16101
+
+outbound_gossip_accept2 = 127.0.0.1:16102
+outbound_gossip_connect2 = 10.10.10.10:16102
+
+outbound_gossip_accept3 = 127.0.0.1:16105
+outbound_gossip_connect3 = 10.10.10.12:16105
+
+outbound_gossip_accept4 = 127.0.0.1:16106
+outbound_gossip_connect4 = 10.10.10.12:16106
+
+[slave2]
+target3
+
+[slave2:vars]
+bind=127.0.0.1
+port_redis1="6105"
+port_redis2="6106"
+
+inbound_worker_accept1 = 10.10.10.12:6105
+inbound_worker_connect1 = 127.0.0.1:6105
+
+inbound_worker_accept2 = 10.10.10.12:6106
+inbound_worker_connect2 = 127.0.0.1:6106
+
+inbound_gossip_accept1 = 10.10.10.12:16105
+inbound_gossip_connect1 = 127.0.0.1:16105
+
+inbound_gossip_accept2 = 10.10.10.12:16106
+inbound_gossip_connect2 = 127.0.0.1:16106
+
+outbound_worker_accept1 = 127.0.0.1:6103
+outbound_worker_connect1 = 10.10.10.11:6103
+
+outbound_worker_accept2 = 127.0.0.1:6104
+outbound_worker_connect2 =  10.10.10.11:6104
+
+outbound_worker_accept3 = 127.0.0.1:6101
+outbound_worker_connect3 = 10.10.10.10:6101
+
+outbound_worker_accept4 = 127.0.0.1:6102
+outbound_worker_connect4 = 10.10.10.10:6102
+
+outbound_gossip_accept1 = 127.0.0.1:16103
+outbound_gossip_connect1 = 10.10.10.11:16103
+
+outbound_gossip_accept2 = 127.0.0.1:16104
+outbound_gossip_connect2 = 10.10.10.11:16104
+
+outbound_gossip_accept3 = 127.0.0.1:16101
+outbound_gossip_connect3 = 10.10.10.10:16101
+
+outbound_gossip_accept4 = 127.0.0.1:16102
+outbound_gossip_connect4 = 10.10.10.10:16102

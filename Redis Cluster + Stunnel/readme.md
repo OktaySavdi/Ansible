@@ -11,7 +11,7 @@
 ![2019-10-15 13_02_59-2019_10_15_12_59_18_02_Redis_Cluster_Kur _BookStack png - Paint](https://user-images.githubusercontent.com/3519706/66822082-32c78400-ef4c-11e9-845b-cd3e0062968a.png)
 
 
-**Stunnel for installation**
+## Stunnel for installation
 
 if installation with stunnel
 

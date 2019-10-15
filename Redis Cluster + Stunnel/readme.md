@@ -2,6 +2,7 @@
 
 -   Ansible 2.8.5
 -   Compatible with most versions of RHEL 7.6
+-   redis cluster and stunnel configuration
   
 ![2019-10-15 12_56_33-Redis - oktaysavdi@gmail com - Evernote](https://user-images.githubusercontent.com/3519706/66821660-75d52780-ef4b-11e9-8366-d5b37ebfdce6.png)
 

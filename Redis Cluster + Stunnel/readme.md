@@ -1,4 +1,4 @@
-# Ansible Redis Cluster
+# Ansible Redis Cluster + Stunnel
 
 -   Ansible 2.8.5
 -   Compatible with most versions of RHEL 7.6

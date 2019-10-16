@@ -1,4 +1,4 @@
-# Ansible Elasticserach Cluster  + Kibana
+# Ansible Elasticsearch Cluster  + Kibana
 
 -   Ansible 2.8.5
 -   Compatible with most versions of RHEL 7.6

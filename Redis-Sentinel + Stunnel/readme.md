@@ -23,6 +23,20 @@ change value (true/false)
 
 ## Installation
 
+I use a **nexus server** because my computer cannot access the **internet**. 
+you may not use nexus so install the version you want to download **.rpm** 
+files and put them to the address below.
+
+> redis*.rpm
+
+    roles/redis_install/files
+
+and change this field
+
+    roles/redis_install/vars/main.yml
+
+>    **redis_rmp:** redis-5.0.5-1.el7.remi.x86_64.rpm
+
 Check Syntax
 
     ansible-playbook playbook.yml -i inventor.txt --syntax-check

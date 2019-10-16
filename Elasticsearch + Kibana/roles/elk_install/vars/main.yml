@@ -1,0 +1,43 @@
+#Elasticsearch RPM File Name
+es_rpm: elasticsearch-7.4.0-x86_64.rpm
+kibana_rpm: kibana-7.4.0-x86_64.rpm
+
+#ELK Set Heapsize on jvm.options
+heap1: "-Xms1g"
+heap2: "-Xmx1g"
+
+#ELK Set Service parameters
+LimitMEMLOCK: "LimitMEMLOCK=infinity"
+
+#Set elasticserach.yml parameters
+cluster_name : ElasticsearchCluster
+node_master: "true"
+node_data: "true"
+http_port: 9200
+transport_port: 9300
+
+discovery_zen_minimum_master_nodes: 2
+bootstrap_memory_lock: "true"
+gateway_recover_after_nodes: 1
+gateway_expected_nodes: 3
+gateway_recover_after_time: 5m
+path_data: /opt/elasticsearch
+path_logs: /var/log/elasticsearch
+
+#ES Data path
+path_data_dir: /opt/elasticsearch
+es_path_dir: /etc/elasticsearch/elasticsearch.yml
+es_jvmops_path_dir: /etc/elasticsearch/jvm.options
+es_service_path_dir: /usr/lib/systemd/system/elasticsearch.service
+kibana_path_dir: /etc/kibana/kibana.yml
+
+#Elasticsearch template
+es_jinja_service: "elasticsearch.service.j2"
+es_jinja_template: "elasticsearch.yml.j2"
+es_jinja_jvmoptions: "jvm.options.j2"
+kibana_jinja_template: "kibana.yml.j2"
+
+#Kibana configuration
+server_port: 5601
+server_host: "{{ network_host }}"
+console_enabled: false

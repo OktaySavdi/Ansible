@@ -1,0 +1,11 @@
+---
+- name: Install Eleasticsearch Cluster
+  hosts: target1,target2,target3
+  tasks:
+    -  include_vars:
+         dir: roles/elk_install/vars
+         extensions:
+           - yml
+    - import_role:
+        name: elk_install
+- import_playbook: roles/elk_install/tasks/kibana.yml

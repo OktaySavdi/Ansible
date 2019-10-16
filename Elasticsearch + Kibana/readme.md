@@ -42,7 +42,7 @@ Run Playbook
 
     ansible-playbook playbook.yml -i inventor.txt
 
-## Check Elasticsearch + kibana
+## Check Elasticsearch + Cluster + Kibana
 
 Control Nodes
 
@@ -50,6 +50,10 @@ Control Nodes
 Control Cluster
 
     curl -X GET "10.10.10.10:9200/_cluster/health?pretty"
+
+Control Kibana
+
+    curl  http://10.10.10.10:5601/app/kibana
 
 ## Service Status
 

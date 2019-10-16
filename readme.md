@@ -14,3 +14,6 @@
 
 ## Elasticsearch Cluster + Kibana
 ![image](https://user-images.githubusercontent.com/3519706/66912891-31658c80-f01c-11e9-8f78-f9d6d086c94d.png)
+
+## RabbitMQ Cluster
+![image](https://user-images.githubusercontent.com/3519706/66912983-61149480-f01c-11e9-98e4-ace7fd7c3aba.png)

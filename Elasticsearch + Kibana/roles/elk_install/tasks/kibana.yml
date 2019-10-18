@@ -1,29 +1,20 @@
+#copy Kibana rpm file
+- name: copy kibana rpm
+  copy:
+    src: "{{ kibana_rpm }}"
+    dest: "{{ kibana_rpm }}"
+  when: ansible_hostname == "{{ node_name1 }}"
 
----
-- name: install Kibana
-  hosts: target1
-  tasks:
-    #copy Kibana rpm file
-    - name: Copy Kibana RPM
-      copy:
-        remote_src: yes
-        src: "{{ kibana_rpm }}"
-        dest: "{{ kibana_rpm }}"
+  #install Kibana on Nexus
+- name: install kibana
+  yum:
+    name: "{{ kibana_rpm }}"
+    state: present
+  when: ansible_hostname == "{{ node_name1 }}"
 
-   #install Kibana on Nexus
-    - name: install Kibana
-      yum:
-        name: "{{ kibana_rpm }}"
-        state: present
-
-   #Deploy Kibana template
-    - name: Deploy Kibana File
-      template: src="{{ kibana_jinja_template }}" dest="{{ kibana_path_dir }}"
-
-  #Start Kibana Service
-    - name: Start Kibana Service
-      service:
-        name: kibana
-        enabled: yes
-        daemon_reload: yes
-        state: started
+  #Deploy Kibana template
+- name: Deploy Kibana File
+  template: src="{{ kibana_jinja_template }}" dest="{{ kibana_path_dir }}"
+  notify:
+      restart kibana
+  when: ansible_hostname == "{{ node_name1 }}"

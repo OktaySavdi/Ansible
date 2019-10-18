@@ -1,0 +1,35 @@
+---
+#copy Elasticsearch rpm file
+- name: Copy Elasticsearch RPM to /root
+  copy:
+    src: "{{ es_rpm }}"
+    dest: "{{ es_rpm }}"
+
+#install Elasticsearch on Nexus
+- name: install Elasticsearch
+  yum:
+    name: "{{ es_rpm }}"
+    state: present
+
+#Create ande set permission folder for Elasticsearch
+- name: Create Elasticsearch Directory
+  file:
+    path: "{{ path_data_dir }}"
+    state: directory
+    recurse: true
+    owner: elasticsearch
+    group: elasticsearch
+    mode: '0755'
+
+#Deploy temaplate to Elasticsearch directory
+- name: Copy Elasticsearch Templates
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+      - src: "{{ es_jinja_service }}"
+        dest: "{{ es_service_path_dir }}"
+      - src: "{{ es_jinja_template }}"
+        dest: "{{ es_path_dir }}"
+      - src: "{{ es_jinja_jvmoptions }}"
+        dest: "{{ es_jvmops_path_dir }}"
+  notify:
+    restart elasticsearch

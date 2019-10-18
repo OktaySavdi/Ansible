@@ -2,7 +2,7 @@ target1 ansible_host=10.10.10.10 ansible_ssh_pass=Abc123
 target2 ansible_host=10.10.10.11 ansible_ssh_pass=Abc123
 target3 ansible_host=10.10.10.12 ansible_ssh_pass=Abc123
 
-[elasticsearch_yml]
+[elasticsearch]
 target1
 target2
 target3
@@ -16,28 +16,22 @@ target2
 [elasticsearch_server3]
 target3
 
-[elasticsearch_yml:vars]
-node_name1=es1
-node_name2=es2
-node_name3=es3
+[elasticsearch:vars]
+node_name1=master
+node_name2=slave1
+node_name3=slave2
 discovery_seed_hosts1=10.10.10.10
 discovery_seed_hosts2=10.10.10.11
 discovery_seed_hosts3=10.10.10.12
 
 [elasticsearch_server1:vars]
-servername=es1
+servername=master
 network_host=10.10.10.10
 
 [elasticsearch_server2:vars]
-servername=es2
+servername=slave1
 network_host=10.10.10.11
 
 [elasticsearch_server3:vars]
-servername=es3
+servername=slave2
 network_host=10.10.10.12
-
-[kibana]
-target1
-
-[kibana:vars]
-hostname=es1

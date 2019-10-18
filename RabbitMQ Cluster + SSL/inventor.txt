@@ -1,6 +1,6 @@
-target1 ansible_host=10.10.10.10 ansible_ssh_pass=Maps2018
-target2 ansible_host=10.10.10.11 ansible_ssh_pass=Maps2018
-target3 ansible_host=10.10.10.12 ansible_ssh_pass=Maps2018
+target1 ansible_host=10.10.10.10 ansible_ssh_pass=Abc123
+target2 ansible_host=10.10.10.11 ansible_ssh_pass=Abc123
+target3 ansible_host=10.10.10.12 ansible_ssh_pass=Abc123
 
 [rabbitmq]
 target1

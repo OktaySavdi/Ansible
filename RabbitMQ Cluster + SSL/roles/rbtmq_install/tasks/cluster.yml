@@ -1,0 +1,42 @@
+---
+#Stop Slave Server RabbitMQ Service
+- name: Stop RabbitMQ Service
+  service:
+    name: rabbitmq-server
+    state: stopped
+  when: ansible_hostname != "{{ node_leader }}"
+
+#Get earlang.cookie file
+- name: Fetch erlang cookie
+  slurp: src="{{ path_erlang_cookie }}"
+  register: erlang_cookie
+  delegate_to: "{{ rabbitmq_leader }}"
+  run_once: yes
+
+#Put earlang.cookie file
+- name: Redistribute erlang cookie
+  copy:
+      content: "{{ erlang_cookie.content | b64decode }}"
+      dest: "{{ path_erlang_cookie }}"
+      mode: 0400
+      owner: rabbitmq
+      group: rabbitmq
+
+- name: Start RabbitMQ Service
+  service:
+    name: rabbitmq-server
+    state: started
+  when: ansible_hostname != "{{ node_leader }}"
+
+#join Node on RabbitMQ Cluster
+- name: Stop RabbitMQ Apps
+  command: rabbitmqctl stop_app
+  when: ansible_hostname != "{{ node_leader }}"
+
+- name: Join RabbitMQ Apps
+  command: "rabbitmqctl join_cluster rabbit@{{ node_leader }}"
+  when: ansible_hostname != "{{ node_leader }}"
+
+- name: Start RabbitMQ apps
+  command: rabbitmqctl start_app
+  when: ansible_hostname != "{{ node_leader }}"

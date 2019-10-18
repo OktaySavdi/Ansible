@@ -1,0 +1,64 @@
+#RabbitMQ RPM File Name
+rbmq_rpm: rabbitmq-server-3.8.0-1.el7.noarch.rpm
+earlang_rpm: erlang-22.1.3-1.el7.x86_64.rpm
+
+#RabbitMQ Servcie
+rabbitmq_service: rabbitmq-server
+
+#Add hostfile for rabbit
+hostfile1: rabbit@{{ node_leader }}
+hostfile2: rabbit@{{ node_slave1 }}
+hostfile3: rabbit@{{ node_slave2 }}
+
+#Cert File Name
+rabbitmq_certfile:
+  - cacert.pem
+  - cert.pem
+  - key.pem
+
+ERL_SSL_PATH: /usr/lib64/erlang/lib/ssl-9.4/ebin
+ssl_dist_optfile: /etc/rabbitmq/ssl_dist.config
+ssl_advance_config: /etc/rabbitmq/advanced.config
+
+ssl_port_rabbit: 5671
+ssl_port_console: 15671
+cacertfile: /etc/rabbitmq/ssl/cacert.pem
+certfile: /etc/rabbitmq/ssl/cert.pem
+keyfile: /etc/rabbitmq/ssl/key.pem
+
+# plugins for HTTP API monitor
+rabbitmq_plugins:
+  - rabbitmq_management
+  - rabbitmq_management_agent
+  - rabbitmq_shovel
+  - rabbitmq_shovel_management
+
+# plugins for HTTP API monitor
+rabbitmq_join_nodes:
+  - rabbitmqctl stop_app
+  - "rabbitmqctl join_cluster rabbit@{{ node_leader }}"
+  - rabbitmqctl start_app
+
+#Set elasticserach.yml parameters
+cluster_name : RabbitMQCluster
+loopback_users: none
+cluster_partition_handling: pause_minority
+vm_memory_high_watermark_relative: "0.6"
+
+#RabbitMQ template
+rbmq_jinja_template: "rabbitmq.conf.j2"
+rbmq_jinja_env: "rabbitmq-env.conf.j2"
+rbmq_jinja_env_ssl: "rabbitmq-env.conf2.j2"
+rbmq_jinja_adv: "advanced.config.j2"
+rbmq_jinja_ssl: "ssl_dist.config.j2"
+
+#RabbitMQ Directories
+path_conf_dir: /etc/rabbitmq/
+path_data_dir: /var/lib/rabbitmq/
+path_cert_dir: /etc/rabbitmq/ssl/
+path_rbmqconf_dir: /etc/rabbitmq/rabbitmq.conf
+path_rbmqenv_dir: /etc/rabbitmq/rabbitmq-env.conf
+path_ssl_dist_dir: /etc/rabbitmq/ssl_dist.config
+path_ssl_adv_dir: /etc/rabbitmq/advanced.config
+path_rbmdb_dir: /opt/rabbitmq/mnesia
+path_erlang_cookie: /var/lib/rabbitmq/.erlang.cookie

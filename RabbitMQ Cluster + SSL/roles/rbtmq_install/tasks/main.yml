@@ -1,0 +1,9 @@
+---
+- include_tasks: bestpractise.yml
+
+- include_tasks: install.yml
+
+- include_tasks: cluster.yml
+
+- include_tasks: ssl.yml
+  when: ssl_active

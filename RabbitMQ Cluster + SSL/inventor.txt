@@ -1,0 +1,28 @@
+target1 ansible_host=10.10.10.10 ansible_ssh_pass=Maps2018
+target2 ansible_host=10.10.10.11 ansible_ssh_pass=Maps2018
+target3 ansible_host=10.10.10.12 ansible_ssh_pass=Maps2018
+
+[rabbitmq]
+target1
+target2
+target3
+
+[rabbitmq_server1]
+target1
+
+[rabbitmq_server2]
+target2
+
+[rabbitmq_server3]
+target3
+
+[rabbitmq:vars]
+ssl_active=false
+
+rabbitmq_leader=10.10.10.10
+rabbitmq_slave1=10.10.10.11
+rabbitmq_slave2=10.10.10.12
+
+node_leader=servername1
+node_slave1=servername2
+node_slave2=servername3

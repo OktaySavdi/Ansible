@@ -1,0 +1,68 @@
+#copy RabbitMQ rpm file
+- name: Copy RPM File to Root
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - { src: "{{ earlang_rpm }}", dest: "{{ earlang_rpm }}" }
+    - { src: "{{ rbmq_rpm }}", dest: "{{ rbmq_rpm }}" }
+
+#install RabbitMQ on Nexus
+- name: install RabbitMQ
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ earlang_rpm }}"
+    - "{{ rbmq_rpm }}"
+
+#Create ande set permission folder for RabbitMQ
+- name: Create RabbitMQ Directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: "true"
+    owner: rabbitmq
+    group: rabbitmq
+    mode: '0750'
+  with_items:
+    - "{{ path_data_dir }}"
+    - "{{ path_rbmdb_dir }}"
+
+#Deploy temaplate to RabbitMQ directory
+- name: rabbitmq default file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: rabbitmq
+    group: rabbitmq
+    mode: '0644'
+  with_items:
+    - { src:  "{{ rbmq_jinja_template }}" , dest: "{{ path_rbmqconf_dir }}" }
+    - { src: "{{ rbmq_jinja_env }}", dest: "{{ path_rbmqenv_dir }}" }
+
+#Start RabbitMQ Service
+- name: Start RabbitMQ Service
+  service:
+    name: rabbitmq-server
+    enabled: yes
+    daemon_reload: yes
+    state: started
+
+#Set permission Recursively change ownership of a Redis Files
+- name: change ownership of a erlang cookie
+  file:
+    path: "{{ item }}"
+    mode: '0400'
+    owner: rabbitmq
+    group: rabbitmq
+  with_items:
+    - "{{ path_erlang_cookie }}"
+
+#Enable the plugins
+- name: Enable the plugins is installed
+  rabbitmq_plugin:
+    names: "{{ item }}"
+    state: enabled
+    new_only: yes
+  with_items: "{{ rabbitmq_plugins }}"
+  notify:
+    restart rabbitmq-server

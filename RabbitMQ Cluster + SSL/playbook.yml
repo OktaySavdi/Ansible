@@ -1,0 +1,5 @@
+---
+- name: Install Eleasticsearch Cluster
+  hosts: rabbitmq
+  roles:
+      - rbtmq_install

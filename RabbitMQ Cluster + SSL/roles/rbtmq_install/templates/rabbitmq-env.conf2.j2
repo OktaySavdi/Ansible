@@ -1,0 +1,13 @@
+RABBITMQ_CONFIG_FILE={{ path_rbmqconf_dir }}
+RABBITMQ_MNESIA_BASE={{ path_rbmdb_dir }}
+ADVANCED_CONFIG_FILE={{ ssl_advance_config }}
+
+ERL_SSL_PATH={{ ERL_SSL_PATH }}
+
+SERVER_ADDITIONAL_ERL_ARGS="+K true +A 128 -pa $ERL_SSL_PATH
+  -proto_dist inet_tls
+  -ssl_dist_optfile {{ ssl_dist_optfile }}"
+
+CTL_ERL_ARGS="-pa $ERL_SSL_PATH
+  -proto_dist inet_tls
+  -ssl_dist_optfile {{ ssl_dist_optfile }}"

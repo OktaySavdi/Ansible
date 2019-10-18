@@ -1,0 +1,27 @@
+#Create ande set permission folder for RabbitMQ
+- name: Create RabbitMQ SSL Directory
+  file:
+    path: "{{ path_cert_dir }}"
+    state: directory
+
+#Copy Cert file to /etc/rabbitmq/ssl/
+- name: Copy Cert File to SSL Directory
+  copy:
+    src: "{{ item }}"
+    dest: "{{ path_cert_dir }}"
+  with_items: "{{ rabbitmq_certfile }}"
+
+#Deploy SSL file to RabbitMQ directory
+- name: Deploy SSL file to RabbitMQ directory
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: rabbitmq
+    group: rabbitmq
+    mode: '0644'
+  with_items:
+    - { src:  "{{ rbmq_jinja_ssl }}" , dest: "{{ path_ssl_dist_dir }}" }
+    - { src: "{{ rbmq_jinja_adv }}", dest: "{{ path_ssl_adv_dir }}" }
+    - { src: "{{ rbmq_jinja_env_ssl }}", dest: "{{ path_rbmqenv_dir }}" }
+  notify:
+    restart rabbitmq-server

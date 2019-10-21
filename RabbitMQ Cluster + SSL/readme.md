@@ -96,7 +96,7 @@ as follows
 
 without SSL
 
-    https://10.10.10.10:15672
+    https://10.10.10.10:15671
    
    ![image](https://user-images.githubusercontent.com/3519706/67088837-d1531f80-f1ae-11e9-8531-29c876fadadc.png)
 

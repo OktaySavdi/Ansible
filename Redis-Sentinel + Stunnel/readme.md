@@ -1,3 +1,4 @@
+
 # Ansible Redis-Sentinel  + Stunnel
 
 -   Ansible 2.8.5
@@ -13,13 +14,18 @@
 
 **Stunnel for installation**
 
-if installation with stunnel
 
-    /roles/redis_install/vars/
+change value (**true/false**) on **inventory.txt**
 
-change value (true/false)
+    stunnel_install= "false"
 
-    stunnel_install: 'true'
+## Certificate
+
+    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/stunnel/redis-server.key -out /etc/stunnel/redis-server.crt
+
+|redis-server.key  |private key  |
+|--|--|
+| **redis-server.crt** | **public certificate** |
 
 ## Installation
 
@@ -37,11 +43,34 @@ and change this field
 
 >    **redis_rmp:** redis-5.0.5-1.el7.remi.x86_64.rpm
 
-Check Syntax
+if you have an internet-connected machine, do the following
+
+change this field
+
+    #copy redis rpm file
+    - name: Copy redis RPM to /opt
+      copy:
+        src: "{{ redis_rmp }}"
+        dest: "{{ redis_rmp }}"
+    
+    #install Redis on Nexus
+    - name: install Redis
+      yum:
+        name: "{{ redis_rmp }}"
+        state: present
+as follows
+
+    #install Redis on Nexus
+    - name: install Redis
+      yum:
+        name: "http://(redis rpm URL)/redis*.rpm"
+        state: present
+
+**Check Syntax**
 
     ansible-playbook playbook.yml -i inventor.txt --syntax-check
 
-Run Playbook
+**Run Playbook**
 
     ansible-playbook playbook.yml -i inventor.txt
 

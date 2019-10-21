@@ -80,11 +80,11 @@ as follows
 
 with Stunnel
 
-    redis-cli -h 127.0.0.1 -p 26101 -a wzBdwbRz3nK5AUiw6xL553dorhbGsYpfH7sgf5MT sentinel info
+    redis-cli -h 127.0.0.1 -p 26101 -a wzBdwbRz3nK5AUiw6xL553dorhbGsYpfH7sgf5MT info
 
 without Stunnel
 
-    redis-cli -h 10.10.10.10 -p 6101 -a wzBdwbRz3nK5AUiw6xL553dorhbGsYpfH7sgf5MT sentinel info
+    redis-cli -h 10.10.10.10 -p 6101 -a wzBdwbRz3nK5AUiw6xL553dorhbGsYpfH7sgf5MT info
 
 ## Service Status
 

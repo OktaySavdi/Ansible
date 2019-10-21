@@ -1,0 +1,76 @@
+cert = {{ cert1 }}
+key = {{ cert2 }}
+pid = {{ pid }}
+output={{ log }}
+fips={{ fips }}
+
+sslVersion={{ sslVersion }}
+options={{ SSLv2 }}
+options={{ SSLv3 }}
+options={{ TLSv1 }}
+
+# Inbound Redis Worker Port
+
+[redis-server-6101]
+client=no
+accept = {{ inbound_worker_accept1 }}
+connect = {{ inbound_worker_connect1 }}
+
+[redis-server-6102]
+client=no
+accept = {{ inbound_worker_accept2 }}
+connect = {{ inbound_worker_connect2 }}
+
+# Inbound Redis Gossip Port
+
+[redis-server-gossip-16101]
+client=no
+accept = {{ inbound_gossip_accept1 }}
+connect = {{ inbound_gossip_connect1 }}
+
+[redis-server-gossip-16102]
+client=no
+accept = {{ inbound_gossip_accept2 }}
+connect = {{ inbound_gossip_connect2 }}
+
+# Outbound Redis Worker Port
+[redis-client-6103]
+client=yes
+accept = {{ outbound_worker_accept1 }}
+connect = {{ outbound_worker_connect1 }}
+
+[redis-client-6104]
+client=yes
+accept = {{ outbound_worker_accept2 }}
+connect = {{ outbound_worker_connect2 }}
+
+[redis-client-6105]
+client=yes
+accept = {{ outbound_worker_accept3 }}
+connect = {{ outbound_worker_connect3 }}
+
+[redis-client-6106]
+client=yes
+accept = {{ outbound_worker_accept4 }}
+connect = {{ outbound_worker_connect4 }}
+
+# Outbound Gossip
+[redis-client-gossip-6103]
+client=yes
+accept = {{ outbound_gossip_accept1 }}
+connect = {{ outbound_gossip_connect1 }}
+
+[redis-client-gossip-6104]
+client=yes
+accept = {{ outbound_gossip_accept2 }}
+connect = {{ outbound_gossip_connect2 }}
+
+[redis-client-gossip-6105]
+client=yes
+accept = {{ outbound_gossip_accept3 }}
+connect = {{ outbound_gossip_connect3 }}
+
+[redis-client-gossip-6106]
+client=yes
+accept = {{ outbound_gossip_accept4 }}
+connect = {{ outbound_gossip_connect4 }}

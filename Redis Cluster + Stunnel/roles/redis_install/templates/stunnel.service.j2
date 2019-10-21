@@ -1,0 +1,20 @@
+[Unit]
+Description=Redis icin SSL Tunel
+After=network.target
+After=syslog.target
+
+[Install]
+WantedBy=multi-user.target
+Alias=stunnel.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/stunnel {{ stunnel_conf_path }}
+ExecStop=/usr/bin/pkill stunnel
+LimitNOFILE={{ LimitNOFILE }}
+
+# If no response to Ping is given,
+TimeoutSec={{ TimeoutSec }}
+
+Restart=always
+PrivateTmp=false

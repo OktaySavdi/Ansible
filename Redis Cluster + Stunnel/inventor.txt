@@ -2,22 +2,34 @@ target1 ansible_host=10.10.10.10 ansible_ssh_pass=Abc123
 target2 ansible_host=10.10.10.11 ansible_ssh_pass=Abc123
 target3 ansible_host=10.10.10.12 ansible_ssh_pass=Abc123
 
-[master]
+[redis]
 target1
+target2
+target3
 
-[master:vars]
+[redis:vars]
+#instal stunnel (true/false)
+stunnel_install= "false"
+
 bind=127.0.0.1
-port_redis1="6101"
-port_redis2="6102"
 port_redis3="6103"
 port_redis4="6104"
 port_redis5="6105"
 port_redis6="6106"
 
+node_leader=master
+
 #define server for cluster
 server1="10.10.10.10"
 server2="10.10.10.11"
 server3="10.10.10.12"
+
+[master]
+target1
+
+[master:vars]
+port_redis1="6101"
+port_redis2="6102"
 
 inbound_worker_accept1 = 10.10.10.10:6101
 inbound_worker_connect1 = 127.0.0.1:6101
@@ -59,7 +71,6 @@ outbound_gossip_connect4 = 10.10.10.12:16106
 target2
 
 [slave1:vars]
-bind=127.0.0.1
 port_redis1="6103"
 port_redis2="6104"
 
@@ -103,7 +114,6 @@ outbound_gossip_connect4 = 10.10.10.12:16106
 target3
 
 [slave2:vars]
-bind=127.0.0.1
 port_redis1="6105"
 port_redis2="6106"
 

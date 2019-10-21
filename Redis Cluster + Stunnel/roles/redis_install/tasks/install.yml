@@ -1,0 +1,79 @@
+---
+#copy redis rpm file
+- name: Copy redis RPM to /opt
+  copy:
+    src: "{{ redis_rmp }}"
+    dest: "{{ redis_rmp }}"
+
+#install Redis on Nexus
+- name: install Redis
+  yum:
+    name: "{{ redis_rmp }}"
+    state: present
+
+#Create ande set permission folder for redis
+- name: Create Redis Directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: redis
+    group: redis
+    mode: '0775'
+  with_items:
+    - "{{ redis_folder_dir }}"
+    - "{{ redis_log_dir }}"
+    - "{{ redis_dump_dir1 }}"
+    - "{{ redis_dump_dir2 }}"
+
+#Exist and move file
+- name: Check Exist Files
+  stat: path="{{ redis_conf_dir }}"
+  register: file
+
+#Delete redis Files
+- name: Ansible delete file example
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ redis_conf_dir }}"
+    - "{{ redis_sentinel_dir }}"
+  when: file.stat.exists
+
+#Deploy temaplate to Redis directory
+- name: Copy Redis Templates
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+      - src: "{{ redis_jinja_template1 }}"
+        dest: "{{ redis_conf_new_dir1 }}"
+      - src: "{{ redis_jinja_shutdown }}"
+        dest: "{{ redis_shutdown_dir }}"
+      - src: "{{ redis_jinja_template2 }}"
+        dest: "{{ redis_conf_new_dir2 }}"
+      - src: "{{ redis_jinja_service1 }}"
+        dest: "{{ redis_service_dir1 }}"
+      - src: "{{ redis_jinja_service2 }}"
+        dest: "{{ redis_service_dir2 }}"
+
+#Set permission Recursively change ownership of a Redis Files
+- name: Recursively change ownership of a Redis Files
+  file:
+    path: "{{ item }}"
+    mode: '0644'
+    owner: redis
+    group: redis
+  with_items:
+    - "{{ redis_conf_new_dir1 }}"
+    - "{{ redis_conf_new_dir2 }}"
+
+#Start Redis Service
+- name: Start Redis Services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    daemon_reload: yes
+    state: started
+  with_items:
+    - redis_{{ port_redis1 }}.service
+    - redis_{{ port_redis2 }}.service
+  when: "{{ stunnel_install }} | bool == false"

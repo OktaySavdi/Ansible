@@ -1,0 +1,68 @@
+#Start Redis Services
+- name: Stop Redis Services
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - redis
+    - redis-sentinel
+
+#copy redis rpm file
+- name: Copy stunnel PM to /opt
+  copy:
+    src: "{{ stunnel_rpm }}"
+    dest: "{{ stunnel_rpm }}"
+
+#install Redis on Nexus
+- name: install Stunnel
+  yum:
+    name: "{{ stunnel_rpm }}"
+    state: present
+
+#Create ande set permission folder for Stunnel
+- name: Create Stunnel Directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+  with_items:
+      - "{{ stunnel_dir }}"
+      - "{{ stunnel_cert_dir }}"
+
+#Deploy temaplate to Redis directory
+- name: Copy Redis Templates
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+      - src: "{{ stunnel_jinja_conf }}"
+        dest: "{{ stunnel_conf_path }}"
+      - src: "{{ stunnel_jinja_service }}"
+        dest: "{{ stunnel_service_path }}"
+
+#Copy Certificate to Cert Folder
+- name: Copy Certificate
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - { src: "{{ cert_name }}", dest: "{{ cert }}" }
+    - { src: "{{ key_name }}", dest: "{{ cert }}" }
+
+#Set permission Recursively change ownership of a Redis Files
+- name: Recursively change ownership of a Redis Files
+  file:
+    path: "{{ item }}"
+    mode: '0600'
+  with_items:
+    - "{{ cert1 }}"
+    - "{{ cert2 }}"
+
+#Start Redis Service
+- name: Start Redis Services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    daemon_reload: yes
+    state: started
+  with_items:
+    - stunnel
+    - redis
+    - redis-sentinel

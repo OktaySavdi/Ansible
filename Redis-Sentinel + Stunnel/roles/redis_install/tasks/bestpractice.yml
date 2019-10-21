@@ -1,0 +1,57 @@
+---
+#Disable Firewall Service
+- name: Stop and disable firewalld.
+  service:
+    name: firewalld
+    state: stopped
+    enabled: False
+
+#Best Practise Disable Selinux
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+#Best Practise Disable OS SWAP
+- name: Disable swapoff
+  shell: swapoff -a
+
+- name: Disable swapoff permanently
+  replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+  register: swap_ch
+    #backup: yes
+
+#Best Practise Copy disable-thp to /etc/init.d/
+- name: Copy disable-thp to /etc/init.d/
+  copy:
+    src: disable-thp
+    dest: "/etc/init.d/disable-thp"
+    mode: 0700
+
+#Best Practise edit configuration /etc/sysctl.conf
+- sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  loop:
+    - { name: 'vm.overcommit_memory', value: '1' }
+    - { name: 'net.ipv4.tcp_max_syn_backlog', value: '65535' }
+    - { name: 'net.core.somaxconn', value: '65535' }
+
+#Reboot Machine if swap changed
+- name: Reboot immediately if there was a change.
+  shell: "sleep 5 && reboot"
+  async: 10 # Do not care for 10 sec
+  poll: 0 # Fire & Forget
+  when: swap_ch is changed
+
+- name: Wait for the reboot to complete if there was a change.
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5 # Do not check for at least 5 sec
+    timeout: 300
+  when: swap_ch is changed

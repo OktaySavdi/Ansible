@@ -2,13 +2,24 @@ target1 ansible_host=10.10.10.10 ansible_ssh_pass=Abc123
 target2 ansible_host=10.10.10.11 ansible_ssh_pass=Abc123
 target3 ansible_host=10.10.10.12 ansible_ssh_pass=Abc123
 
+[redis]
+target1
+target2
+target3
+
+[redis:vars]
+#instal stunnel (true/false)
+stunnel_install= 'false'
+
+bind=127.0.0.1
+redis_master=10.10.10.10
+redis_master_port="6101"
+
+
 [master]
 target1
 
 [master:vars]
-bind=127.0.0.1
-redis_master=10.10.10.10
-redis_master_port="6101"
 port_redis="6101"
 port_sentinel=26101
 switch=#
@@ -35,9 +46,6 @@ outbound_gossip_connect2=10.10.10.12:26103
 target2
 
 [slave1:vars]
-bind=127.0.0.1
-redis_master=10.10.10.10
-redis_master_port="6101"
 port_redis="6102"
 port_sentinel=26102
 switch=
@@ -64,9 +72,6 @@ outbound_gossip_connect2=10.10.10.10:26101
 target3
 
 [slave2:vars]
-bind=127.0.0.1
-redis_master=10.10.10.10
-redis_master_port="6101"
 port_redis="6103"
 port_sentinel=26103
 switch=

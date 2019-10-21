@@ -1,0 +1,44 @@
+cert = {{ cert1 }}
+key = {{ cert2 }}
+pid = {{ pid }}
+output={{ log }}
+fips={{ fips }}
+
+sslVersion={{ sslVersion }}
+options={{ SSLv2 }}
+options={{ SSLv3 }}
+options={{ TLSv1 }}
+
+# Inbound Redis Worker Port
+[redis-server-1]
+client=no
+accept = {{ inbound_worker_accept }}
+connect = {{ inbound_worker_connect }}
+
+# Inbound Redis Gossip Port
+[redis-server-gossip-1]
+client=no
+accept = {{ inbound_gossip_accept }}
+connect = {{ inbound_gossip_connect }}
+
+# Outbound Redis Worker Port
+[redis-client-2]
+client=yes
+accept = {{ outbound_worker_accept }}
+connect = {{ outbound_worker_connect }}
+
+[redis-client-3]
+client=yes
+accept = {{ outbound_worker_accept2 }}
+connect = {{ outbond_worker_connect2 }}
+
+# Outbound Gossip
+[redis-client-gossip-2]
+client=yes
+accept = {{ outbound_gossip_accept }}
+connect = {{ outbound_gossip_connect }}
+
+[redis-client-gossip-3]
+client=yes
+accept = {{ outbound_gossip_accept2 }}
+connect = {{ outbound_gossip_connect2 }}

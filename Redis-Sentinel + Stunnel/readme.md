@@ -12,7 +12,12 @@
 ![2019-10-15 13_16_33-2019_10_15_12_59_18_02_Redis_Cluster_Kur _BookStack png - Paint](https://user-images.githubusercontent.com/3519706/66823067-204e4a00-ef4e-11e9-9327-f753be68981d.png)
 
 
-**Stunnel for installation**
+## Getting started
+
+Below are a few example playbooks and configurations for deploying a variety of Redis architectures.
+This role expects to be run as root
+
+## Optional Stunnel for installation
 
 
 change value (**true/false**) on **inventory.txt**

@@ -1,3 +1,4 @@
+
 # Ansible Elasticsearch Cluster  + Kibana
 
 -   Ansible 2.8.5
@@ -33,12 +34,41 @@ and change this field
 >    **es_rpm**: elasticsearch-7.4.0-x86_64.rpm
 
 >    **kibana_rpm**: kibana-7.4.0-x86_64.rpm
+>    
+if you have an internet-connected machine, do the following
 
-Check Syntax
+change this field
+
+    #copy Elasticsearch rpm file
+        - name: Copy Elasticsearch RPM to /root
+	      copy:
+	        src: "{{ es_rpm }}"
+	        dest: "{{ es_rpm }}"
+          
+    #install Elasticsearch on Nexus
+       - name: install Elasticsearch
+         yum:
+	       name: "{{ es_rpm }}"
+	       state: present
+
+as follows
+
+    #install RabbitMQ on Nexus
+        - name: install RabbitMQ
+          yum:
+	        name: "{{ item }}"
+	        state: present
+         with_items:
+	       - "http://(elastic rpm URL)/elastic*.rpm"
+	       - "http://(kibana rpm URL)/kibana*.rpm"
+
+
+
+**Check Syntax**
 
     ansible-playbook playbook.yml -i inventor.txt --syntax-check
 
-Run Playbook
+**Run Playbook**
 
     ansible-playbook playbook.yml -i inventor.txt
 

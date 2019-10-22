@@ -12,8 +12,12 @@
 
 ![2019-10-15 13_02_59-2019_10_15_12_59_18_02_Redis_Cluster_Kur _BookStack png - Paint](https://user-images.githubusercontent.com/3519706/66905959-7b944100-f00f-11e9-8bfb-4d697a46f88a.png)
 
+## Getting started
 
-## RabbitMQ SSL Activation
+Below are a few example playbooks and configurations for deploying a variety of RabbitMQ architectures.
+This role expects to be run as root
+
+## Optional RabbitMQ SSL Activation
 
 change value (**true/false**) on **inventory.txt**
 

@@ -1,0 +1,81 @@
+---
+#add computer name on hosts files
+- name: Add Computer Name on Hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item }}"
+  with_items:
+    - '{{ kafka_server1 }} {{ node1_name }}'
+    - '{{ kafka_server2 }} {{ node2_name }}'
+    - '{{ kafka_server3 }} {{ node3_name }}'
+
+#create user and group
+- name: create group
+  group: name={{ kafka_user }}
+
+- name: create account
+  user: name={{ kafka_user }} group={{ kafka_user }}
+
+#Create ande set permission folder for kafka
+- name: Create kafka Directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0775'
+  with_items: "{{ kafka_directories }}"
+
+#copy kafka rpm file
+- name: copy kafka and JDK files
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - { src: "{{ jdk_rpm }}", dest: "{{ jdk_rpm }}" }
+    - { src: "{{ kafka_tgz_name }}", dest: "{{ kafka_tgz_name }}" }
+
+#install kafka on Nexus
+- name: install JDK for Kafka
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ jdk_rpm }}"
+
+#Extract kafka
+- name: extract kafka tar file
+  unarchive:
+    src: "{{ kafka_tgz_name }}"
+    dest: "{{ kafka_opt_dir }}"
+    extra_opts:
+    - --strip-components=1
+#    extra_opts: [--strip-components=1]
+
+#Create myid File
+- name: Create myid File
+  shell: echo "{{ myid }}" > {{ kafka_myid_dir }}
+  args:
+    warn: no
+
+#Deploy temaplate to kafka directory
+- name: Copy kafka Templates
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+      - src: "{{ kafka_server_jinja_temp }}"
+        dest: "{{ server_properties }}"
+      - src: "{{ kafka_zookeeper_jinja_temp }}"
+        dest: "{{ zookeeper_properties }}"
+      - src: "{{ kafka_service_jinja_temp }}"
+        dest: "{{ kafka_service_dir }}"
+      - src: "{{ zookeper_service_jinja_temp }}"
+        dest: "{{ zookeeper_service_dir }}"
+
+#Start kafka Service
+- name: Start kafka and zookeeper Services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    daemon_reload: yes
+    state: started
+  with_items:
+    - "{{ kafka_service }}"
+    - "{{ zookeeper_service }}"

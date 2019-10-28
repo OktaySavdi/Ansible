@@ -1,0 +1,4 @@
+---
+- include_tasks: bestpractice.yml
+
+- include_tasks: install.yml

@@ -1,0 +1,57 @@
+#Define installation Files
+jdk_rpm: jdk-11.0.5_linux-x64_bin.rpm
+kafka_tgz_name: kafka.tgz
+
+#kafka user
+kafka_user: kafka
+
+#Service Name
+kafka_service: kafka.service
+zookeeper_service: zookeeper.service
+
+#kafka directories
+kafka_directories:
+  - /data/zookeeper
+  - /data/kafka
+  - /opt/kafka
+
+kafka_dataDir: /data/zookeeper
+kafka_opt_dir: /opt/kafka
+kafka_myid_dir: /data/zookeeper/myid
+kafka_log_dirs: /data/kafka
+
+#kafka Templates
+kafka_server_jinja_temp: server.properties.j2
+kafka_zookeeper_jinja_temp: zookeeper.properties.j2
+kafka_service_jinja_temp: kafka.service.j2
+zookeper_service_jinja_temp: zookeeper.service.j2
+
+#Kafka properties
+server_properties: /opt/kafka/config/server.properties
+zookeeper_properties: /opt/kafka/config/zookeeper.properties
+kafka_service_dir: /etc/systemd/system/kafka.service
+zookeeper_service_dir: /etc/systemd/system/zookeeper.service
+
+kafka_log: /opt/kafka/kafka.log
+kafka_start_server: /opt/kafka/bin/kafka-server-start.sh
+kafka_stop_server: /opt/kafka/bin/kafka-server-stop.sh
+zookeeper_start_server: /opt/kafka/bin/zookeeper-server-start.sh
+zookeeper_stop_server: /opt/kafka/bin/zookeeper-server-stop.sh
+
+#Zookeper properties
+clientPort: 2181
+maxClientCnxns: 0
+tickTime: 2000
+initLimit: 10
+syncLimit: 5
+
+#Server properties
+delete_topic_enable: "true"
+num_partitions: 8
+default_replication_factor: 3
+log_retention_hours: 168
+log_segment_bytes: 1073741824
+log_retention_check_interval_ms: 300000
+zookeeper_connection_timeout_ms: 6000
+auto_create_topics_enable: false
+min_insync_replicas: 2

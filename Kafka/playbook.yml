@@ -1,5 +1,0 @@
----
-- name: Install Redis Cluster
-  hosts: kafka
-  roles:
-      - kafka_install

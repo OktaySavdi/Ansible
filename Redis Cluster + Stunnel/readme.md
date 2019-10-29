@@ -5,11 +5,11 @@
 -   Compatible with most versions of RHEL 7.6
 -   Redis cluster and Stunnel configuration
   
-![2019-10-15 12_56_33-Redis - oktaysavdi@gmail com - Evernote](https://user-images.githubusercontent.com/3519706/66821660-75d52780-ef4b-11e9-8366-d5b37ebfdce6.png)
+![redis cluster ssl for stunnel](https://user-images.githubusercontent.com/3519706/66821660-75d52780-ef4b-11e9-8366-d5b37ebfdce6.png)
 
 **Structure of automation**
 
-![2019-10-15 13_02_59-2019_10_15_12_59_18_02_Redis_Cluster_Kur _BookStack png - Paint](https://user-images.githubusercontent.com/3519706/66822082-32c78400-ef4c-11e9-845b-cd3e0062968a.png)
+![redis cluster tophology](https://user-images.githubusercontent.com/3519706/66822082-32c78400-ef4c-11e9-845b-cd3e0062968a.png)
 
 
 ## Getting started

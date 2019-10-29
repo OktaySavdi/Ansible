@@ -5,12 +5,12 @@
 -   Compatible with most versions of RHEL 7.6
 -   RabbitMQ Cluster and SSL configuration
   
-![image](https://user-images.githubusercontent.com/3519706/66912983-61149480-f01c-11e9-98e4-ace7fd7c3aba.png)
+![rabbitmq cluster](https://user-images.githubusercontent.com/3519706/66912983-61149480-f01c-11e9-98e4-ace7fd7c3aba.png)
 
 
 **Structure of automation**
 
-![2019-10-15 13_02_59-2019_10_15_12_59_18_02_Redis_Cluster_Kur _BookStack png - Paint](https://user-images.githubusercontent.com/3519706/66905959-7b944100-f00f-11e9-8bfb-4d697a46f88a.png)
+![rabb cluster tophology](https://user-images.githubusercontent.com/3519706/66905959-7b944100-f00f-11e9-8bfb-4d697a46f88a.png)
 
 ## Getting started
 
@@ -96,13 +96,13 @@ as follows
 
     http://10.10.10.10:15672
     
-![image](https://user-images.githubusercontent.com/3519706/67088580-2c384700-f1ae-11e9-84f8-5114f3da6052.png)
+![rabbitmq cluster ssl](https://user-images.githubusercontent.com/3519706/67088580-2c384700-f1ae-11e9-84f8-5114f3da6052.png)
 
 without SSL
 
     https://10.10.10.10:15671
    
-   ![image](https://user-images.githubusercontent.com/3519706/67088837-d1531f80-f1ae-11e9-8531-29c876fadadc.png)
+   ![rabbitmq cluster without ssl](https://user-images.githubusercontent.com/3519706/67088837-d1531f80-f1ae-11e9-8531-29c876fadadc.png)
 
 ## Service Status
 

@@ -14,4 +14,4 @@
 
 ## RabbitMQ Cluster
 
-## Kafka
+## Kafka Cluster

@@ -72,7 +72,7 @@ as follows
 
     ansible-playbook playbook.yml -i inventor.txt
 
-## Check Elasticsearch + Cluster + Kibana
+## Check Elasticsearch Cluster + Kibana
 
 Control Nodes
 

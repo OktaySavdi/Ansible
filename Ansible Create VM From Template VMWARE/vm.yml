@@ -1,0 +1,46 @@
+---
+- name: Create a VM from a template
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - vcenter
+    - servers
+  tasks:
+  - name: Clone the template
+    vmware_guest:
+      hostname: "{{ vcenter.access.hostname }}"
+      username: "{{ vcenter.access.username }}"
+      password: "{{ vcenter.access.password }}"
+      validate_certs: False
+      name: "{{item.hostname}}"
+      template: "{{ vcenter.guestlocation.template }}"
+      datacenter: "{{ vcenter.guestlocation.datacenter }}"
+      cluster: "{{ vcenter.guestlocation.cluster }}"
+      folder: "{{ servers.global.vm_folder }}"
+      state: poweredon
+      hardware:
+        memory_mb: "{{ item.memory }}"
+        num_cpus: "{{ item.num_cpus }}"
+      networks:
+      - name: "{{ servers.global.network }}"
+        ip: "{{ item.ip }}"
+        netmask: "{{ servers.global.netmask }}"
+        gateway: "{{ servers.global.gateway }}"
+        dns_servers: "{{ servers.global.dns_servers }}"
+        type: static
+        device_type: vmxnet3
+      wait_for_ip_address: yes
+      customization:
+        domain: "{{ servers.global.domain }}"
+        dns_servers: "{{ servers.global.dns_servers }}"
+        dns_suffix: "{{ servers.global.dns_suffix }}"
+    with_items:
+        - "{{ servers.nodelist }}"
+    async: 600  # Maximum runtime in seconds. Adjust as needed.
+    poll: 0  # Fire and continue (never poll)
+
+  - name: Wait 50 seconds, but only start checking after 60 seconds
+    wait_for_connection:
+      delay: 60
+      timeout: 50

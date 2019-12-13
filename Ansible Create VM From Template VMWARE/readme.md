@@ -7,8 +7,8 @@ Playbook and role to deploy multiple vSphere virtual machines from a template us
 
 **Requirements**
 
- - Python (≥ 2.8.5) 
- - Ansible 
+ - Python (python27) 
+ - Ansible (≥ 2.8.5)
  - PyVmomi
  
  ![Ansible-vmware](https://user-images.githubusercontent.com/3519706/67880393-9b6b4f00-fb4f-11e9-9275-3694f6f8b525.png)

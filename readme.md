@@ -5,7 +5,7 @@
 -   Compatible with most versions of RHEL 7.6
 
 
-We did 6 installation on Ansible
+**We did 6 installation on Ansible**
 1. Ansible Create VM From Template VMWARE
 
 2. Ansible Elasticsearch Cluster + Kibana

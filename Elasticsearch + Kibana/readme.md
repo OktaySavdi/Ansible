@@ -17,7 +17,7 @@ I use a **nexus server** because my computer cannot access the **internet**.
 you may not use nexus so install the version you want to download **.rpm** 
 files and put them to the address below.
 
-Download: [Elaticsearch](https://www.elastic.co/downloads/elasticsearch)
+Download: [Elasticsearch](https://www.elastic.co/downloads/elasticsearch)
 
 Download: [Kibana](https://www.elastic.co/products/kibana)
 

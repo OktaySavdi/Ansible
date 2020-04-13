@@ -53,8 +53,8 @@ change this field
 
 as follows
 
-    #install RabbitMQ on Nexus
-        - name: install RabbitMQ
+    #install Elasticsearch on Nexus
+        - name: install Elasticsearch and Kibana
           yum:
 	        name: "{{ item }}"
 	        state: present

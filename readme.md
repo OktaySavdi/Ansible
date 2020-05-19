@@ -17,3 +17,5 @@
 5. Ansible Redis Cluster + Stunnel
 
 6. Ansible Redis-Sentinel + Stunnel
+
+7. Ansible Jboss EAP Domain Controller

@@ -1,0 +1,55 @@
+- name: "Create JBoss User"
+  user: 
+    name: "jboss-eap"
+    shell: /sbin/nologin
+    state: present
+
+- name: Create the Jboss EAP's run directory
+  file:
+    path: "{{ jboss_run_directory }}"
+    state: directory
+    mode: '0755'
+
+- name: Copy Jboss Templates
+  template:
+    src: "{{ jboss_template }}"
+    dest: "{{ item }}"
+  with_items:
+    - "{{ jboss_service_dest }}/jboss-eap.conf"
+    - "{{ jboss_home }}/bin/init.d/jboss-eap.conf"
+
+- name: Copy Jboss conf files
+  copy:
+    src: "{{ jboss_home }}/bin/init.d/jboss-eap-rhel.sh"
+    dest: "{{ jboss_service_script_dest }}"
+
+- name: Recursively change ownership of a directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+    owner: "{{ jboss_service_user }}"
+    group: "{{ jboss_service_user }}"
+  with_items: 
+    - "{{ jboss_home }}"
+    - "{{ jboss_run_directory }}"
+
+- file:
+    path: "{{ jboss_service_directory }}"
+    state: touch
+    mode: "a+x"
+
+- name: Start & enable JBoss Systemd service
+  command: "{{ item }}"
+  with_items: 
+    - chkconfig --add jboss-eap-rhel.sh
+    - chkconfig jboss-eap-rhel.sh on
+  register: apply_service
+  until: apply_service.rc == 0
+  retries: 10
+  delay: 2
+
+- name: Start & enable JBoss Systemd service
+  service: 
+    name: "{{ jboss_service_name }}"
+    state: restarted

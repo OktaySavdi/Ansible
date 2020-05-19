@@ -1,0 +1,22 @@
+# jboss-eap user
+jboss_console_user: admin
+jboss_console_password: admin
+
+# jboss-eap service
+jboss_service_user: jboss-eap
+jboss_service_dest: /etc/default
+jboss_service_script_dest: /etc/init.d/
+jboss_service_directory: /etc/init.d/jboss-eap-rhel.sh
+jboss_service_name: jboss-eap-rhel
+
+#jboss-eap install
+jboss_zip_file: jboss-eap-7.3.0.zip
+jboss_extract_directory: /opt/
+jboss_zip_name: /opt/jboss-eap-7.3
+jboss_home: /opt/jboss-eap
+jboss_run_directory: /var/run/jboss-eap
+
+# jboss-eap template
+jboss_template: jboss-eap.conf.j2
+
+

@@ -1,0 +1,39 @@
+- name: Create the sqlserver directory
+  file:
+    path: "{{ jboss_home }}/modules/com/microsoft/sqlserver/main/"
+    state: directory
+    mode: '0755'
+  when: sqlserver == 'true'
+
+- name: Copy sqljdbc42.jar for sqlserver
+  copy:
+    src: "sqljdbc42.jar"
+    dest: "{{ jboss_home }}/modules/com/microsoft/sqlserver/main/"
+  when: sqlserver == 'true'
+
+- name: Copy module.xml for sqlserver
+  copy:
+    src: "sql_server_module.xml"
+    dest: "{{ jboss_home }}/modules/com/microsoft/sqlserver/main/module.xml"
+  when: sqlserver == 'true'
+
+  ####### oracleserver
+
+- name: Create the oracleserver directory
+  file:
+    path: "{{ jboss_home }}/modules/oracle/jdbc/main/"
+    state: directory
+    mode: '0755'
+  when: oracleserver == 'true'
+
+- name: Copy ojdbc6.jar for oracleserver
+  copy:
+    src: "ojdbc6.jar"
+    dest: "{{ jboss_home }}/modules/oracle/jdbc/main/"
+  when: oracleserver == 'true'
+
+- name: Copy module.xml for oracleserver
+  copy:
+    src: "oracle_server_module.xml"
+    dest: "{{ jboss_home }}/modules/oracle/jdbc/main/module.xml"
+  when: oracleserver == 'true'

@@ -1,0 +1,38 @@
+target1 ansible_host=10.10.10.10 ansible_ssh_pass=Abc123
+target2 ansible_host=10.10.10.11 ansible_ssh_pass=Abc123
+target3 ansible_host=10.10.10.12 ansible_ssh_pass=Abc123
+
+[jboss]
+target1
+target2
+target3
+
+[jboss:vars]
+master=jboss01
+slave1=jboss02
+slave2=jboss03
+master_IP=10.10.10.10
+
+[master]
+target1
+
+[slave1]
+target2
+
+[slave2]
+target3
+
+[master:vars]
+IP="10.10.10.10" 
+name="master" 
+role=master
+
+[slave1:vars]
+IP="10.10.10.11" 
+name="slave1-jboss02" 
+role=slave
+
+[slave2:vars]
+IP="10.10.10.12" 
+name="slave2-jboss03" 
+role=slave

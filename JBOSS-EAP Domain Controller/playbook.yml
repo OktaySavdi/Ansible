@@ -1,0 +1,5 @@
+---
+    - name: Install jboss Cluster
+      hosts: jboss
+      roles:
+          - jboss-eap

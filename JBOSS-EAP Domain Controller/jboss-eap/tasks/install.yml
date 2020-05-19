@@ -1,0 +1,35 @@
+#install jboss for dependancy 
+- name: Install required packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - unzip
+    - java-1.8.0-openjdk 
+  register: apply_feature
+  until: apply_feature.rc == 0
+  retries: 10
+  delay: 2
+
+# Copy jboss eap zip file
+- name: Copy Jboss eap zip files
+  copy:
+    src: "{{ jboss_zip_file }}"
+    dest: "{{ jboss_extract_directory }}"
+
+# Extract jboss.zip into /opt
+- name: Extract jboss.zip into /opt
+  unarchive:
+    src: "{{ jboss_extract_directory }}{{ jboss_zip_file }}"
+    dest: "{{ jboss_extract_directory }}"
+    remote_src: yes
+
+# Rename jboss-eap directory
+- name: Rename jboss-eap directory
+  command: mv "{{ jboss_zip_name }}" "{{ jboss_home }}"
+
+# Clean artifact path
+- name: Clean artifact path
+  file:
+    state: absent
+    path: "{{ jboss_extract_directory }}{{ jboss_zip_file }}"

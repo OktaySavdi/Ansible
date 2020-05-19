@@ -1,0 +1,8 @@
+---
+- include_tasks: install.yml
+
+- include_tasks: install_controller.yml
+
+- include_tasks: service.yml
+
+- include_tasks: datasource.yml

@@ -1,0 +1,58 @@
+- name: Adding the admin console user
+  shell: "{{ jboss_home }}/bin/add-user.sh -u admin -p admin"  
+  when:
+    - ansible_hostname == "{{ master }}"
+
+- name: Update public interface host-master.xml to
+  replace:
+    dest: "{{ jboss_home }}/domain/configuration/host-master.xml"
+    regexp: "jboss.bind.address.management:127.0.0.1"
+    replace: "jboss.bind.address.management:{{ IP }}"
+  when:
+    - ansible_hostname  == "{{ master }}"
+
+- name: Update public interface host-slave.xml to
+  replace:
+    dest: "{{ jboss_home }}/domain/configuration/host-slave.xml"
+    regexp: "{{ item.name }}"
+    replace: "{{ item.groups }}"
+  loop:
+    - { name: "jboss.bind.address:127.0.0.1", groups: "jboss.bind.address:{{ IP }}" }
+    - { name: "jboss.bind.address.management:127.0.0.1", groups: "jboss.bind.address.management:{{ IP }}" }
+  when:
+    - ansible_hostname  != "{{ master }}"
+
+- name: set slave identity
+  lineinfile:
+    dest: "{{ jboss_home }}/domain/configuration/host-slave.xml"
+    backrefs: yes
+    regexp: '(^(.*)<secret value=").*("/>$)'
+    line: '\1{{ jboss_console_password | b64encode }}\3'
+  when:
+    - ansible_hostname  != "{{ master }}"
+
+- name: set name for slave
+  lineinfile:
+    dest: "{{ jboss_home }}/domain/configuration/host-slave.xml"
+    backrefs: yes
+    regexp: '(^<host)\s*(?:name(.*))?(\s*xmlns="urn:jboss:domain:11.0">$)'
+    line: '\1 name="{{ name }}" \3'
+  when:
+    - ansible_hostname  != "{{ master }}"
+
+- name: set username for console on host-slave.xml
+  replace:
+    dest: "{{ jboss_home }}/domain/configuration/host-slave.xml"
+    regexp: '<remote security-realm="ManagementRealm">'
+    replace: '<remote security-realm="ManagementRealm" username="{{ jboss_console_user }}">'
+  when:
+    - ansible_hostname  != "{{ master }}"
+
+- name: Update domain master address host-slave.xml to
+  replace:
+    dest: "{{ jboss_home }}/domain/configuration/host-slave.xml"
+    regexp: "jboss.domain.master.address"
+    replace: "jboss.domain.master.address:{{ master_IP }}"
+  when:
+    - ansible_hostname  != "{{ master }}"
+  

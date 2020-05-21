@@ -19,7 +19,7 @@ This role expects to be run as root
 
 **Check Syntax**
 ```ruby
-ansible-playbook playbook.yml -i inventor.ini--syntax-check
+ansible-playbook playbook.yml -i inventor.ini --syntax-check
 ```
 **Run Playbook**
 

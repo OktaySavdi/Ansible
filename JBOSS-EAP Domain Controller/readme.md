@@ -19,11 +19,11 @@ This role expects to be run as root
 
 **Check Syntax**
 ```ruby
-ansible-playbook playbook.yml -i inventor.ini --syntax-check
+ansible-playbook playbook.yml -i inventor.txt --syntax-check
 ```
 **Run Playbook**
 
-    ansible-playbook playbook.yml -i inventor.ini
+    ansible-playbook playbook.yml -i inventor.txt
 
 ## Check Jboss Cluster
 ```ruby

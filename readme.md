@@ -19,3 +19,5 @@
 6. Ansible Redis-Sentinel + Stunnel
 
 7. Ansible Jboss EAP Domain Controller
+
+8. Openshift Application Dump

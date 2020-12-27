@@ -1,0 +1,24 @@
+- name: "OpenShift CLI login"
+  shell: oc login --token {{ token_ocpcluster1 }} --insecure-skip-tls-verify=false
+  when: cluster == "ocpcluster1"
+
+- name: "OpenShift CLI login"
+  shell: oc login --token {{ token_ocpcluster2 }} --insecure-skip-tls-verify=false
+  when: cluster == "ocpcluster2"
+
+- name: "OpenShift CLI login"
+  shell: oc login --token {{ token_ocpcluster3 }} --insecure-skip-tls-verify=false
+  when: cluster == "ocpcluster3"
+  
+- name: "Get dump for heap"
+  shell: oc exec {{ pod_name }} -c "$(echo {{ pod_name }} | rev | cut -d "-" -f3- | rev)" -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" -- jcmd 1 GC.heap_dump /tmp/{{ pod_name }}-heap.hprof
+
+- name: "Get dump file to local server"
+  shell: oc -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" rsync {{ pod_name }}:/tmp/{{ pod_name }}-heap.hprof /tmp/.
+
+- name: "Remove dump file on pods"
+  shell: oc exec {{ pod_name }} -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" -- rm /tmp/{{ pod_name }}-heap.hprof
+
+- name: "copy dump file to ftp"
+  shell: curl -T /tmp/{{ pod_name }}-heap.hprof ftp://{{ftp_server}}/{{ftp_path}}/{{ pod_name }}-heap.hprof && rm -rf /tmp/{{ pod_name }}-heap.hprof
+  #shell: sftp -b /tmp/{{ pod_name }}-heap.hprof anonymous@pgarftplog01:/tcpdump/ 

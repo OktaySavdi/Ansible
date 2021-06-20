@@ -1,6 +1,8 @@
 ftp_server: < myftpserver >
 ftp_path: < ftppath >
 
+cluster: ocpcluster1
+
 token_ocpcluster1: <token> https://api.ocpcluster1.hb.oc.local:6443
 
 token_ocpcluster2: <token> https://api.ocpcluster2.hb.oc.local:6443

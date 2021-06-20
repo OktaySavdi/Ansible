@@ -1,14 +1,5 @@
 - name: "OpenShift CLI login"
-  shell: oc login --token {{ token_ocpcluster1 }} --insecure-skip-tls-verify=false
-  when: cluster == "ocpcluster1"
-
-- name: "OpenShift CLI login"
-  shell: oc login --token {{ token_ocpcluster2 }} --insecure-skip-tls-verify=false
-  when: cluster == "ocpcluster2"
-
-- name: "OpenShift CLI login"
-  shell: oc login --token {{ token_ocpcluster3 }} --insecure-skip-tls-verify=false
-  when: cluster == "ocpcluster3"
+  shell: oc login --token "{{ vars['token_' + cluster ] }}" --insecure-skip-tls-verify=false
   
 - name: "Get dump for gc collect"
   shell: oc exec {{ pod_name }} -c "$(echo {{ pod_name }} | rev | cut -d "-" -f3- | rev)" -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" -- jcmd 1 GC.class_histogram > /tmp/{{ pod_name }}-GC_class_histogram.txt

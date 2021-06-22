@@ -1,0 +1,5 @@
+- name: ARK Openshift Bank
+  shell: |
+    curl -s -XGET -H "Authorization: Bearer {{ mycluster1 }}" -H 'Accept: application/json' "https://mycluster1.mydomain.com:6443/apis/network.openshift.io/v1/netnamespaces/{{ prj_name }}" --insecure | jq -r '.egressIPs' | tr -d ' []' | sed '/^\s*$/d'
+    curl -s -XGET -H "Authorization: Bearer {{ mycluster2 }}" -H 'Accept: application/json' "https://mycluster2.mydomain.com:6443/apis/network.openshift.io/v1/netnamespaces/{{ prj_name }}" --insecure | jq -r '.egressIPs' | tr -d ' []' | sed '/^\s*$/d'
+    curl -s -XGET -H "Authorization: Bearer {{ mycluster3 }}" -H 'Accept: application/json' "https://mycluster3.mydomain.com:6443/apis/network.openshift.io/v1/netnamespaces/{{ prj_name }}" --insecure | jq -r '.egressIPs' | tr -d ' []' | sed '/^\s*$/d'

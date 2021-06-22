@@ -1,6 +1,0 @@
-cluster: < mycluster >
-pod_name: < mypodname > 
-timeout: 30
-
-ftp_server: < myftpserver >
-ftp_path: < ftppath >

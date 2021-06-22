@@ -1,0 +1,5 @@
+---
+- name: get project ip addres on openshift clusters
+  hosts: all
+  roles:
+      - get_project_ip

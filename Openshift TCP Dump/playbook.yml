@@ -1,0 +1,5 @@
+---
+- name: Get dumps on pods
+  hosts: all
+  roles:
+      - tcp_dumps

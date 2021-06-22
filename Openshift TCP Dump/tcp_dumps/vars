@@ -4,9 +4,3 @@ timeout: 30
 
 ftp_server: < myftpserver >
 ftp_path: < ftppath >
-
-token_ocpcluster1: <token> https://api.ocpcluster1.hb.oc.local:6443
-
-token_ocpcluster2: <token> https://api.ocpcluster2.hb.oc.local:6443
-
-token_ocpcluster3: <token> https://api.ocpcluster3.hb.oc.local:6443

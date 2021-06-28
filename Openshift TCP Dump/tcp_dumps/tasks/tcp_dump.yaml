@@ -8,7 +8,18 @@
   environment:
     KUBECONFIG: "/root/files/ocp/installation/{{ cluster }}/kubeconfig"
   register: get_node_ip_address
-  
+
+- name: check pod exist
+  shell: oc get po -A | grep "{{ pod_name }}" | wc -l
+  environment:
+    KUBECONFIG: "{{ path_result.stdout | trim }}"
+  register: check_pod_exist
+
+- name: message for pod exist
+  debug:
+    msg: "The pod is doesnt exist - {{ pod_name }}"
+  when: check_pod_exist.stdout == "0"
+
 - name: get tcp dump
   shell: |
      ssh core@{{ get_node_ip_address.stdout | trim }} << 'EOF'
@@ -31,7 +42,8 @@
      timeout {{ timeout }}s nsenter -t $pod_pid -n -- tcpdump -i any -nn -w /host/mnt/{{ tcpdump_filename.stdout | trim }}
      EOF
   ignore_errors: true
-  
+  when: check_pod_exist.stdout == "1"
+
 - name: deploy pcap file to ftp
   shell: |
      ssh core@{{ get_node_ip_address.stdout | trim }} << 'EOF'
@@ -45,3 +57,4 @@
      curl -T /mnt/{{ tcpdump_filename.stdout | trim }} ftp://{{ftp_server}}/{{ftp_path}}/{{ tcpdump_filename.stdout | trim }}
      rm -rf  /mnt/{{ tcpdump_filename.stdout | trim }}
      EOF
+  when: check_pod_exist.stdout == "1"

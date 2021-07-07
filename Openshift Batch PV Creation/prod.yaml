@@ -1,0 +1,83 @@
+- name: ocp check namespace exist
+  shell: |
+    curl -ks -H "Authorization: Bearer {{ sa_token }}" -H 'Accept: application/json' "{{ url }}/api/v1/namespaces/{{ namespace }}-{{ env }}" --insecure | jq -r '.status' | grep phase | cut -d: -f2 | tr -d " " | sed 's/"//g'
+  register: check_namespace_exist
+
+- name: "Namespace does not exist - [{{ namespace }}-{{ env }}]"
+  debug:
+    msg: "Namespace does not exist - [{{ namespace }}-{{ env }}]"
+  when: check_namespace_exist.stdout != "Active"
+
+- meta: end_play
+  when: check_namespace_exist.stdout != "Active"
+
+- name: "The entered Namespace must not contain -prod [{{ namespace }}]"
+  debug:
+    msg: "The entered Namespace must not contain -prod [{{ namespace }}]"
+  when: '"-prod" in namespace'
+
+# if exist env on parameter
+- meta: end_play
+  when: '"-prod" in namespace'
+
+- name: mount /mnt/nfs
+  raw: mount {{ storage }} /mnt
+  ignore_errors: true
+
+#- name: mount /mnt/nfs
+#  shell: echo {{ namespace }} | cut -d- -f1
+#  register: namespace
+
+- name: Creates {{ namespace }} and {{ namespace }}-{{ env }}
+  file:
+    path: "/mnt/{{ item }}"
+    state: directory
+    mode: '0777'
+    force: yes
+    recurse: yes
+  with_items:
+    - "{{ namespace }}"
+    - "{{ namespace }}/{{ namespace }}-{{ env }}/data01"
+
+- name: ocp create pv
+  shell: |
+    curl -k \
+        -X POST \
+        -d @- \
+        -H "Authorization: Bearer {{ sa_token }}" \
+        -H 'Accept: application/json' \
+        -H 'Content-Type: application/json' \
+        {{ url }}/api/v1/persistentvolumes/ <<'EOF'
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "name": "{{ namespace }}-{{ env }}-batch-pv"
+       },
+       "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "capacity": {
+          "storage": "5Gi"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "{{ namespace }}-{{ env }}-batch-pvc",
+          "namespace": "{{ namespace }}-{{ env }}"
+        },
+        "nfs": {
+          "path": "/{{ storage_path }}/{{ namespace }}/{{ namespace }}-{{ env }}/data01",
+          "server": "{{ server }}"
+        },
+        "persistentVolumeReclaimPolicy": "Recycle"
+      }
+    }
+    EOF
+  args:
+    executable: /bin/bash
+
+- name: umount /mnt/nfs
+  raw: umount -f /mnt && umount -f /var/mnt
+  ignore_errors: true

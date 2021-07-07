@@ -11,22 +11,22 @@
 - meta: end_play
   when: check_namespace_exist.stdout != "Active"
 
-- name: "The entered Namespace must not contain -prod [{{ namespace }}]"
-  debug:
-    msg: "The entered Namespace must not contain -prod [{{ namespace }}]"
-  when: '"-prod" in namespace'
+- name: ocp check pv exist
+  shell: |
+    curl -ks -H "Authorization: Bearer {{ sa_token }}" -H 'Accept: application/json' "{{ url }}/api/v1/persistentvolumes" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ namespace }}-{{ env }}-batch-pv" || true
+  register: check_pv_exist
 
-# if exist env on parameter
+- name: "the pv is exist"
+  debug:
+    msg: "the pv is exist"
+  when: check_pv_exist.stdout == "1"
+
 - meta: end_play
-  when: '"-prod" in namespace'
+  when: check_pv_exist.stdout == "1"
 
 - name: mount /mnt/nfs
   raw: mount {{ storage }} /mnt
   ignore_errors: true
-
-#- name: mount /mnt/nfs
-#  shell: echo {{ namespace }} | cut -d- -f1
-#  register: namespace
 
 - name: Creates {{ namespace }} and {{ namespace }}-{{ env }}
   file:

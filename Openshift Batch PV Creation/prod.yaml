@@ -1,15 +1,15 @@
 - name: ocp check namespace exist
   shell: |
-    curl -ks -H "Authorization: Bearer {{ sa_token }}" -H 'Accept: application/json' "{{ url }}/api/v1/namespaces/{{ namespace }}-{{ env }}" --insecure | jq -r '.status' | grep phase | cut -d: -f2 | tr -d " " | sed 's/"//g'
+    curl -ks -H "Authorization: Bearer {{ sa_token }}" -H 'Accept: application/json' "{{ url }}/api/v1/namespaces" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ namespace }}-{{ env }}" || true
   register: check_namespace_exist
 
 - name: "Namespace does not exist - [{{ namespace }}-{{ env }}]"
   debug:
     msg: "Namespace does not exist - [{{ namespace }}-{{ env }}]"
-  when: check_namespace_exist.stdout != "Active"
+  when: check_namespace_exist.stdout != "1"
 
 - meta: end_play
-  when: check_namespace_exist.stdout != "Active"
+  when: check_namespace_exist.stdout != "1"
 
 - name: ocp check pv exist
   shell: |

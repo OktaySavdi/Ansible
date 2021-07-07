@@ -52,7 +52,7 @@
       "apiVersion": "v1",
       "kind": "PersistentVolume",
       "metadata": {
-        "name": "{{ namespace }}-{{ env }}-batch-pv"
+        "name": "batch-{{ namespace }}-{{ env }}-pv"
        },
        "spec": {
         "accessModes": [
@@ -64,7 +64,7 @@
         "claimRef": {
           "apiVersion": "v1",
           "kind": "PersistentVolumeClaim",
-          "name": "{{ namespace }}-{{ env }}-batch-pvc",
+          "name": "batch-{{ namespace }}-{{ env }}-pvc",
           "namespace": "{{ namespace }}-{{ env }}"
         },
         "nfs": {

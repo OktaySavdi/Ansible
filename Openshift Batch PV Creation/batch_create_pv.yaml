@@ -1,0 +1,31 @@
+- name: OCP | Project | Create batch PV for DEV environment
+  hosts: dev
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: dev.yaml
+
+- name: OCP | Project | Create batch PV for TEST environment
+  hosts: test
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: test.yaml
+
+- name: OCP | Project | Create batch PV for QA environment
+  hosts: qa
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: qa.yaml
+
+- name: OCP | Project | Create batch PV for PROD environment
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: prod.yaml

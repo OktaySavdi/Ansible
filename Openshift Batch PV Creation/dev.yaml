@@ -13,7 +13,7 @@
 
 - name: ocp check pv exist
   shell: |
-    curl -ks -H "Authorization: Bearer {{ sa_token }}" -H 'Accept: application/json' "{{ url }}/api/v1/persistentvolumes" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ namespace }}-{{ env }}-batch-pv" || true
+    curl -ks -H "Authorization: Bearer {{ sa_token }}" -H 'Accept: application/json' "{{ url }}/api/v1/persistentvolumes" --insecure | jq -r '.items[].metadata.name' | grep -xc "batch-{{ namespace }}-{{ env }}-pv" || true
   register: check_pv_exist
 
 - name: "the pv is exist"
@@ -53,25 +53,51 @@
       "kind": "PersistentVolume",
       "metadata": {
         "name": "batch-{{ namespace }}-{{ env }}-pv"
-       },
-       "spec": {
+      },
+      "spec": {
+        "capacity": {
+          "storage": "10Gi"
+        },
         "accessModes": [
           "ReadWriteMany"
         ],
-        "capacity": {
-          "storage": "5Gi"
-        },
-        "claimRef": {
-          "apiVersion": "v1",
-          "kind": "PersistentVolumeClaim",
-          "name": "batch-{{ namespace }}-{{ env }}-pvc",
-          "namespace": "{{ namespace }}-{{ env }}"
-        },
         "nfs": {
           "path": "/{{ storage_path }}/{{ namespace }}/{{ namespace }}-{{ env }}/data01",
           "server": "{{ server }}"
         },
-        "persistentVolumeReclaimPolicy": "Recycle"
+        "persistentVolumeReclaimPolicy": "Recycle",
+        "volumeMode": "Filesystem"
+      }
+    }
+    EOF
+  args:
+    executable: /bin/bash
+
+- name: ocp create pvc
+  shell: |
+    curl -k \
+        -X POST \
+        -d @- \
+        -H "Authorization: Bearer {{ sa_token }}" \
+        -H 'Accept: application/json' \
+        -H 'Content-Type: application/json' \
+        {{ url }}/api/v1/namespaces/{{ namespace }}-{{ env }}/persistentvolumeclaims <<'EOF'
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "name": "batch-{{ namespace }}-pvc",
+        "namespace": "{{ namespace }}-{{ env }}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "10Gi"
+          }
+        }
       }
     }
     EOF

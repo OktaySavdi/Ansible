@@ -1,0 +1,5 @@
+---
+# defaults file for ocp_project
+
+# Variable to define the SSL verify for Openshift API calls
+ocp_verify_ssl: true

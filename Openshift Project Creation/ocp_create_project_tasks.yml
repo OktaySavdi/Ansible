@@ -1,0 +1,31 @@
+- name: OCP | Project | Create project for DEV environment
+  hosts: dev
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: ocp_create_project.yml
+
+- name: OCP | Project | Create project for TEST environment
+  hosts: test
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: ocp_create_project.yml
+
+- name: OCP | Project | Create project for QA environment
+  hosts: qa
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: ocp_create_project.yml
+
+- name: OCP | Project | Create project for PROD environment
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: ocp_create_project.yml

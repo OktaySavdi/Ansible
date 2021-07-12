@@ -1,0 +1,109 @@
+- name: OCP | ServiceMeshMemberRolls Role | Block of tasks to retry Update SMMR until success
+  block:
+    - name: OCP | ServiceMeshMemberRolls Role | Get Members in ServiceMeshMemberRolls
+      k8s_facts:
+        api_version: maistra.io/v1
+        api_key: "{{ token }}"
+        host: "{{ api_url }}"
+        verify_ssl: "{{ ocp_verify_ssl }}"
+        kind: ServiceMeshMemberRoll
+        namespace: "{{ project_sm_name }}"
+        name: "{{ smmr_name }}"
+      register: get_smmr
+
+    - debug:
+        var: get_smmr.resources.0.spec.members
+
+    - debug:
+        var: rescue_retries
+
+    - name: OCP | ServiceMeshMemberRolls Role | Add Project 1 to members list in ServiceMeshMemberRolls
+      set_fact:
+        smmr_members: "{{ [ project_name ] | list }}"
+        res_ver: "{{ get_smmr.resources.0.metadata.resourceVersion }}"
+      when:
+        - get_smmr.resources.0.spec.members is not defined or get_smmr.resources.0.spec.members == "" or get_smmr.resources.0.spec.members is none
+        - action_smmr == "add"
+        - smmr_members is not defined or smmr_members == ""
+
+    - name: OCP | ServiceMeshMemberRolls Role | Add Project 2 to members list in ServiceMeshMemberRolls
+      set_fact:
+        smmr_members: "{{ get_smmr.resources.0.spec.members | unique | sort + [ project_name ] | list }}"
+        res_ver: "{{ get_smmr.resources.0.metadata.resourceVersion }}"
+      when:
+        - get_smmr.resources.0.spec.members is defined and get_smmr.resources.0.spec.members != "" and get_smmr.resources.0.spec.members is not none
+        - project_name not in (get_smmr.resources.0.spec.members)
+        - action_smmr == "add"
+        - smmr_members is not defined or smmr_members == ""
+
+    - name: OCP | ServiceMeshMemberRolls Role | Delete Project from members list in ServiceMeshMemberRolls
+      set_fact:
+        smmr_members: "{{ get_smmr.resources.0.spec.members | unique | sort | reject('search', project_name) | list }}"
+        res_ver: "{{ get_smmr.resources.0.metadata.resourceVersion }}"
+      when:
+        - get_smmr.resources.0.spec.members is defined and get_smmr.resources.0.spec.members != "" and get_smmr.resources.0.spec.members is not none
+        - project_name in (get_smmr.resources.0.spec.members)
+        - action_smmr == "delete"
+        - smmr_members is not defined or smmr_members == ""
+
+    - name: OCP | ServiceMeshMemberRolls Role | Update Members list in ServiceMeshMemberRolls
+      k8s:
+        api_version: maistra.io/v1
+        api_key: "{{ token }}"
+        host: "{{ api_url }}"
+        verify_ssl: "{{ ocp_verify_ssl }}"
+        kind: ServiceMeshMemberRoll
+        namespace: "{{ project_sm_name }}"
+        name: "{{ smmr_name }}"
+        state: present
+        definition: "{{ lookup('template', 'smmr.yml.j2') | from_yaml }}"
+        force: true
+      register: update_smmr
+      when: smmr_members is defined and smmr_members != ""
+
+    - name: OCP | ServiceMeshMemberRolls Role | Check if project is in ServiceMeshMemberRolls
+      fail:
+        msg: "ERROR: {{ project_name }} not in ServiceMeshMemberRolls"
+      when:
+        - update_smmr.result.spec.members is defined and project_name not in (update_smmr.result.spec.members)
+        - action_smmr == "add"
+        - smmr_members is defined and smmr_members != ""
+
+    - name: OCP | ServiceMeshMemberRolls Role | Check if project is not in ServiceMeshMemberRolls
+      fail:
+        msg: "ERROR: {{ project_name }} not in ServiceMeshMemberRolls"
+      when:
+        - update_smmr.result.spec.members is defined and project_name in (update_smmr.result.spec.members)
+        - action_smmr == "delete"
+        - smmr_members is defined and smmr_members != ""
+
+  rescue:
+    - name: OCP | ServiceMeshMemberRolls Role | Debug failed task
+      debug:
+        msg: "Failed tasks: {{ ansible_failed_task }} with error: {{ ansible_failed_result }}"
+    
+    - name: OCP | ServiceMeshMemberRolls Role | Reset smmr_members variable
+      set_fact:
+        smmr_members: ""
+      when:
+        - smmr_members is defined and smmr_members != ""
+
+    - name: OCP | ServiceMeshMemberRolls Role | Update rescue_retries variable
+      set_fact:
+        rescue_retries: "{{ rescue_retries | int + 1 }}"
+      when:
+        - rescue_retries | int < 5
+
+    - name: OCP | ServiceMeshMemberRolls Role | Retrying
+      debug:
+        msg: "Retry number {{ rescue_retries }} to update SMMR..."
+      when: rescue_retries | int < 5
+
+    - name: OCP | ServiceMeshMemberRolls Role | Retry Update SMMR
+      include_tasks: update_smmr.yml
+      when: rescue_retries | int < 5
+
+    - name: OCP | ServiceMeshMemberRolls Role | Fail after 5 retries
+      fail:
+        msg: "ERROR: {{ project_name }} not in ServiceMeshMemberRolls after 5 retries"
+      when: rescue_retries >= 5

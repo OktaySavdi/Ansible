@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ quotas_size }}
+  namespace: {{ project_name }}
+spec:
+  {{ resource_quotas | to_yaml }}

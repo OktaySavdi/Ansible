@@ -1,0 +1,65 @@
+---
+# Task for getting next available IP from Infoblox
+- name: Get next ip
+  set_fact:
+    next_ipaddr: "{{ lookup('nios_next_ip', '10.10.10.10.0/21', provider={'host': 'ipmanager', 'username': 'MyOCPUser', 'password':  MyOCPUser_password }) }}"
+  delegate_to: localhost
+
+# Task for IPv4 reservation on Infoblox
+- name:  Dynamically add host record to next available ip
+  nios_fixed_address:
+    name: "{{ project_name }}"
+    ipaddr: "{{ next_ipaddr | first }}"
+    mac: 00:00:00:00:00:00
+    network: 10.10.10.10.0/21
+    network_view: default
+    state: present
+    comment: ipv4 reservation for egress ip
+    provider:
+      host: ipmanager
+      username: MyOCPUser
+      password: "{{ MyOCPUser_password }}"
+  connection: local
+  delegate_to: localhost
+
+# Task for log in to Openshift and get API token if user/password is used to authenticate
+- name: OCP | Limits | Log in (obtain access token)
+  k8s_auth:
+    username: "{{ ocp_username }}"
+    password: "{{ ocp_password }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+  register: k8s_auth_results
+  when: (ocp_token is not defined or ocp_token == "")
+
+# Task for getting token
+- name: OCP | ServiceMeshMemberRolls | Set the OCP API token value and rescue_retries control variable
+  set_fact:  
+    token: "{% if ocp_token is defined and ocp_token != '' %}{{ ocp_token }} {% else %}{{ k8s_auth_results.k8s_auth.api_key }}{% endif %}"
+    rescue_retries: 0
+  no_log: true
+
+
+# Task for assign egress IPs to namespace
+- name: Assign egress ip to namespace
+  k8s:
+#    api_version: maistra.io/v1
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    kind: NetNamespace
+    merge_type: merge
+    name: "{{ project_name }}"
+#    force: true
+    resource_definition: |
+      egressIPs:
+      - "{{ next_ipaddr | first }}"
+
+
+- name: OCP | ServiceMeshMemberRolls Role | Log out (revoke access token)
+  k8s_auth:
+    state: absent
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+  when: k8s_auth_results.k8s_auth.api_key is defined

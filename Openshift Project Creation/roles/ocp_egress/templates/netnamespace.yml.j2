@@ -1,0 +1,8 @@
+apiVersion: network.openshift.io/v1
+egressIPs:
+- {{ next_ipaddr | first }}
+kind: NetNamespace
+metadata:
+  name: {{ project_name }}
+netname: {{ project_name }}
+netid: 5672348

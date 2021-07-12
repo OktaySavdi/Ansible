@@ -1,0 +1,11 @@
+---
+# defaults file for ocp_smmr
+
+# Variable to define the SSL verify for Openshift API calls
+ocp_verify_ssl: true
+
+# The Service Mesh Member Roll object name
+smmr_name: default
+
+# The action to perform with the project
+action_smmr: add

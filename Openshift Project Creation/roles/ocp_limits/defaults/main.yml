@@ -1,0 +1,20 @@
+---
+# defaults file for ocp_limits
+
+# Variable to define the SSL verify for Openshift API calls
+ocp_verify_ssl: true
+
+# Limits Range definition
+limits:
+  - name: resource-limits
+    limit:
+       - type: Container
+         default:
+           cpu: 150m
+           memory: 900Mi
+         defaultRequest:
+           cpu: 100m
+           memory: 600Mi
+         max:
+           cpu: 1
+           memory: 2100Mi

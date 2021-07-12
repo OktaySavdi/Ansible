@@ -1,0 +1,131 @@
+# Inventory for DEV environment
+dev:
+  hosts:
+    cluster-dev-01:
+#     ansible_host: myserver
+      ansible_connection: local
+      ansible_python_interpreter: /usr/local/bin/python3
+      url: "https://api.MyTestCluster-1.mydomain.com:6443"
+      usr: 'MyOCPUser'
+      passwd: "{{ project_password }}"
+      sa_token: 'ODFNKOJDFLKNDKNFDKNBFKNDBFNKDBFMNBFMDFBMDBFMD'
+    cluster-dev-02:
+#      ansible_host: myserver
+      ansible_connection: local
+      ansible_python_interpreter: /usr/local/bin/python3
+      url: "https://api.MyTestCluster-2.mydomain.com:6443"
+      usr: 'MyOCPUser'
+      passwd: "{{ project_password }}"
+      sa_token: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+  vars:
+    suffix_name: dev
+    annotations: dev-test
+    resource_quotas_size: medium
+    prj_sm_name: garanti-servicemesh
+    prj_smmr_name: default
+    prj_action: create
+    prj_name: ordinaryus
+    prj_owner: corporation
+
+# Inventory for TEST environment
+test:
+  hosts:
+    cluster-test-01:
+#      ansible_host: myserver
+      ansible_connection: local
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
+      url: "https://api.MyTestCluster-1.mydomain.com:6443"
+      usr: 'MyOCPUser'
+      passwd: "{{ project_password }}"
+      sa_token: ''
+    cluster-test-02:
+#      ansible_host: myserver
+      ansible_connection: local
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
+      url: "https://api.MyTestCluster-2.mydomain.com:6443"
+      usr: 'MyOCPUser'
+      passwd: "{{ project_password }}"
+      sa_token: ''
+  vars:
+    suffix_name: test
+    annotations: dev-test
+    resource_quotas_size: medium
+    prj_sm_name: garanti-servicemesh
+    prj_smmr_name: default
+    prj_action: create
+    prj_name: ordinaryus
+    prj_owner: corporation
+
+# Inventory for QA environment
+qa:
+  hosts:
+    cluster-qa-01:
+#      ansible_host: myserver
+      ansible_connection: local
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
+      url: "https://api.MyTestCluster-1.mydomain.com:6443"
+      usr: 'MyOCPUser'
+      passwd: "{{ project_password }}"
+      sa_token: ''
+    cluster-qa-02:
+#      ansible_host: myserver
+      ansible_connection: local
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
+      url: "https://api.MyTestCluster-2.mydomain.com:6443"
+      usr: 'MyOCPUser'
+      passwd: "{{ project_password }}"
+      sa_token: ''
+  vars:  
+    suffix_name: qa
+    annotations: qa
+    resource_quotas_size: large
+    prj_sm_name: garanti-servicemesh
+    prj_smmr_name: default
+    prj_action: create
+    prj_name: ordinaryus
+    prj_owner: corporation
+
+# Inventory for PROD environment
+prod:
+  hosts:
+    cluster-prod-01:
+#      ansible_host: myserver
+      ansible_connection: local
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
+      url: "https://api.MyProdCluster-1.mydomain.com:6443"
+      usr: 'MyOCPUser'
+      passwd: "{{ project_password }}"
+      sa_token: ''
+    cluster-prod-02:
+#      ansible_host: myserver
+      ansible_connection: local
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
+      url: "https://api.MyProdCluster-2.mydomain.com:6443"
+      usr: 'MyOCPUser'
+      passwd: "{{ project_password }}"
+      sa_token: ''
+  vars:
+    suffix_name: prod
+    annotations: prod
+    resource_quotas_size: large
+    prj_sm_name: garanti-servicemesh
+    prj_smmr_name: default
+    prj_action: create
+    prj_name: ordinaryus
+    prj_owner: corporation
+
+# Inventory for bastion servers
+bastion:
+   hosts:
+     bastion-test-01:
+       ansible_host: 10.10.10.10
+       ocp_cluster_name: MyTestCluster-1
+     bastion-test-02:
+       ansible_host: 10.10.10.10
+       ocp_cluster_name: MyTestCluster-2
+     bastion-prod-01:
+       ansible_host: 10.10.10.11
+       ocp_cluster_name: MyProdCluster-1
+     bastion-prod-02:
+       ansible_host: 10.10.10.11
+       ocp_cluster_name: MyProdCluster-2

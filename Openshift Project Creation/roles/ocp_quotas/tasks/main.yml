@@ -1,0 +1,52 @@
+---
+- name: OCP | Quotas Role | Log in (obtain access token)
+  k8s_auth:
+    username: "{{ ocp_username }}"
+    password: "{{ ocp_password }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+  register: k8s_auth_results
+  when: (ocp_token is not defined or ocp_token == "")
+
+- name: OCP | Quotas | Set the OCP API token value
+  set_fact:  
+    token: "{% if ocp_token is defined and ocp_token != '' %}{{ ocp_token }} {% else %}{{ k8s_auth_results.k8s_auth.api_key }}{% endif %}"
+  no_log: true
+
+- name: OCP | Quotas Role | Set resource_quotas variable depending on quota_size
+  set_fact:
+    resource_quotas: "{{ quotas[quotas_size] }}"
+
+- name: OCP | Quotas | Set Project Quotas
+  k8s:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    state: present
+    definition: "{{ lookup('template', 'quota.yml.j2') | from_yaml }}"
+    force: true
+    validate:
+      fail_on_error: no
+      strict: yes
+  register: set_quotas
+
+- name: OCP | Quotas Role | Check Project Quotas
+  k8s_facts:
+    api_version: v1
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    kind: ResourceQuota
+    namespace: "{{ project_name }}"
+  register: get_quotas
+
+- debug:
+    var: get_quotas.resources
+
+- name: OCP | Quotas Role | Log out (revoke access token)
+  k8s_auth:
+    state: absent
+    api_key: "{{ k8s_auth_results.k8s_auth.api_key }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+  when: k8s_auth_results.k8s_auth.api_key is defined

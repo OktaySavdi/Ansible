@@ -1,0 +1,9 @@
+apiVersion: maistra.io/v1
+kind: ServiceMeshMemberRoll
+metadata:
+  name: {{ smmr_name }}
+  namespace: {{ project_sm_name }}
+  resourceVersion: "{{ res_ver }}"
+spec:
+  members:
+    {{ smmr_members | to_yaml }}

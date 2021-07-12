@@ -1,0 +1,17 @@
+- name: OCP | Project Role | Delete project
+  k8s:
+    api_version: v1
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    kind: Namespace
+    name: "{{ project_name }}"
+    state: absent
+    wait: yes
+  register: delete_project
+  failed_when: 
+    - delete_project.result.status.phase is defined and delete_project.result.status.phase != "Terminating"
+    - delete_project.msg is defined and "The system is ensuring all content is removed from this namespace" not in delete_project.msg
+
+- debug:
+    var: delete_project

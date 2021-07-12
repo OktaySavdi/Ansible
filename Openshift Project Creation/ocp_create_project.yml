@@ -1,0 +1,76 @@
+# --------------------------------------------------------------------------------
+# Playbook used to create a Project in OCP Cluster
+# --------------------------------------------------------------------------------
+
+# 1.- Create project in each cluster for each environment (DEV, TEST, QA and PROD)
+- name: Role ocp_project
+  include_role: 
+    name: ocp_project
+  vars:
+    api_url: "{{ url }}"
+    ocp_username: "{{ usr }}"
+    ocp_password: "{{ passwd }}"
+    ocp_token: "{{ sa_token }}"
+    ocp_verify_ssl: false
+    project_name: "{{ prj_name }}-{{ suffix_name }}"
+    project_annotation: "deploy-env={{ prj_owner }}-{{ annotations }}"
+    project_action: 'create'
+
+# 2.- Set Limitranges for each environment (DEV, TEST, QA and PROD)
+- name: Role ocp_limits
+  include_role:
+    name: ocp_limits
+  vars:
+    api_url: "{{ url }}"
+    ocp_username: "{{ usr }}"
+    ocp_password: "{{ passwd }}"
+    ocp_token: "{{ sa_token }}"
+    ocp_verify_ssl: false
+    project_name: "{{ prj_name }}-{{ suffix_name }}"
+    limit_ranges: "{{ limits }}"
+  when: not project_exists
+
+# 3.- Set Quotas for each environment (DEV, TEST, QA and PROD)
+- name: Role ocp_quotas
+  include_role:
+    name: ocp_quotas
+  vars:
+    api_url: "{{ url }}"
+    ocp_username: "{{ usr }}"
+    ocp_password: "{{ passwd }}"
+    ocp_token: "{{ sa_token }}"
+    ocp_verify_ssl: false
+    project_name: "{{ prj_name }}-{{ suffix_name }}"
+    quotas_size: "{{ resource_quotas_size }}"
+  when: not project_exists
+
+# 4.- Assign egressIP in PROD environment
+- name: Role ocp_egress
+  include_role:
+    name: ocp_egress
+  vars:
+    api_url: "{{ url }}"
+    ocp_username: "{{ usr }}"
+    ocp_password: "{{ passwd }}"
+    ocp_token: "{{ sa_token }}"
+    ocp_verify_ssl: false
+    project_name: "{{ prj_name }}-{{ suffix_name }}"
+    project_annotation: "deploy-env={{ prj_owner }}-{{ annotations }}"
+    project_action: 'create'
+  when: 
+    - inventory_hostname  == "cluster-prod-01" or inventory_hostname  == "cluster-prod-02"
+
+# 5.- Add project to ServiceMeshMemberRolls in PROD environment
+- name: Role ocp_smmr
+  include_role:
+    name: ocp_smmr
+  vars:
+    api_url: "{{ url }}"
+    ocp_username: "{{ usr }}"
+    ocp_password: "{{ passwd }}"
+    ocp_token: "{{ sa_token }}"
+    ocp_verify_ssl: false
+    project_name: "{{ prj_name }}-{{ suffix_name }}"
+    project_sm_name: "{{ prj_sm_name }}"
+    smmr_name: "{{ prj_smmr_name }}"
+    action_smmr: "add"

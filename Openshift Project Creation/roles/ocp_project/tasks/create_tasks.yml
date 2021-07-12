@@ -1,0 +1,45 @@
+- name: OCP | Project Role | Create project
+  k8s:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    definition: "{{ lookup('template', 'project.yml.j2') | from_yaml }}"
+    state: present
+    validate:
+      fail_on_error: no
+      strict: yes
+  register: create_project
+
+- name: OCP | Project Role | Add Node Selector To Project
+  k8s:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    state: present
+    merge_type: json
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ project_name }}"
+        annotations:
+          openshift.io/node-selector: "{{ project_annotation }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+
+- debug:
+    var: create_project.result.metadata
+
+- name: OCP | Project Role | Verify project
+  k8s:
+    api_version: v1
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    kind: Namespace
+    name: "{{ project_name }}"
+  register: get_project
+
+- debug:
+    var: get_project.result.status.phase

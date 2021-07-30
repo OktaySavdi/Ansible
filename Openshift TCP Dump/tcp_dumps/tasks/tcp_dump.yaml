@@ -3,13 +3,7 @@
     echo {{pod_name}}-$(date +"%m-%d-%Y-%H-%M-%S").pcap
   register: tcpdump_filename
 
-- name: get node ip addres
-  shell: oc get node $(oc get po -A -o wide | grep "{{ pod_name }}" | awk '{print $8}') -o wide --no-headers | awk '{print $6}'
-  environment:
-    KUBECONFIG: "/root/files/ocp/installation/{{ cluster }}/kubeconfig"
-  register: get_node_ip_address
-
-- name: check pod exist
+ - name: check pod exist
   shell: oc get po -A | grep "{{ pod_name }}" | wc -l
   environment:
     KUBECONFIG: "{{ path_result.stdout | trim }}"
@@ -17,8 +11,17 @@
 
 - name: message for pod exist
   debug:
-    msg: "The pod is doesnt exist - {{ pod_name }}"
+    msg: "The pod is doesn't exist - {{ pod_name }}"
   when: check_pod_exist.stdout == "0"
+
+- meta: end_play
+  when: check_pod_exist.stdout == "0"
+
+- name: get node ip addres
+  shell: oc get node $(oc get po -A -o wide | grep "{{ pod_name }}" | awk '{print $8}') -o wide --no-headers | awk '{print $6}'
+  environment:
+    KUBECONFIG: "/root/files/ocp/installation/{{ cluster }}/kubeconfig"
+  register: get_node_ip_address
 
 - name: get tcp dump
   shell: |

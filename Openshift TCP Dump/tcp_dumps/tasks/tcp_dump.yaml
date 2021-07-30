@@ -45,7 +45,6 @@
      timeout {{ timeout }}s nsenter -t $pod_pid -n -- tcpdump -i any -nn -w /host/mnt/{{ tcpdump_filename.stdout | trim }}
      EOF
   ignore_errors: true
-  when: check_pod_exist.stdout == "1"
 
 - name: deploy pcap file to ftp
   shell: |
@@ -60,4 +59,3 @@
      curl -T /mnt/{{ tcpdump_filename.stdout | trim }} ftp://{{ftp_server}}/{{ftp_path}}/{{ tcpdump_filename.stdout | trim }}
      rm -rf  /mnt/{{ tcpdump_filename.stdout | trim }}
      EOF
-  when: check_pod_exist.stdout == "1"

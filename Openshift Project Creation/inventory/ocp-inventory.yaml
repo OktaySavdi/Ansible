@@ -4,7 +4,7 @@ dev:
     cluster-dev-01:
 #     ansible_host: myserver
       ansible_connection: local
-      ansible_python_interpreter: /usr/local/bin/python3
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
       url: "https://api.MyTestCluster-1.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"
@@ -12,7 +12,7 @@ dev:
     cluster-dev-02:
 #      ansible_host: myserver
       ansible_connection: local
-      ansible_python_interpreter: /usr/local/bin/python3
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
       url: "https://api.MyTestCluster-2.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"

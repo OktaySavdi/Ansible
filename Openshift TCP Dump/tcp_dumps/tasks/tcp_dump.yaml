@@ -25,7 +25,7 @@
 
 - name: get tcp dump
   shell: |
-     ssh core@{{ get_node_ip_address.stdout | trim }} << 'EOF'
+     ssh -o StrictHostKeyChecking=no core@{{ get_node_ip_address.stdout | trim }} << 'EOF'
      sudo -i
      export http_proxy=http://myproxy.mydomain.com:80
      export https_proxy=http://myproxy.mydomain.com:80
@@ -48,7 +48,7 @@
 
 - name: deploy pcap file to ftp
   shell: |
-     ssh core@{{ get_node_ip_address.stdout | trim }} << 'EOF'
+     ssh -o StrictHostKeyChecking=no core@{{ get_node_ip_address.stdout | trim }} << 'EOF'
      sudo -i
      export http_proxy=http://myproxy.mydomain.com:80
      export https_proxy=http://myproxy.mydomain.com:80

@@ -1,0 +1,156 @@
+- name: ocp check namespace exist
+  shell: |
+    curl -ks -H "Authorization: Bearer {{ quota_token }}" -H 'Accept: application/json' "{{ url }}/api/v1/namespaces" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ namespace }}-{{ env }}" || true
+  register: check_namespace_exist
+
+- name: "Namespace does not exist - [{{ namespace }}-{{ env }}]"
+  debug:
+    msg: "Namespace does not exist. - [{{ namespace }}-{{ env }}]"
+  when: check_namespace_exist.stdout != "1"
+
+- meta: end_play
+  when: check_namespace_exist.stdout != "1"
+
+- name: get quota name
+  shell: |
+    curl -ks -H  "Authorization: Bearer {{ quota_token }}" -H 'Accept: application/json' "{{ url }}/api/v1/namespaces/{{ namespace }}-{{ env }}/resourcequotas" --insecure | jq -r '.items[].metadata.name' 
+  register: get_quota_name
+  ignore_errors: true
+
+- name: "quota name - [{{ namespace }}-{{ env }}]"
+  debug:
+    msg: "quota name - [{{ get_quota_name.stdout }}]"
+  when: prj_action == "get"
+
+- meta: end_play
+  when: prj_action == "get"
+
+- name: get profiles standart
+  shell:
+    cmd: |
+      if [[ "{{ get_quota_name.stdout }}" == "medium" ]] && [[ "{{ new_quota2 }}" == "ml" ]]; then 
+        echo "YES"
+      elif [[ "{{ get_quota_name.stdout }}" == "ml" ]] && [[ "{{ new_quota2 }}" == "large" ]]; then
+        echo "YES"
+      elif [[ "{{ get_quota_name.stdout }}" == "large" ]] && [[ "{{ new_quota2 }}" == "xl" ]]; then
+        echo "YES"
+      elif [[ "{{ get_quota_name.stdout }}" == "xl" ]]; then
+        echo "NO"
+      elif [[ "{{ get_quota_name.stdout }}" == "{{ new_quota2 }}" ]]; then
+        echo "NO"
+      else
+        echo "NO"
+      fi
+  register: quota_profile_result
+  when: get_quota_name.stdout | length > 0
+
+- name: "check quota profiles standart"
+  debug:
+    msg: "quota profile : [{{ get_quota_name.stdout }}] - your selected profile : [{{ new_quota2 }}] does not conform to the standart"
+  when:
+    - get_quota_name.stdout | length > 0
+    - quota_profile_result.stdout == "NO"
+
+- meta: end_play
+  when:
+    - get_quota_name.stdout | length > 0 
+    - quota_profile_result.stdout == "NO"
+
+- name: "delete quota in project - [{{ namespace }}-{{ env }}]"
+  shell: |
+    curl -ks -X DELETE -H "Authorization: Bearer {{ quota_token }}" -H 'Accept: application/json' -H 'Content-Type: application/json' "{{ url }}/api/v1/namespaces/{{ namespace }}-{{ env }}/resourcequotas/{{ get_quota_name.stdout }}?gracePeriodSeconds=0"
+  when: 
+    - get_quota_name.stdout | length > 0
+
+- name: ocp create quota for ml
+  shell: |
+    curl -ks \
+        -X POST \
+        -d @- \
+        -H "Authorization: Bearer {{ quota_token }}" \
+        -H 'Accept: application/json' \
+        -H 'Content-Type: application/json' \
+        {{ url }}/api/v1/namespaces/{{ namespace }}-{{ env }}/resourcequotas <<'EOF'
+    {
+      "apiVersion": "v1",
+      "kind": "ResourceQuota",
+      "metadata": {
+        "name": "ml"
+      },
+      "spec": {
+        "hard": {
+          "limits.cpu": "10",
+          "limits.memory": "20G",
+          "requests.cpu": "7",
+          "requests.memory": "30Gi",
+          "requests.storage": "30Gi"
+        }
+      }
+    }
+    EOF
+  args:
+    executable: /bin/bash
+  when: new_quota2 == "ml"
+
+
+#LARGE Profile seçildi ise kurulur
+- name: ocp create quota for large
+  shell: |
+    curl -ks \
+        -X POST \
+        -d @- \
+        -H "Authorization: Bearer {{ quota_token }}" \
+        -H 'Accept: application/json' \
+        -H 'Content-Type: application/json' \
+        {{ url }}/api/v1/namespaces/{{ namespace }}-{{ env }}/resourcequotas <<'EOF'
+    {
+      "apiVersion": "v1",
+      "kind": "ResourceQuota",
+      "metadata": {
+        "name": "large"
+      },
+      "spec": {
+        "hard": {
+          "limits.cpu": "30",
+          "limits.memory": "60G",
+          "requests.cpu": "30",
+          "requests.memory": "50Gi",
+          "requests.storage": "30Gi"
+        }
+      }
+    }
+    EOF
+  args:
+    executable: /bin/bash
+  when: new_quota2 == "large"
+
+#XL Profile seçildi ise kurulur
+- name: ocp create quota for xl
+  shell: |
+    curl -ks \
+        -X POST \
+        -d @- \
+        -H "Authorization: Bearer {{ quota_token }}" \
+        -H 'Accept: application/json' \
+        -H 'Content-Type: application/json' \
+        {{ url }}/api/v1/namespaces/{{ namespace }}-{{ env }}/resourcequotas <<'EOF'
+    {
+      "apiVersion": "v1",
+      "kind": "ResourceQuota",
+      "metadata": {
+        "name": "xl"
+      },
+      "spec": {
+        "hard": {
+          "limits.cpu": "45",
+          "limits.memory": "90G",
+          "requests.cpu": "30",
+          "requests.memory": "75Gi",
+          "requests.storage": "30Gi"
+        }
+      }
+    }
+    EOF
+  args:
+    executable: /bin/bash
+  when: new_quota2 == "xl"

@@ -1,0 +1,87 @@
+# Inventory for DEV environment
+dev:
+  hosts:
+    cluster-dev-01:
+      ansible_connection: local
+      url: "https://api.mytestcluster1.mydomain.com:6443"
+      usr: 'myocpuser'
+      passwd: "{{ project_password }}"
+      sa_token: 'HDFDFHKHKJDHFKHDFUIYEUIRJLKJFDKNVIYF'
+    cluster-dev-02:
+      ansible_connection: local
+      url: "https://api.mytestcluster2.mydomain.com:6443"
+      usr: 'myocpuser'
+      passwd: "{{ project_password }}"
+      sa_token: 'PIERNCCMOERYEIEURERPOEIPILKJFDKNVIYF'
+  vars:
+    storage: <MY_NFS_SERVERNAME>:/<MY_NFS_Folder_Name>
+    namespace: ordinaryus
+    server: "<MY_NFS_SERVERNAME>"
+    storage_path: <MY_NFS_Folder_Name>
+    env: dev
+
+# Inventory for TEST environment
+test:
+  hosts:
+    cluster-test-01:
+      ansible_connection: local
+      url: "https://api.mytestcluster1.mydomain.com:6443"
+      usr: 'myocpuser'
+      passwd: "{{ project_password }}"
+      sa_token: 'CNLQEOPEIYDBCDJKPEORIRJLKJFDKNVIYF'
+    cluster-test-02:
+      ansible_connection: local
+      url: "https://api.mytestcluster2.mydomain.com:6443"
+      usr: 'myocpuser'
+      passwd: "{{ project_password }}"
+      sa_token: 'BVXPOEWWSDUIPOVCMŞSDLRJLKJFDKNVIYF'
+  vars:
+    storage: <MY_NFS_SERVERNAME>:/<MY_NFS_Folder_Name>
+    namespace: ordinaryus
+    server: "<MY_NFS_SERVERNAME>"
+    storage_path: <MY_NFS_Folder_Name>
+    env: test
+
+# Inventory for QA environment
+qa:
+  hosts:
+    cluster-qa-01:
+      ansible_connection: local
+      url: "https://api.mytestcluster1.mydomain.com:6443"
+      usr: 'myocpuser'
+      passwd: "{{ project_password }}"
+      sa_token: 'POIIUVCVMNSDOYEUIRJLKJFDKNVIYF'
+    cluster-qa-02:
+      ansible_connection: local
+      url: "https://api.mytestcluster2.mydomain.com:6443"
+      usr: 'myocpuser'
+      passwd: "{{ project_password }}"
+      sa_token: 'OKVNSDKJISDSGYEUIRJLKJFDKNVIYF'
+  vars:
+    storage: <MY_NFS_SERVERNAME>:/<MY_NFS_Folder_Name>
+    namespace: ordinaryus
+    server: "<MY_NFS_SERVERNAME>"
+    storage_path: <MY_NFS_Folder_Name>
+    env: qa
+  
+# Inventory for PROD environment
+prod:
+  hosts:
+    cluster-prod-01:
+      ansible_connection: local
+      url: "https://api.myprodcluster1.mydomain.com:6443"
+      usr: 'myocpuser'
+      passwd: "{{ project_password }}"
+      sa_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+    cluster-prod-02:
+      ansible_connection: local
+      url: "https://api.myprodcluster2.mydomain.com:6443"
+      usr: 'myocpuser'
+      passwd: "{{ project_password }}"
+      sa_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+  vars:
+    storage: <MY_NFS_SERVERNAME>:/<MY_NFS_Folder_Name>
+    namespace: ordinaryus
+    server: "<MY_NFS_SERVERNAME>"
+    storage_path: <MY_NFS_Folder_Name>
+    env: prod

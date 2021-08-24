@@ -1,1 +1,53 @@
+- name: check namespace names
+  shell: echo "{{ namespace }}-{{ env }}" | grep -cx ^openshift.* || true
+  register: check_namespace_name
 
+- name: "namespace names control"
+  debug:
+    msg: "namespace does not start with openshift - [{{ namespace }}-{{ env }}]"
+  when: check_namespace_name.stdout == "1"
+
+- name: ocp check namespace exist
+  shell: |
+    curl -ks -H "Authorization: Bearer {{ token_permission }}" -H 'Accept: application/json' "{{ url }}/api/v1/namespaces" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ namespace }}-{{ env }}" || true
+  register: check_namespace_exist
+
+- name: "namespace does not exist - [{{ namespace }}-{{ env }}]"
+  debug:
+    msg: "Namespace does not exist - [{{ namespace }}-{{ env }}]"
+  when: check_namespace_exist.stdout != "1"
+
+- name: ocp check group exist
+  shell: |
+    curl -ks -H "Authorization: Bearer {{ token_permission }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/groups/" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ group }}" || true
+  register: check_group_exist
+
+- name: "group does not exist - [{{ gorup }}]"
+  debug:
+    msg: "group does not exist - [{{ gorup }}]"
+  when: check_group_exist.stdout != "1" 
+
+- name: get policy name
+  shell:
+    cmd: |
+      if [[ "{{ team }}" == "altyapi" ]]; then 
+        echo "edit"
+      else
+        echo "view"
+      fi
+  register: policy_name
+
+- name: ocp set assign roles to the group
+  shell: |
+    curl -ks \
+        -X POST \
+        -d @- \
+        -H "Authorization: Bearer {{ token_permission }}" \
+        -H 'Accept: application/json' \
+        -H 'Content-Type: application/json' \
+        {{ url }}/apis/authorization.openshift.io/v1/namespaces/{{ namespace }}-{{ env }}/rolebindings <<'EOF'
+     {"kind":"RoleBinding","apiVersion":"authorization.openshift.io/v1","metadata":{"name":"{{ policy_name.stdout }}-{{ tower_job_id }}","namespace":"{{ namespace }}-{{ env }}","creationTimestamp":null},"userNames":null,"groupNames":["{{ group }}"],"subjects":[{"kind":"Group","name":"{{ group }}"}],"roleRef":{"name":"{{ policy_name.stdout }}"}}
+    EOF
+  args:
+    executable: /bin/bash
+  ignore_errors: true

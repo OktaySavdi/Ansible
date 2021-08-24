@@ -4,11 +4,11 @@ dev:
     cluster-dev-01:
       ansible_connection: local
       url: "https://api.mytestcluster1.mydomain.com:6443"
-      sa_token: 'HDFDFHKHKJDHFKHDFUIYEUIRJLKJFDKNVIYF'
+      quota_token: 'HDFDFHKHKJDHFKHDFUIYEUIRJLKJFDKNVIYF'
     cluster-dev-02:
       ansible_connection: local
       url: "https://api.mytestcluster2.mydomain.com:6443"
-      sa_token: 'PIERNCCMOERYEIEURERPOEIPILKJFDKNVIYF'
+      quota_token: 'PIERNCCMOERYEIEURERPOEIPILKJFDKNVIYF'
   vars:
     namespace: ordinaryus
     prj_action: create
@@ -21,11 +21,11 @@ test:
     cluster-test-01:
       ansible_connection: local
       url: "https://api.mytestcluster1.mydomain.com:6443"
-      sa_token: 'CNLQEOPEIYDBCDJKPEORIRJLKJFDKNVIYF'
+      quota_token: 'CNLQEOPEIYDBCDJKPEORIRJLKJFDKNVIYF'
     cluster-test-02:
       ansible_connection: local
       url: "https://api.mytestcluster2.mydomain.com:6443"
-      sa_token: 'BVXPOEWWSDUIPOVCMŞSDLRJLKJFDKNVIYF'
+      quota_token: 'BVXPOEWWSDUIPOVCMŞSDLRJLKJFDKNVIYF'
   vars:
     namespace: ordinaryus
     prj_action: create
@@ -38,11 +38,11 @@ qa:
     cluster-qa-01:
       ansible_connection: local
       url: "https://api.mytestcluster1.mydomain.com:6443"
-      sa_token: 'POIIUVCVMNSDOYEUIRJLKJFDKNVIYF'
+      quota_token: 'POIIUVCVMNSDOYEUIRJLKJFDKNVIYF'
     cluster-qa-02:
       ansible_connection: local
       url: "https://api.mytestcluster2.mydomain.com:6443"
-      sa_token: 'OKVNSDKJISDSGYEUIRJLKJFDKNVIYF'
+      quota_token: 'OKVNSDKJISDSGYEUIRJLKJFDKNVIYF'
   vars:
     namespace: ordinaryus
     prj_action: create
@@ -55,11 +55,11 @@ prod:
     cluster-prod-01:
       ansible_connection: local
       url: "https://api.myprodcluster1.mydomain.com:6443"
-      sa_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+      quota_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
     cluster-prod-02:
       ansible_connection: local
       url: "https://api.myprodcluster2.mydomain.com:6443"
-      sa_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+      quota_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
     namespace: ordinaryus
     prj_action: create

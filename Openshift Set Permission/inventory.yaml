@@ -4,20 +4,16 @@ dev:
     cluster-dev-01:
       ansible_connection: local
       url: "https://api.mytestcluster1.mydomain.com:6443"
-      usr: 'myocpuser'
-      passwd: "{{ project_password }}"
-      sa_token: 'HDFDFHKHKJDHFKHDFUIYEUIRJLKJFDKNVIYF'
+      token_permission: 'HDFDFHKHKJDHFKHDFUIYEUIRJLKJFDKNVIYF'
     cluster-dev-02:
       ansible_connection: local
       url: "https://api.mytestcluster2.mydomain.com:6443"
-      usr: 'myocpuser'
-      passwd: "{{ project_password }}"
-      sa_token: 'PIERNCCMOERYEIEURERPOEIPILKJFDKNVIYF'
+      token_permission: 'PIERNCCMOERYEIEURERPOEIPILKJFDKNVIYF'
   vars:
-    storage: <MY_NFS_SERVERNAME>:/<MY_NFS_Folder_Name>
-    namespace: ordinaryus
-    server: "<MY_NFS_SERVERNAME>"
-    storage_path: <MY_NFS_Folder_Name>
+    namespace: oktay
+    group: "my mail grup name"
+    cluster: ocp-cluster1
+    team: infrastructure #software
     env: dev
 
 # Inventory for TEST environment
@@ -26,20 +22,16 @@ test:
     cluster-test-01:
       ansible_connection: local
       url: "https://api.mytestcluster1.mydomain.com:6443"
-      usr: 'myocpuser'
-      passwd: "{{ project_password }}"
-      sa_token: 'CNLQEOPEIYDBCDJKPEORIRJLKJFDKNVIYF'
+      token_permission: 'CNLQEOPEIYDBCDJKPEORIRJLKJFDKNVIYF'
     cluster-test-02:
       ansible_connection: local
       url: "https://api.mytestcluster2.mydomain.com:6443"
-      usr: 'myocpuser'
-      passwd: "{{ project_password }}"
-      sa_token: 'BVXPOEWWSDUIPOVCMŞSDLRJLKJFDKNVIYF'
+      token_permission: 'BVXPOEWWSDUIPOVCMŞSDLRJLKJFDKNVIYF'
   vars:
-    storage: <MY_NFS_SERVERNAME>:/<MY_NFS_Folder_Name>
-    namespace: ordinaryus
-    server: "<MY_NFS_SERVERNAME>"
-    storage_path: <MY_NFS_Folder_Name>
+    namespace: oktay
+    group: "my mail grup name"
+    cluster: ocp-cluster1
+    team: infrastructure #software
     env: test
 
 # Inventory for QA environment
@@ -48,20 +40,16 @@ qa:
     cluster-qa-01:
       ansible_connection: local
       url: "https://api.mytestcluster1.mydomain.com:6443"
-      usr: 'myocpuser'
-      passwd: "{{ project_password }}"
-      sa_token: 'POIIUVCVMNSDOYEUIRJLKJFDKNVIYF'
+      token_permission: 'POIIUVCVMNSDOYEUIRJLKJFDKNVIYF'
     cluster-qa-02:
       ansible_connection: local
       url: "https://api.mytestcluster2.mydomain.com:6443"
-      usr: 'myocpuser'
-      passwd: "{{ project_password }}"
-      sa_token: 'OKVNSDKJISDSGYEUIRJLKJFDKNVIYF'
+      token_permission: 'OKVNSDKJISDSGYEUIRJLKJFDKNVIYF'
   vars:
-    storage: <MY_NFS_SERVERNAME>:/<MY_NFS_Folder_Name>
-    namespace: ordinaryus
-    server: "<MY_NFS_SERVERNAME>"
-    storage_path: <MY_NFS_Folder_Name>
+    namespace: oktay
+    group: "my mail grup name"
+    cluster: ocp-cluster1
+    team: infrastructure #software
     env: qa
   
 # Inventory for PROD environment
@@ -70,18 +58,99 @@ prod:
     cluster-prod-01:
       ansible_connection: local
       url: "https://api.myprodcluster1.mydomain.com:6443"
-      usr: 'myocpuser'
-      passwd: "{{ project_password }}"
-      sa_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+      token_permission: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
     cluster-prod-02:
       ansible_connection: local
       url: "https://api.myprodcluster2.mydomain.com:6443"
-      usr: 'myocpuser'
-      passwd: "{{ project_password }}"
-      sa_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+      token_permission: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
-    storage: <MY_NFS_SERVERNAME>:/<MY_NFS_Folder_Name>
-    namespace: ordinaryus
-    server: "<MY_NFS_SERVERNAME>"
-    storage_path: <MY_NFS_Folder_Name>
+    namespace: oktay
+    group: "my mail grup name"
+    cluster: ocp-cluster1
+    team: infrastructure #software
     env: prod
+  
+hosting-dev:
+  hosts:
+    cluster-hosting-dev-01:
+      ansible_connection: local
+      url: "https://api.hosting-dev-cluster1.mydomain.com:6443"
+      token_permission: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+    cluster-hosting-dev-02:
+      ansible_connection: local
+      url: "https://api.hosting-dev-cluster2.mydomain.com:6443"
+      token_permission: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+  vars:
+    namespace: oktay
+    group: "my mail grup name"
+    cluster: ocp-cluster1
+    team: infrastructure #software
+    env: dev
+    
+hosting-test:
+  hosts:
+    cluster-hosting-test-01:
+      ansible_connection: local
+      url: "https://api.hosting-test-cluster1.mydomain.com:6443"
+      token_permission: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+    cluster-hosting-test-02:
+      ansible_connection: local
+      url: "https://api.hosting-test-cluster2.mydomain.com:6443"
+      token_permission: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+  vars:
+    namespace: oktay
+    group: "my mail grup name"
+    cluster: ocp-cluster1
+    team: infrastructure #software
+    env: test
+
+hosting-qa:
+  hosts:
+    cluster-hosting-qa-01:
+      ansible_connection: local
+      url: "https://api.hosting-qa-cluster1.mydomain.com:6443"
+      token_permission: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+    cluster-hosting-qa-02:
+      ansible_connection: local
+      url: "https://api.hosting-qa-cluster2.mydomain.com:6443"
+      token_permission: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+  vars:
+    namespace: oktay
+    group: "my mail grup name"
+    cluster: ocp-cluster1
+    team: infrastructure #software
+    env: qa
+
+hosting-prod:
+  hosts:
+    cluster-hosting-prod-01:
+      ansible_connection: local
+      url: "https://api.hosting-prod-cluster1.mydomain.com:6443"
+      token_permission: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+    cluster-hosting-prod-02:
+      ansible_connection: local
+      url: "https://api.hosting-prod-cluster2.mydomain.com:6443"
+      token_permission: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+  vars:
+    namespace: oktay
+    group: "my mail grup name"
+    cluster: ocp-cluster1
+    team: infrastructure #software
+    env: prod
+
+hosting-lab:
+  hosts:
+    cluster-hosting-lab-01:
+      ansible_connection: local
+      url: "https://api.myhosting-lab-cluster2.mydomain.com:6443"
+      token_permission: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+    cluster-hosting-lab-02:
+      ansible_connection: local
+      url: "https://api.myhosting-lab-cluster2.mydomain.com:6443"
+      token_permission: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+  vars:
+    namespace: oktay
+    group: "my mail grup name"
+    cluster: ocp-cluster1
+    team: infrastructure #software
+    env: lab

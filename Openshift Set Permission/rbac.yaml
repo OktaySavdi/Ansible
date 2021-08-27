@@ -22,6 +22,8 @@ rules:
       - get
       - list
       - watch
+      - update
+      - create
     apiGroups:
       - user.openshift.io
     resources:

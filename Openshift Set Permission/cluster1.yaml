@@ -19,12 +19,16 @@
 
 - name: ocp check group exist
   shell: |
-    curl -ks -H "Authorization: Bearer {{ token_permission }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/groups/" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ group }}" || true
+    curl -ks -H "Authorization: Bearer {{ token_permission }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/groups/" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ grup }}" || true
   register: check_group_exist
 
-- name: "group does not exist - [{{ group }}]"
-  debug:
-    msg: "group does not exist - [{{ group }}]"
+- name: add group on cluster
+  shell: "{{ item }}"
+  with_items:
+    - oc login --token {{ token_permission }} {{ url }} --insecure-skip-tls-verify=false
+    - if [ $(cat /data/openshift/ldap/ad_whitelist | grep "{{ grup }}" | wc -l) != "1" ]; then echo "cn={{ grup }},ou=MY Groups,dc=com" >> /data/openshift/ldap/ad_whitelist;fi
+    - oc adm groups sync --sync-config=/data/openshift/ldap/ldap_syncconfig.yaml --type=ldap --whitelist=/data/openshift/ldap/ad_whitelist --confirm
+  ignore_errors: true
   when: check_group_exist.stdout != "1" 
 
 - name: get policy name

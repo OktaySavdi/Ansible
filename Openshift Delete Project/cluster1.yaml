@@ -42,7 +42,7 @@
     curl -ks GET -H "Authorization: Bearer {{ delete_project_token }}" -H 'Accept: application/json' "{{ url }}/apis/network.openshift.io/v1/netnamespaces/{{ namespace }}-{{ env }}" --insecure | jq -r '.egressIPs[]' | wc -l || true
   register: check_egress_exist
 
-- name: ocp get egress ip for INFOBOX
+- name: ocp get egress ip for INFOBLOX
   shell: |
     curl -ks GET -H "Authorization: Bearer {{ delete_project_token }}" -H 'Accept: application/json' "{{ url }}/apis/network.openshift.io/v1/netnamespaces/{{ namespace }}-{{ env }}" --insecure | jq -r '.egressIPs[]' || true
   register: get_egress_ip

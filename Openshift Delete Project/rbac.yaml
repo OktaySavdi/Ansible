@@ -14,22 +14,26 @@ rules:
       - list
     apiGroups:
       - 'apps.openshift.io'
+      - 'apps'
     resources:
       - deploymentconfigs
       - deployments
-      - namespaces
   - verbs:
       - get
       - list
     apiGroups:
+      - 'network.openshift.io'
       - ''
     resources:
       - hostsubnets
       - netnamespaces
   - verbs:
+      - get
+      - list
       - delete
     apiGroups:
       - 'project.openshift.io'
+      - ''
     resources:
       - namespaces
       - projects

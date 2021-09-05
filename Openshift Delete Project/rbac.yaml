@@ -13,7 +13,7 @@ rules:
       - get
       - list
     apiGroups:
-      - ''
+      - 'apps.openshift.io'
     resources:
       - deploymentconfigs
       - deployments

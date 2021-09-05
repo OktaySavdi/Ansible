@@ -49,7 +49,7 @@
   when: check_egress_exist.stdout > "0"
 
 - name: Remove a ipv4 dhcp fixed address
-  community.general.nios_fixed_address:
+  nios_fixed_address:
     name: ipv4_fixed
     ipaddr: 192.168.10.1
     mac: 08:6d:41:e8:fd:e8

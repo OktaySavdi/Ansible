@@ -14,7 +14,6 @@ dev:
     group: "my mail grup name"
     cluster: ocp-cluster1
     team: infrastructure #software
-    env: dev
 
 # Inventory for TEST environment
 test:
@@ -32,7 +31,6 @@ test:
     group: "my mail grup name"
     cluster: ocp-cluster1
     team: infrastructure #software
-    env: test
 
 # Inventory for QA environment
 qa:
@@ -50,7 +48,6 @@ qa:
     group: "my mail grup name"
     cluster: ocp-cluster1
     team: infrastructure #software
-    env: qa
   
 # Inventory for PROD environment
 prod:
@@ -68,7 +65,6 @@ prod:
     group: "my mail grup name"
     cluster: ocp-cluster1
     team: infrastructure #software
-    env: prod
   
 hosting-dev:
   hosts:
@@ -85,7 +81,6 @@ hosting-dev:
     group: "my mail grup name"
     cluster: ocp-cluster1
     team: infrastructure #software
-    env: dev
     
 hosting-test:
   hosts:
@@ -102,7 +97,6 @@ hosting-test:
     group: "my mail grup name"
     cluster: ocp-cluster1
     team: infrastructure #software
-    env: test
 
 hosting-qa:
   hosts:
@@ -119,7 +113,6 @@ hosting-qa:
     group: "my mail grup name"
     cluster: ocp-cluster1
     team: infrastructure #software
-    env: qa
 
 hosting-prod:
   hosts:
@@ -136,9 +129,8 @@ hosting-prod:
     group: "my mail grup name"
     cluster: ocp-cluster1
     team: infrastructure #software
-    env: prod
 
-hosting-lab:
+lab:
   hosts:
     cluster-hosting-lab-01:
       ansible_connection: local
@@ -153,4 +145,3 @@ hosting-lab:
     group: "my mail grup name"
     cluster: ocp-cluster1
     team: infrastructure #software
-    env: lab

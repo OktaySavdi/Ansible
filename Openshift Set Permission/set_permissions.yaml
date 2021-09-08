@@ -1,118 +1,32 @@
 - name: OCP | Project | Launch playbook for environment
-  hosts: dev
+  hosts: "{{ namespace.split('-')[-1] }}"
   gather_facts: no
   serial: 1
+  vars:
+    namespace: oktay-dev
   tasks:
     - name: OCP | Project | Launch playbook for environment
-      import_tasks: cluster1.yaml
-      when: 
-        - cluster == "ocp-cluster1"
-        - team == "infrastructure"
+      import_tasks: all.yaml
+      when: cluster == "ocp-cluster1"
 
 - name: OCP | Project | Launch playbook for environment
-  hosts: dev
+  hosts: "hosting-{{ namespace.split('-')[-1] }}"
   gather_facts: no
   serial: 1
+  vars:
+    namespace: oktay-dev
   tasks:
     - name: OCP | Project | Launch playbook for environment
-      import_tasks: cluster1.yaml
-      when: 
-        - cluster == "ocp-cluster1"
-        - team == "software"
-
-- name: OCP | Project | Create batch PV for TEST environment
-  hosts: test
-  gather_facts: no
-  serial: 1
-  tasks:
-    - name: OCP | Project | Launch playbook for environment
-      import_tasks: cluster1.yaml
-      when: 
-        - cluster == "ocp-cluster1"
-        - team == "infrastructure"
-
-- name: OCP | Project | Launch playbook for environment
-  hosts: qa
-  gather_facts: no
-  serial: 1
-  tasks:
-    - name: OCP | Project | Launch playbook for environment
-      import_tasks: cluster1.yaml
-      when: 
-        - cluster == "ocp-cluster1"
-        - team == "infrastructure"
-
-- name: OCP | Project | Create batch PV for PROD environment
-  hosts: prod
-  gather_facts: no
-  serial: 1
-  tasks:
-    - name: OCP | Project | Launch playbook for environment
-      import_tasks: cluster1.yaml
-      when: 
-        - cluster == "ocp-cluster1"
-        - team == "infrastructure"
-
-- name: OCP | Project | Launch playbook for environment
-  hosts: hosting-dev
-  gather_facts: no
-  serial: 1
-  tasks:
-    - name: OCP | Project | Launch playbook for environment
-      import_tasks: cluster2.yaml
-      when: 
-        - cluster == "ocp-cluster2"
-        - team == "infrastructure"
-
-- name: OCP | Project | Launch playbook for environment
-  hosts: hosting-dev
-  gather_facts: no
-  serial: 1
-  tasks:
-    - name: OCP | Project | Launch playbook for environment
-      import_tasks: cluster2.yaml
-      when: 
-        - cluster == "ocp-cluster2"
-        - team == "software"
-
-- name: OCP | Project | Launch playbook for environment
-  hosts: hosting-test
-  gather_facts: no
-  serial: 1
-  tasks:
-    - name: OCP | Project | Launch playbook for environment
-      import_tasks: cluster2.yaml
-      when: 
-        - cluster == "ocp-cluster2"
-        - team == "infrastructure"
-
-- name: OCP | Project | Launch playbook for environment
-  hosts: hosting-qa
-  gather_facts: no
-  serial: 1
-  tasks:
-    - name: OCP | Project | Launch playbook for environment
-      import_tasks: cluster2.yaml
-      when: 
-        - cluster == "ocp-cluster2"
-        - team == "infrastructure"
-
-- name: OCP | Project | Launch playbook for environment
-  hosts: hosting-prod
-  gather_facts: no
-  serial: 1
-  tasks:
-    - name: OCP | Project | Launch playbook for environment
-      import_tasks: cluster2.yaml
-      when: 
-        - cluster == "ocp-cluster2"
-        - team == "infrastructure"
+      import_tasks: all.yaml
+      when: cluster == "ocp-cluster2"
         
 - name: OCP | Project | Launch playbook for environment
-  hosts: lab
+  hosts: "{{ namespace.split('-')[-1] }}"
   gather_facts: no
   serial: 1
+  vars:
+    namespace: oktay-dev
   tasks:
     - name: OCP | Project | Launch playbook for environment
-      import_tasks: lab.yaml
+      import_tasks: all.yaml
       when: cluster == "lab"

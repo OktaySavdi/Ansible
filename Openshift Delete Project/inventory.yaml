@@ -12,7 +12,6 @@ dev:
   vars:
     namespace: oktay
     cluster: ocp-cluster1
-    env: dev
 
 # Inventory for TEST environment
 test:
@@ -28,7 +27,6 @@ test:
   vars:
     namespace: oktay
     cluster: ocp-cluster1
-    env: test
 
 # Inventory for QA environment
 qa:
@@ -44,7 +42,6 @@ qa:
   vars:
     namespace: oktay
     cluster: ocp-cluster1
-    env: qa
   
 # Inventory for PROD environment
 prod:
@@ -58,9 +55,9 @@ prod:
       url: "https://api.myprodcluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    network: 192.168.20.10/24
     namespace: oktay
     cluster: ocp-cluster1
-    env: prod
   
 hosting-dev:
   hosts:
@@ -75,7 +72,6 @@ hosting-dev:
   vars:
     namespace: oktay
     cluster: ocp-cluster1
-    env: dev
     
 hosting-test:
   hosts:
@@ -90,7 +86,6 @@ hosting-test:
   vars:
     namespace: oktay
     cluster: ocp-cluster1
-    env: test
 
 hosting-qa:
   hosts:
@@ -105,7 +100,6 @@ hosting-qa:
   vars:
     namespace: oktay
     cluster: ocp-cluster1
-    env: qa
 
 hosting-prod:
   hosts:
@@ -118,11 +112,11 @@ hosting-prod:
       url: "https://api.hosting-prod-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    network: 192.168.10.10/24
     namespace: oktay
     cluster: ocp-cluster1
-    env: prod
 
-hosting-lab:
+lab:
   hosts:
     cluster-hosting-lab-01:
       ansible_connection: local
@@ -135,4 +129,3 @@ hosting-lab:
   vars:
     namespace: oktay
     cluster: ocp-cluster1
-    env: lab

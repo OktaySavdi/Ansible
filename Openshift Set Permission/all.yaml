@@ -26,7 +26,7 @@
   shell: "{{ item }}"
   with_items:
     - oc login --token {{ token_permission }} {{ url }} --insecure-skip-tls-verify=false
-    - if [ $(cat /sw/openshift/ldap/ad_whitelist | grep "{{ grup }}" | wc -l) != "1" ]; then echo "cn={{ grup }},ou=Garanti Teknoloji,ou=All Groups,DC=fw,dc=garanti,dc=com,dc=tr" >> /sw/openshift/ldap/ad_whitelist;fi
+    - if [ $(cat /sw/openshift/ldap/ad_whitelist | grep "{{ grup }}" | wc -l) != "1" ]; then echo "cn={{ grup }},ou=MyGroup,dc=mycompany,dc=com" >> /sw/openshift/ldap/ad_whitelist;fi
     - oc adm groups sync --sync-config=/sw/openshift/ldap/ldap_syncconfig.yaml --type=ldap --whitelist=/sw/openshift/ldap/ad_whitelist --confirm
   ignore_errors: true
   when: check_group_exist.stdout != "1" 

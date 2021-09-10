@@ -29,7 +29,28 @@
     - if [ $(cat /sw/openshift/ldap/ad_whitelist | grep "{{ grup }}" | wc -l) != "1" ]; then echo "cn={{ grup }},ou=MyGroup,dc=mycompany,dc=com" >> /sw/openshift/ldap/ad_whitelist;fi
     - oc adm groups sync --sync-config=/sw/openshift/ldap/ldap_syncconfig.yaml --type=ldap --whitelist=/sw/openshift/ldap/ad_whitelist --confirm
   ignore_errors: true
-  when: check_group_exist.stdout != "1" 
+  when: check_group_exist.stdout != "1"
+ 
+ - name: ocp check group exist
+  shell: |
+    curl -ks -H "Authorization: Bearer {{ token_permission }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/groups/" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ grup }}" || true
+  register: check_group_exist2
+
+- name: "check group is exists - [{{ grup }}]"
+  debug:
+    msg: "The group name is not correct - [{{ grup }}]"
+  when: check_group_exist2.stdout == "0"
+
+- name: Delete keys in /sw/openshift/ldap/ad_whitelist
+  lineinfile: 
+    dest: /sw/openshift/ldap/ad_whitelist
+    state: absent 
+    regexp: '.*{{grup}}.*$'
+  when: check_group_exist2.stdout == "0"
+
+- name: "check group is exists - [{{ grup }}]"
+  shell: exit 5
+  when: check_group_exist2.stdout == "0"
   
 - name: get policy name
   shell:

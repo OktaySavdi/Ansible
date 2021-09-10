@@ -7,6 +7,10 @@
     msg: "namespace does not start with openshift - [{{ namespace }}]"
   when: check_namespace_name.stdout == "1"
 
+- name: "namespace names control"
+  shell: exit 5
+  when: check_namespace_name.stdout == "1"
+
 - name: ocp check namespace exist
   shell: |
     curl -ks -H "Authorization: Bearer {{ token_permission }}" -H 'Accept: application/json' "{{ url }}/api/v1/namespaces" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ namespace }}" || true
@@ -15,6 +19,10 @@
 - name: "namespace does not exist - [{{ namespace }}]"
   debug:
     msg: "Namespace does not exist - [{{ namespace }}]"
+  when: check_namespace_exist.stdout != "1"
+
+- name: "namespace does not exist"
+  shell: exit 10
   when: check_namespace_exist.stdout != "1"
 
 - name: ocp check group exist
@@ -29,9 +37,11 @@
     - if [ $(cat /sw/openshift/ldap/ad_whitelist | grep "{{ grup }}" | wc -l) != "1" ]; then echo "cn={{ grup }},ou=MyGroup,dc=mycompany,dc=com" >> /sw/openshift/ldap/ad_whitelist;fi
     - oc adm groups sync --sync-config=/sw/openshift/ldap/ldap_syncconfig.yaml --type=ldap --whitelist=/sw/openshift/ldap/ad_whitelist --confirm
   ignore_errors: true
-  when: check_group_exist.stdout != "1"
- 
- - name: ocp check group exist
+  when: 
+    - check_group_exist.stdout != "1"
+    - outsource == "false"
+
+- name: ocp check group exist
   shell: |
     curl -ks -H "Authorization: Bearer {{ token_permission }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/groups/" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ grup }}" || true
   register: check_group_exist2
@@ -49,9 +59,9 @@
   when: check_group_exist2.stdout == "0"
 
 - name: "check group is exists - [{{ grup }}]"
-  shell: exit 5
+  shell: exit 15
   when: check_group_exist2.stdout == "0"
-  
+
 - name: get policy name
   shell:
     cmd: |

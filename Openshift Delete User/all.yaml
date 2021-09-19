@@ -1,0 +1,35 @@
+- name: ocp check user users
+  shell: |
+    curl -ks -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/users" --insecure | jq -r '.items[].metadata.name' | grep -ic "{{ user }}" || true
+  register: check_user_exist
+
+- name: "user does not exist - [{{ user }}]"
+  debug:
+    msg: "user does not exist - [{{ user }}]"
+  when: check_user_exist.stdout != "1"
+
+- name: ocp get correct user name
+  shell: |
+    curl -ks -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/users" --insecure | jq -r '.items[].metadata.name' | grep -i "{{ user }}" || true
+  register: get_correct_user_name
+  when: check_user_exist.stdout == "1"
+
+- name: ocp get user info
+  shell: |
+    curl -ks GET -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/users/{{ get_correct_user_name.stdout }}" --insecure || true
+  register: get_identities
+  when: check_user_exist.stdout == "1"
+
+- set_fact:
+    user_identity: "{{ (get_identities.stdout|from_json).identities[0] }}"
+  when: check_user_exist.stdout == "1"
+
+- name: ocp delete user
+  shell: |
+    curl -ks -X DELETE -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/users/{{ get_correct_user_name.stdout }}" --insecure || true
+  when: check_user_exist.stdout == "1"
+
+- name: ocp delete user identities
+  shell: |
+    curl -ks -X DELETE -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/identities/{{ user_identity }}" --insecure || true
+  when: check_user_exist.stdout == "1"

@@ -1,0 +1,71 @@
+# Inventory for DEV environment
+dev:
+  hosts:
+    cluster-dev-01:
+      ansible_connection: local
+      url: "https://api.mytestcluster1.mydomain.com:6443"
+      delete_project_token: 'HDFDFHKHKJDHFKHDFUIYEUIRJLKJFDKNVIYF'
+    cluster-dev-02:
+      ansible_connection: local
+      url: "https://api.mytestcluster2.mydomain.com:6443"
+      delete_project_token: 'PIERNCCMOERYEIEURERPOEIPILKJFDKNVIYF'
+  vars:
+    cluster: ark
+    user: oktaysav
+  
+# Inventory for PROD environment
+prod:
+  hosts:
+    cluster-prod-01:
+      ansible_connection: local
+      url: "https://api.myprodcluster1.mydomain.com:6443"
+      delete_project_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+    cluster-prod-02:
+      ansible_connection: local
+      url: "https://api.myprodcluster2.mydomain.com:6443"
+      delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+  vars:
+    cluster: ark
+    user: oktaysav
+  
+hosting-dev:
+  hosts:
+    cluster-hosting-dev-01:
+      ansible_connection: local
+      url: "https://api.hosting-dev-cluster1.mydomain.com:6443"
+      delete_project_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+    cluster-hosting-dev-02:
+      ansible_connection: local
+      url: "https://api.hosting-dev-cluster2.mydomain.com:6443"
+      delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+  vars:
+    cluster: ark
+    user: oktaysav
+    
+hosting-prod:
+  hosts:
+    cluster-hosting-prod-01:
+      ansible_connection: local
+      url: "https://api.hosting-prod-cluster1.mydomain.com:6443"
+      delete_project_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+    cluster-hosting-prod-02:
+      ansible_connection: local
+      url: "https://api.hosting-prod-cluster2.mydomain.com:6443"
+      delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+  vars:
+    cluster: ark
+    user: oktaysav
+
+lab:
+  hosts:
+    cluster-hosting-lab-01:
+      ansible_connection: local
+      url: "https://api.myhosting-lab-cluster2.mydomain.com:6443"
+      delete_project_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
+    cluster-hosting-lab-02:
+      ansible_connection: local
+      url: "https://api.myhosting-lab-cluster2.mydomain.com:6443"
+      delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
+  vars:
+    cluster: ark
+    user: oktaysav

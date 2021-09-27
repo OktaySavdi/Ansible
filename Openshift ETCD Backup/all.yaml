@@ -1,0 +1,76 @@
+- name: take etcd backup master1
+  shell: |
+     ssh -o StrictHostKeyChecking=no core@{{ vars['cluster_' + item ] }} << 'EOF'
+     sudo -i
+     export http_proxy=http://myproxy.com:80
+     export https_proxy=http://myproxy.com:80
+     export no_proxy=".mydomain.com,.mydomain2.com,.mydomain3.com,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0/24"
+     export HTTP_PROXY=$http_proxy
+     export HTTPS_PROXY=$http_proxy
+     mount {{ backup_share }} /mnt
+     /usr/local/bin/cluster-backup.sh /mnt/backup/{{ vars['cluster_' + item + '_hostname' ] }}-$(date +"%m-%d-%Y")
+     umount -lf /mnt
+     EOF
+  vars:
+    item: master1
+  register: backup1
+  ignore_errors: true
+
+- name: take etcd backup master2
+  shell: |
+     ssh -o StrictHostKeyChecking=no core@{{ vars['cluster_' + item ] }} << 'EOF'
+     sudo -i
+     export http_proxy=http://myproxy.com:80
+     export https_proxy=http://myproxy.com:80
+     export no_proxy=".mydomain,.mydomain2.com,.mydomain3.com,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0/24"
+     export HTTP_PROXY=$http_proxy
+     export HTTPS_PROXY=$http_proxy
+     mount {{ backup_share }} /mnt
+     /usr/local/bin/cluster-backup.sh /mnt/backup/{{ vars['cluster_' + item + '_hostname' ] }}-$(date +"%m-%d-%Y")
+     umount -lf /mnt
+     EOF
+  vars:
+    item: master2
+  register: backup2
+  ignore_errors: true
+
+- name: take etcd backup master3
+  shell: |
+     ssh -o StrictHostKeyChecking=no core@{{ vars['cluster_' + item ] }} << 'EOF'
+     sudo -i
+     export http_proxy=http://myproxy.com:80
+     export https_proxy=http://myproxy.com:80
+     export no_proxy=".mydomain,.mydomain2.com,.mydomain3.com,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0/24"
+     export HTTP_PROXY=$http_proxy
+     export HTTPS_PROXY=$http_proxy
+     mount {{ backup_share }} /mnt
+     /usr/local/bin/cluster-backup.sh /mnt/backup/{{ vars['cluster_' + item + '_hostname' ] }}-$(date +"%m-%d-%Y")
+     find /mnt/backup/* -type d -ctime +10 -exec rm -rf {} \;
+     umount -lf /mnt
+     EOF
+  vars:
+    item: master3
+  register: backup3
+  ignore_errors: true
+
+#https://www.middlewareinventory.com/blog/ansible-dict-object-has-no-attribute-stdout-or-stderr-how-to-resolve/
+#- debug:
+ #   msg: "{{ item.stdout }}"
+  #when: "'successfully saved' not in item.stdout"
+  #loop: "{{ backup6.results }}"
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain
+    port: 25
+    sender: ansible@mydomain.com
+    to: myGroup@mydomain.com
+    subject: Ansible Backup ETCD Report [FAIL]
+    body: 'ETCD Backup JOB_ID: {{ tower_job_id }} is Failed, System: {{ group_names }} - view details at {{ tower_job_template_name }}'
+  delegate_to: localhost
+  when: 
+    - (not "successfully saved" in backup1.stdout) or
+      (not "successfully saved" in backup2.stdout) or
+      (not "successfully saved" in backup3.stdout)
+  

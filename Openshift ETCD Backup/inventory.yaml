@@ -1,0 +1,59 @@
+# Inventory for lab servers
+lab:
+   hosts:
+     mybastion01:
+       ansible_host: 10.10.10.10
+   vars:
+     backup_share: MyNsfServer_lab.my.domain.com:/MyNfsFile_lab
+     cluster_master1: 10.10.10.154
+     cluster_master1_hostname: myocplab2-dw94f-master-0.my.domain.com
+     cluster_master2: 10.10.10.155
+     cluster_master2_hostname: myocplab2-dw94f-master-1.my.domain.com
+     cluster_master3: 10.10.10.153
+     cluster_master3_hostname: myocplab2-dw94f-master-2.my.domain.com
+     cluster_master4: 10.10.10.34
+     cluster_master4_hostname: myocplab3-76jsz-master-0.my.domain.com
+     cluster_master5: 10.10.10.33
+     cluster_master5_hostname: myocplab3-76jsz-master-1.my.domain.com
+     cluster_master6: 10.10.10.31
+     cluster_master6_hostname: myocplab3-76jsz-master-2.my.domain.com
+
+# Inventory for test servers
+ark-test:
+   hosts:
+     mybastion02:
+       ansible_host: 10.10.11.10
+   vars:
+     backup_share: MyNsfServer_nonprod.my.domain.com:/MyNfsFile_nonprod
+     cluster_master1_hostname: myocptest1-6nqvx-master-0.my.domain.com
+     cluster_master1: 10.10.11.110
+     cluster_master2_hostname: myocptest1-6nqvx-master-1.my.domain.com
+     cluster_master2: 10.10.11.111
+     cluster_master3_hostname: myocptest1-6nqvx-master-2.my.domain.com
+     cluster_master3: 10.10.11.112
+     cluster_master4_hostname: myocptest2-d9v6s-master-0.my.domain.com
+     cluster_master4: 10.10.11.69
+     cluster_master5_hostname: myocptest2-d9v6s-master-1.my.domain.com
+     cluster_master5: 10.10.11.67
+     cluster_master6_hostname: myocptest2-d9v6s-master-2.my.domain.com
+     cluster_master6: 10.10.11.68
+
+# Inventory for prod servers
+ark-prod:
+   hosts:
+     mybastion03:
+       ansible_host: 10.10.12.10
+   vars:
+     backup_share: MyNsfServer_prod.my.domain.com:/MyNfsFile_prod
+     cluster_master1_hostname: myocpprod1-72kjb-master-0.my.domain.com
+     cluster_master1: 10.10.12.107
+     cluster_master2_hostname: myocpprod1-72kjb-master-1.my.domain.com
+     cluster_master2: 10.10.12.106
+     cluster_master3_hostname: myocpprod1-72kjb-master-2.my.domain.com
+     cluster_master3: 10.10.12.105
+     cluster_master4_hostname: myocpprod2-gg22g-master-0.my.domain.com
+     cluster_master4: 10.10.12.97
+     cluster_master5_hostname: myocpprod2-gg22g-master-1.my.domain.com
+     cluster_master5: 10.10.12.98
+     cluster_master6_hostname: myocpprod2-gg22g-master-2.my.domain.com
+     cluster_master6: 10.10.12.100

@@ -1,0 +1,25 @@
+- name: OCP | Project | backup etcd lab environment
+  hosts: lab
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+
+- name: OCP | Project | backup etcd ark test environment
+  hosts: test
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+
+- name: OCP | Project | backup etcd ark prod environment
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  become: yes #special user
+  become_user: myocpuser #special user
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml

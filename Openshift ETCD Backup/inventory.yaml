@@ -19,7 +19,7 @@ lab:
      cluster_master6_hostname: myocplab3-76jsz-master-2.my.domain.com
 
 # Inventory for test servers
-ark-test:
+test:
    hosts:
      mybastion02:
        ansible_host: 10.10.11.10
@@ -39,7 +39,7 @@ ark-test:
      cluster_master6: 10.10.11.68
 
 # Inventory for prod servers
-ark-prod:
+prod:
    hosts:
      mybastion03:
        ansible_host: 10.10.12.10

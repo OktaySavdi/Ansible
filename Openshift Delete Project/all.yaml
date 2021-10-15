@@ -1,3 +1,32 @@
+- name: check namespace names
+  shell: echo "{{ namespace }}" | grep -cx ^openshift.* || true
+  register: check_namespace_name
+
+- name: "namespace names control"
+  debug:
+    msg: "namespace does not start with openshift - [{{ namespace }}]"
+  when: check_namespace_name.stdout == "1"
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@garanti.com.tr
+    to: "{{ usermail }}"
+    subject: "Project Delete - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your Project Delete Request
+
+        "Project Delete Job Result: Cluster - [{{ inventory_hostname }}] - Namespace must not start with openshift - [{{ namespace }}]"
+  delegate_to: localhost
+  when: 
+    - check_namespace_name.stdout == "1"
+ 
+ - name: "Namespace must not start with openshift - [{{ namespace }}]"
+  shell: exit 2
+  when: check_namespace_name.stdout == "1"
+
 - name: ocp check namespace exist
   shell: |
     curl -ks -H "Authorization: Bearer {{ delete_project_token }}" -H 'Accept: application/json' "{{ url }}/api/v1/namespaces" --insecure | jq -r '.items[].metadata.name' | grep -xc "{{ namespace }}" || true
@@ -7,6 +36,22 @@
   debug:
     msg: "Namespace does not exist - [{{ namespace }}]"
   when: check_namespace_exist.stdout != "1"
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Project Delete - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your Project Delete Request
+
+        "Project Delete Job Result: Cluster - [{{ inventory_hostname }}] - Namespace does not exist - [{{ namespace }}]"
+  delegate_to: localhost
+  when: 
+    - check_namespace_exist.stdout != "1"
 
 - name: "namespace does not exist - [{{ namespace }}]"
   shell: exit 5
@@ -21,6 +66,22 @@
   debug:
     msg: "dc exist - [{{ namespace }}]"
   when: check_dc_exist.stdout > "0"
+  
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Project Delete - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your Project Delete Request
+
+        "Project Delete Job Result: Cluster - [{{ inventory_hostname }}] - Deploymentconfig exist. Deletion cannot be performed - [{{ namespace }}]"
+  delegate_to: localhost
+  when: 
+    - check_dc_exist.stdout > "0"
 
 - name: "check dc exist - [{{ namespace }}]"
   shell: exit 10
@@ -35,6 +96,22 @@
   debug:
     msg: "deploy exist - [{{ namespace }}]"
   when: check_deploy_exist.stdout > "0"
+ 
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Project Delete - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your Project Delete Request
+
+        "Project Delete Job Result: Cluster - [{{ inventory_hostname }}] - Deployment exist. Deletion cannot be performed - [{{ namespace }}]"
+  delegate_to: localhost
+  when: 
+    - check_deploy_exist.stdout > "0"
 
 - name: "check deploy exist - [{{ namespace }}]"
   shell: exit 15
@@ -79,4 +156,23 @@
     EOF
   args:
     executable: /bin/bash
+  register: result
   ignore_errors: true
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Project Delete - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your Project Delete Request
+        
+        {% if ("Success" in result.stdout) %}
+        "Project Delete Job Result is [Success]: Cluster - [{{ inventory_hostname }}] - The project has been deleted - [{{ namespace }}]"
+        {% else %}
+        "Project Delete Job Result is [FAILED] : Cluster - [{{ inventory_hostname }}] - The project has not been deleted. Please Contact with Mygroup@mydomainçcom teams"
+        {% endif %}
+  delegate_to: localhost

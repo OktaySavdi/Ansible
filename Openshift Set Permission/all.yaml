@@ -6,6 +6,22 @@
   debug:
     msg: "namespace does not start with openshift - [{{ namespace }}]"
   when: check_namespace_name.stdout == "1"
+ 
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Project Permission - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your Project Permission Request
+
+        "Project Permission Job Result: Cluster - [{{ inventory_hostname }}] - Namespace must not start with openshift - [{{ namespace }}]"
+  delegate_to: localhost
+  when: 
+    - check_namespace_name.stdout == "1"
 
 - name: "namespace names control"
   shell: exit 5
@@ -20,6 +36,22 @@
   debug:
     msg: "Namespace does not exist - [{{ namespace }}]"
   when: check_namespace_exist.stdout != "1"
+  
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Project Permission - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your Project Permission Request
+
+        "Project Permission Job Result: Cluster - [{{ inventory_hostname }}] - Namespace does not exist - [{{ namespace }}]"
+  delegate_to: localhost
+  when: 
+    - check_namespace_exist.stdout != "1"
 
 - name: "namespace does not exist"
   shell: exit 10
@@ -58,6 +90,22 @@
     regexp: '.*{{grup}}.*$'
   when: check_group_exist2.stdout == "0"
 
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Project Permission - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your Project Permission Request
+
+        "Project Permission Job Result: Cluster - [{{ inventory_hostname }}] - The group name is not correct - [{{ grup }}]"
+  delegate_to: localhost
+  when: 
+    - check_group_exist2.stdout == "0"
+
 - name: "check group is exists - [{{ grup }}]"
   shell: exit 15
   when: check_group_exist2.stdout == "0"
@@ -85,4 +133,23 @@
     EOF
   args:
     executable: /bin/bash
+  register: result
   ignore_errors: true
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Project Permission - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your Project Permission Request
+        
+        {% if ("Update" in result.stdout) %}
+        "Project Permission Job Result is [Success]: Cluster - [{{ inventory_hostname }}] - Authorized for Project - [{{ namespace }}]"
+        {% else %}
+        "Project Permission Job Result is [FAILED] : Cluster - [{{ inventory_hostname }}] - Failed to authorize project. Please Contact with GTBulutPlatformTeknolojileri@garantibbva.com.tr teams"
+        {% endif %}        
+  delegate_to: localhost

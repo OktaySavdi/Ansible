@@ -10,8 +10,10 @@ dev:
       url: "https://api.mytestcluster2.mydomain.com:6443"
       delete_project_token: 'PIERNCCMOERYEIEURERPOEIPILKJFDKNVIYF'
   vars:
-    cluster: ark
+    cluster: cluster1
     user: oktaysav
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
   
 # Inventory for PROD environment
 prod:
@@ -25,8 +27,10 @@ prod:
       url: "https://api.myprodcluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
-    cluster: ark
+    cluster: cluster1
     user: oktaysav
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
   
 hosting-dev:
   hosts:
@@ -39,8 +43,10 @@ hosting-dev:
       url: "https://api.hosting-dev-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
-    cluster: ark
+    cluster: cluster1
     user: oktaysav
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
     
 hosting-prod:
   hosts:
@@ -53,8 +59,10 @@ hosting-prod:
       url: "https://api.hosting-prod-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
-    cluster: ark
+    cluster: cluster2
     user: oktaysav
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
 
 lab:
   hosts:
@@ -67,5 +75,7 @@ lab:
       url: "https://api.myhosting-lab-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
-    cluster: ark
+    cluster: cluster2
     user: oktaysav
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr

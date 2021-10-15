@@ -10,6 +10,8 @@ dev:
       url: "https://api.mytestcluster2.mydomain.com:6443"
       delete_project_token: 'PIERNCCMOERYEIEURERPOEIPILKJFDKNVIYF'
   vars:
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
     namespace: oktay
     cluster: ocp-cluster1
 
@@ -25,6 +27,8 @@ test:
       url: "https://api.mytestcluster2.mydomain.com:6443"
       delete_project_token: 'BVXPOEWWSDUIPOVCMŞSDLRJLKJFDKNVIYF'
   vars:
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
     namespace: oktay
     cluster: ocp-cluster1
 
@@ -40,6 +44,8 @@ qa:
       url: "https://api.mytestcluster2.mydomain.com:6443"
       delete_project_token: 'OKVNSDKJISDSGYEUIRJLKJFDKNVIYF'
   vars:
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
     namespace: oktay
     cluster: ocp-cluster1
   
@@ -55,6 +61,8 @@ prod:
       url: "https://api.myprodcluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
     network: 192.168.20.10/24
     namespace: oktay
     cluster: ocp-cluster1
@@ -70,6 +78,8 @@ hosting-dev:
       url: "https://api.hosting-dev-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
     namespace: oktay
     cluster: ocp-cluster1
     
@@ -84,6 +94,8 @@ hosting-test:
       url: "https://api.hosting-test-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
     namespace: oktay
     cluster: ocp-cluster1
 
@@ -98,6 +110,8 @@ hosting-qa:
       url: "https://api.hosting-qa-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
     namespace: oktay
     cluster: ocp-cluster1
 
@@ -112,6 +126,8 @@ hosting-prod:
       url: "https://api.hosting-prod-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
     network: 192.168.10.10/24
     namespace: oktay
     cluster: ocp-cluster1
@@ -127,5 +143,7 @@ lab:
       url: "https://api.myhosting-lab-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
     namespace: oktay
     cluster: ocp-cluster1

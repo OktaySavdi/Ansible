@@ -152,7 +152,7 @@
         -H "Authorization: Bearer {{ delete_project_token }}" \
         -H 'Accept: application/json' \
         -H 'Content-Type: application/json' \
-        {{ url }}/apis/project.openshift.io/v1/projects/{{ namespace }}-{{ env }}?gracePeriodSeconds=0<<'EOF'
+        {{ url }}/apis/project.openshift.io/v1/projects/{{ namespace }}?gracePeriodSeconds=0<<'EOF'
     EOF
   args:
     executable: /bin/bash

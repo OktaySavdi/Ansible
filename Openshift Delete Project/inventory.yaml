@@ -12,7 +12,7 @@ dev:
   vars:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay
+    namespace: oktay-dev
     cluster: ocp-cluster1
 
 # Inventory for TEST environment
@@ -29,7 +29,7 @@ test:
   vars:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay
+    namespace: oktay-dev
     cluster: ocp-cluster1
 
 # Inventory for QA environment
@@ -46,7 +46,7 @@ qa:
   vars:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay
+    namespace: oktay-dev
     cluster: ocp-cluster1
   
 # Inventory for PROD environment
@@ -64,7 +64,7 @@ prod:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
     network: 192.168.20.10/24
-    namespace: oktay
+    namespace: oktay-dev
     cluster: ocp-cluster1
   
 hosting-dev:
@@ -80,7 +80,7 @@ hosting-dev:
   vars:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay
+    namespace: oktay-dev
     cluster: ocp-cluster1
     
 hosting-test:
@@ -96,7 +96,7 @@ hosting-test:
   vars:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay
+    namespace: oktay-dev
     cluster: ocp-cluster1
 
 hosting-qa:
@@ -112,7 +112,7 @@ hosting-qa:
   vars:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay
+    namespace: oktay-dev
     cluster: ocp-cluster1
 
 hosting-prod:
@@ -129,7 +129,7 @@ hosting-prod:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
     network: 192.168.10.10/24
-    namespace: oktay
+    namespace: oktay-dev
     cluster: ocp-cluster1
 
 lab:
@@ -145,5 +145,5 @@ lab:
   vars:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay
+    namespace: oktay-dev
     cluster: ocp-cluster1

@@ -7,6 +7,22 @@
   debug:
     msg: "user does not exist - [{{ user }}]"
   when: check_user_exist.stdout != "1"
+ 
+ - name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "User Delete Process - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your User Delete Request
+
+        "User Delete Job Result: Cluster - [{{ inventory_hostname }}] - Your username already does not exist"
+  delegate_to: localhost
+  when: 
+    - check_user_exist.stdout != "1"
 
 - name: ocp get correct user name
   shell: |
@@ -27,9 +43,31 @@
 - name: ocp delete user
   shell: |
     curl -ks -X DELETE -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/users/{{ get_correct_user_name.stdout }}" --insecure || true
+  register: result_users
   when: check_user_exist.stdout == "1"
 
 - name: ocp delete user identities
   shell: |
     curl -ks -X DELETE -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/identities/{{ user_identity }}" --insecure || true
+  register: result_identities
+  when: check_user_exist.stdout == "1"
+
+ - name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "User Delete Process - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Report from Your User Delete Request
+
+        {% if ("Success" in result_identities.stdout) or
+              ("Success" in result_users.stdout) %}
+        "User Delete Job Result is [Success] : Cluster - [{{ inventory_hostname }}] - Your username has been deleted"
+        {% else %}
+        "User Delete Job Result is [FAILED] : Cluster - [{{ inventory_hostname }}] - Your username has not been deleted. Please Contact with Mygroup@mydomain.com teams"
+        {% endif %}
+  delegate_to: localhost
   when: check_user_exist.stdout == "1"

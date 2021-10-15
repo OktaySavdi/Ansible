@@ -1,6 +1,6 @@
 - name: ocp check user users
   shell: |
-    curl -ks -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/users" --insecure | jq -r '.items[].metadata.name' | grep -ic "{{ user }}" || true
+    curl -ks -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/users" --insecure | jq -r '.items[].metadata.name' | grep -ixc "{{ user }}" || true
   register: check_user_exist
 
 - name: "user does not exist - [{{ user }}]"
@@ -26,7 +26,7 @@
 
 - name: ocp get correct user name
   shell: |
-    curl -ks -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/users" --insecure | jq -r '.items[].metadata.name' | grep -i "{{ user }}" || true
+    curl -ks -H "Authorization: Bearer {{ delete_user_token }}" -H 'Accept: application/json' "{{ url }}/apis/user.openshift.io/v1/users" --insecure | jq -r '.items[].metadata.name' | grep -ix "{{ user }}" || true
   register: get_correct_user_name
   when: check_user_exist.stdout == "1"
 

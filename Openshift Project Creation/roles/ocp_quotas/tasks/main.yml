@@ -1,16 +1,7 @@
 ---
-- name: OCP | Quotas Role | Log in (obtain access token)
-  k8s_auth:
-    username: "{{ ocp_username }}"
-    password: "{{ ocp_password }}"
-    host: "{{ api_url }}"
-    verify_ssl: "{{ ocp_verify_ssl }}"
-  register: k8s_auth_results
-  when: (ocp_token is not defined or ocp_token == "")
-
 - name: OCP | Quotas | Set the OCP API token value
   set_fact:  
-    token: "{% if ocp_token is defined and ocp_token != '' %}{{ ocp_token }} {% else %}{{ k8s_auth_results.k8s_auth.api_key }}{% endif %}"
+    token: "{{ quota_creation_sa }}"
   no_log: true
 
 - name: OCP | Quotas Role | Set resource_quotas variable depending on quota_size
@@ -42,11 +33,3 @@
 
 - debug:
     var: get_quotas.resources
-
-- name: OCP | Quotas Role | Log out (revoke access token)
-  k8s_auth:
-    state: absent
-    api_key: "{{ k8s_auth_results.k8s_auth.api_key }}"
-    host: "{{ api_url }}"
-    verify_ssl: "{{ ocp_verify_ssl }}"
-  when: k8s_auth_results.k8s_auth.api_key is defined

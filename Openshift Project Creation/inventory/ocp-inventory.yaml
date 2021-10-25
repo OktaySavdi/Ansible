@@ -8,7 +8,12 @@ dev:
       url: "https://api.MyTestCluster-1.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"
-      sa_token: 'ODFNKOJDFLKNDKNFDKNBFKNDBFNKDBFMNBFMDFBMDBFMD'
+      ns_creation_sa: 'DJFLDKDMVDKVKGDJDJDJOSLÖDJVBDNBVBVDV'
+      egress_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      limitrange_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      quota_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      token_permission: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      servicemesh_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
     cluster-dev-02:
 #      ansible_host: myserver
       ansible_connection: local
@@ -16,7 +21,12 @@ dev:
       url: "https://api.MyTestCluster-2.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"
-      sa_token: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      ns_creation_sa: 'DJFLDKDMVDKVKGDJDJDJOSLÖDJVBDNBVBVDV'
+      egress_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      limitrange_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      quota_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      token_permission: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      servicemesh_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
   vars:
     suffix_name: dev
     annotations: dev-test
@@ -37,7 +47,12 @@ test:
       url: "https://api.MyTestCluster-1.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"
-      sa_token: ''
+      ns_creation_sa: 'DJFLDKDMVDKVKGDJDJDJOSLÖDJVBDNBVBVDV'
+      egress_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      limitrange_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      quota_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      token_permission: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      servicemesh_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
     cluster-test-02:
 #      ansible_host: myserver
       ansible_connection: local
@@ -45,7 +60,12 @@ test:
       url: "https://api.MyTestCluster-2.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"
-      sa_token: ''
+      ns_creation_sa: 'DJFLDKDMVDKVKGDJDJDJOSLÖDJVBDNBVBVDV'
+      egress_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      limitrange_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      quota_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      token_permission: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      servicemesh_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
   vars:
     suffix_name: test
     annotations: dev-test
@@ -66,7 +86,12 @@ qa:
       url: "https://api.MyTestCluster-1.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"
-      sa_token: ''
+      ns_creation_sa: 'DJFLDKDMVDKVKGDJDJDJOSLÖDJVBDNBVBVDV'
+      egress_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      limitrange_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      quota_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      token_permission: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      servicemesh_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
     cluster-qa-02:
 #      ansible_host: myserver
       ansible_connection: local
@@ -74,7 +99,12 @@ qa:
       url: "https://api.MyTestCluster-2.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"
-      sa_token: ''
+      ns_creation_sa: 'DJFLDKDMVDKVKGDJDJDJOSLÖDJVBDNBVBVDV'
+      egress_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      limitrange_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      quota_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      token_permission: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      servicemesh_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
   vars:  
     suffix_name: qa
     annotations: qa
@@ -95,7 +125,12 @@ prod:
       url: "https://api.MyProdCluster-1.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"
-      sa_token: ''
+      ns_creation_sa: 'DJFLDKDMVDKVKGDJDJDJOSLÖDJVBDNBVBVDV'
+      egress_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      limitrange_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      quota_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      token_permission: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      servicemesh_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
     cluster-prod-02:
 #      ansible_host: myserver
       ansible_connection: local
@@ -103,7 +138,12 @@ prod:
       url: "https://api.MyProdCluster-2.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"
-      sa_token: ''
+      ns_creation_sa: 'DJFLDKDMVDKVKGDJDJDJOSLÖDJVBDNBVBVDV'
+      egress_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      limitrange_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      quota_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      token_permission: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
+      servicemesh_creation_sa: 'DJFLDKDMVDKVKDBJHVBDJVBDJVBDJVBDNBVBVDV'
   vars:
     suffix_name: prod
     annotations: prod

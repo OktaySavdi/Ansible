@@ -1,17 +1,7 @@
 ---
-- name: OCP | Project Role | Log in (obtain access token)
-  k8s_auth:
-    username: "{{ ocp_username }}"
-    password: "{{ ocp_password }}"
-    host: "{{ api_url }}"
-    verify_ssl: "{{ ocp_verify_ssl }}"
-#    validate_certs: false
-  register: k8s_auth_results
-  when: (ocp_token is not defined or ocp_token == "")
-
 - name: OCP | Project | Set the OCP API token value
   set_fact:  
-    token: "{% if ocp_token is defined and ocp_token != '' %}{{ ocp_token }} {% else %}{{ k8s_auth_results.k8s_auth.api_key }}{% endif %}"
+    token: "{{ ns_creation_sa }}"
     project_exists: false
   no_log: true
 
@@ -38,11 +28,3 @@
 - name: OCP | Project | Delete project
   include_tasks: delete_tasks.yml
   when: (project_exists and project_action == "delete")
-
-- name: OCP | Project Role | Log out (revoke access token)
-  k8s_auth:
-    state: absent
-    api_key: "{{ token }}"
-    host: "{{ api_url }}"
-    verify_ssl: "{{ ocp_verify_ssl }}"
-  when: k8s_auth_results.k8s_auth.api_key is defined

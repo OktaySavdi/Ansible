@@ -1,0 +1,125 @@
+- name: "OpenShift CLI login"
+  shell:  oc login --token="{{ vars['token_' + cluster ] }}" --server="{{ vars['server_' + cluster ] }}" --insecure-skip-tls-verify=true || true
+  ignore_errors: true
+
+- name: OpenShift check project exist - [ {{ namespace }} ]
+  shell: "oc projects | grep {{ namespace }} | wc -l"
+  register: check_namespace_exist
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Operator UPGRADE Operations - Smart JOB_ID [ {{ job_id }} ]"
+    body: |
+        Report from Your Openshift Operator Request
+
+        "Project Operator UPGRADE Job Result: Cluster - [ {{ cluster }} ] - Namespace does not exist - [ {{ namespace }} ]"
+  delegate_to: localhost
+  when: check_namespace_exist.stdout < "0"
+
+- name: "namespace does not exist - [ {{ namespace }} ]"
+  shell: exit 5
+  when: check_namespace_exist.stdout < "0"
+
+- name: OpenShift check operator exist
+  shell: "oc get ip -n {{ namespace }} --no-headers | wc -l"
+  register: operator_exist
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    cc: MygroupMail@mydomain.com
+    subject: "Operator UPGRADE Operations - Smart JOB_ID [ {{ job_id }} ]"
+    body: |
+        Report from Your Openshift Operator Request
+
+        "Project Operator UPGRADE Job Result: Cluster - [ {{ cluster }} ] - Operator does not exist"
+  delegate_to: localhost
+  when: operator_exist.stdout < "0"
+
+- name: "operator does not exist"
+  shell: exit 10
+  when: operator_exist.stdout < "0"
+
+- name: Get openshift operator upgrade exist - [ {{ InstallPlan }} ]
+  shell: "oc get ip -n {{ namespace }} {{ InstallPlan }} --no-headers | wc -l"
+  register: upgrade_exist
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    cc: MygroupMail@mydomain.com
+    subject: "Operator UPGRADE Operations - Smart JOB_ID [ {{ job_id }} ]"
+    body: |
+      Report from Your Openshift Operator Request Result
+     
+      Cluster : [ {{ cluster }} ]
+            
+      New InstalPlan version does not exist - [ {{ InstallPlan }} ]
+  delegate_to: localhost
+  when: upgrade_exist.stdout != "1"
+
+- name: "New Operator version does not exist - [ {{ InstallPlan }} ]"
+  shell: exit 15
+  when: upgrade_exist.stdout != "1"
+
+- name: Upgrade Operator [ {{ InstallPlan }} ]
+  shell: oc -n {{ namespace }} patch installplan {{ InstallPlan }} -p '{"spec":{"approved":true}}' --type merge
+  register: upgrade_operator
+
+- name: Get openshift exist operator version
+  shell: "oc get ip -n {{ namespace }} | grep Manual | grep true | awk '{print $2}'"
+  register: operator_version 
+
+- name: Get openshift installed version
+  shell: "oc get ip -n {{ namespace }} -o=custom-columns=InstalPlan:.metadata.name,APPROVED:.spec.approved,APPROVAL:.spec.approval,CSV:.spec.clusterServiceVersionNames[0]"
+  register: operator_installed
+
+- name: Get openshift operator upgrade status
+  shell: "oc get ip -n {{ namespace }} | grep Manual | grep false | awk '{print $2}'"
+  register: upgrade_exist  
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    cc: MygroupMail@mydomain.com
+    subject: "Operator UPGRADE Operations - Smart JOB_ID [ {{ job_id }} ]"
+    body: |
+      Report from Your Openshift Operator Request Result
+     
+      Cluster : [ {{ cluster }} ]
+
+      {% if  ("patched" in upgrade_operator.stdout) %}
+      Upgrade Operator Job Result is [ SUCCESS ] : Your operator has been upgraded.
+      {% else %}
+      Upgrade Operator Job Result is [ FAILED ] : Your operator has not been upgraded. Please Contact with MygroupMail@mydomain.com teams
+      {% endif %}
+      
+      Current Operator Version : 
+
+      {{ operator_version.stdout }}
+
+      {% if (upgrade_exist.stdout) != "" %}
+      New Operator Version waiting for Upgrade : [ {{ upgrade_exist.stdout }} ]
+      {% endif %}
+
+      Operator InstallPlan : 
+
+      {{ operator_installed.stdout }}
+  delegate_to: localhost

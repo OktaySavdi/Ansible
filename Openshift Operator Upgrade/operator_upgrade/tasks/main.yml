@@ -1,0 +1,6 @@
+---
+- include_tasks: get_operator.yml
+  when: actions == "get"
+
+- include_tasks: upgrade_operator.yml
+  when: actions == "upgrade"

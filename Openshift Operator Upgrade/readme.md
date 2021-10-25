@@ -9,7 +9,7 @@
 
 **Check Syntax**
 
-    ansible-playbook playbook.yml -i inventor.ini --syntax-check
+    ansible-playbook playbook.yml -i inventory.ini --syntax-check
 
 **Run Playbook**
 

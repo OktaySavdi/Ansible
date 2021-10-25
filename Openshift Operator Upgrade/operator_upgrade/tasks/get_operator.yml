@@ -1,0 +1,85 @@
+- name: "OpenShift CLI login"
+  shell:  oc login --token="{{ vars['token_' + cluster ] }}" --server="{{ vars['server_' + cluster ] }}" --insecure-skip-tls-verify=true || true
+  ignore_errors: true
+
+- name: OpenShift check project exist
+  shell: "oc projects | grep {{ namespace }} | wc -l"
+  register: check_namespace_exist
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Operator GET Operations - Smart JOB_ID [ {{ job_id }} ]"
+    body: |
+        Report from Your Openshift Operator Request
+
+        "Project Operator List Job Result: Cluster - [ {{ cluster }} ] - Namespace does not exist - [ {{ namespace }} ]"
+  delegate_to: localhost
+  when: check_namespace_exist.stdout < "0"
+
+- name: "namespace does not exist - [ {{ namespace }} ]"
+  shell: exit 5
+  when: check_namespace_exist.stdout < "0"
+
+- name: OpenShift check operator exist
+  shell: "oc get ip -n {{ namespace }} --no-headers | wc -l"
+  register: operator_exist
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: smtpappv1.fw.garanti.com.tr
+    port: 25
+    sender: ansible@garanti.com.tr
+    to: "{{ usermail }}"
+    subject: "Operator GET Operations - Smart JOB_ID [ {{ job_id }} ]"
+    body: |
+        Report from Your Openshift Operator Request
+
+        "Project Operator List Job Result: Cluster - [ {{ cluster }} ] - Operator does not exist"
+  delegate_to: localhost
+  when: operator_exist.stdout < "0"
+
+- name: "operator does not exist"
+  shell: exit 10
+  when: operator_exist.stdout < "0"
+
+- name: Get openshift exist operator version
+  shell: "oc get ip -n {{ namespace }} | grep Manual | grep true | awk '{print $2}'"
+  register: operator_version 
+
+- name: Get openshift installed version
+  shell: "oc get ip -n {{ namespace }} -o=custom-columns=InstalPlan:.metadata.name,APPROVED:.spec.approved,APPROVAL:.spec.approval,CSV:.spec.clusterServiceVersionNames[0]"
+  register: operator_installed
+
+- name: Get openshift operator upgrade status
+  shell: "oc get ip -n {{ namespace }} | grep Manual | grep false | awk '{print $2}'"
+  register: upgrade_exist  
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Operator GET Operations - Smart JOB_ID [ {{ job_id }} ]"
+    body: |
+      Report from Your Openshift Operator Request Result
+     
+      Cluster : [ {{ cluster }} ]
+      
+      Current Operator Version : [ {{ operator_version.stdout }} ]
+
+      {% if (upgrade_exist.stdout) != "" %}
+      New Operator Version waiting for Upgrade : [ {{ upgrade_exist.stdout }} ]
+      {% endif %}
+
+      Operator InstallPlan : 
+
+      {{ operator_installed.stdout }}
+  delegate_to: localhost

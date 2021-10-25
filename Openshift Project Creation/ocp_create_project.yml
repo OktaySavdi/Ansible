@@ -78,7 +78,7 @@
 # 6.- Add project to ServiceMeshMemberRolls in PROD environment
 - name: Role ocp_smmr
   include_role:
-    name: ocp_smmr_NEW
+    name: ocp_smmr
   vars:
     api_url: "{{ url }}"
     ocp_username: "{{ usr }}"
@@ -94,7 +94,7 @@
 # 7.- Set Permissions for each environment projects (DEV, TEST, QA and PROD)
 - name: Role set_permissions
   include_role:
-    name: set_permissions_NEW
+    name: set_permissions
   vars:
     api_url: "{{ url }}"
     ocp_username: "{{ usr }}"

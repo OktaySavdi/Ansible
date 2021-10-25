@@ -1,0 +1,30 @@
+---
+- name: OCP | Permissions | Set the OCP API token value
+  set_fact:  
+    token: "{{ token_permission }}"
+  no_log: true
+
+- name: OCP | Permissions | Set Project Permissions
+  k8s:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    state: present
+    definition: "{{ lookup('template', 'permission.yml.j2') | from_yaml }}"
+    force: true
+    validate:
+      fail_on_error: no
+      strict: yes
+
+- name: OCP | Permissions Role | Check Project Permissions
+  k8s_facts:
+    api_version: v1
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    kind: RoleBinding
+    namespace: "{{ project_name }}"
+  register: get_permissions
+
+- debug:
+    var: get_permissions.stdout

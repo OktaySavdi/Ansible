@@ -1,0 +1,258 @@
+#namespace creation
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ns-creation-sa
+  namespace: default
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ns-creation-sa
+rules:
+  - verbs:
+      - get
+      - list
+      - create
+      - patch
+    apiGroups:
+      - '*'
+      - projectrequests.project.openshift.io
+      - project.openshift.io
+    resources:
+      - namespaces
+      - projects
+      - projectrequests
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ns-creation-sa
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ns-creation-sa
+subjects:
+- kind: ServiceAccount
+  name: ns-creation-sa
+  namespace: default
+---
+# egress
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: egress-creation-sa
+  namespace: default
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: egress-creation-sa
+rules:
+  - verbs:
+      - get
+      - list
+      - create
+      - patch
+    apiGroups:
+      - 'network.openshift.io'
+      - ''
+    resources:
+      - hostsubnets
+      - netnamespaces
+  - verbs:
+      - get
+      - list
+      - patch
+    apiGroups:
+      - 'project.openshift.io'
+      - ''
+    resources:
+      - namespaces
+      - projects
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: egress-creation-sa
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: egress-creation-sa
+subjects:
+  - kind: ServiceAccount
+    name: egress-creation-sa
+    namespace: default
+---
+#limitrange
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: limitrange-creation-sa
+  namespace: default
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: limitrange-creation-sa
+rules:
+  - verbs:
+      - get
+      - list
+      - create
+      - patch
+    apiGroups:
+      - '*'
+    resources:
+      - limitranges
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: limitrange-creation-sa
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: limitrange-creation-sa
+subjects:
+  - kind: ServiceAccount
+    name: limitrange-creation-sa
+    namespace: default
+---
+# quotas
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: quota-creation-sa
+  namespace: default
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: quota-creation-sa
+rules:
+  - verbs:
+      - get
+      - list
+      - create
+      - patch
+    apiGroups:
+      - '*'
+    resources:
+      - resourcequotas
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: quota-creation-sa
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: quota-creation-sa
+subjects:
+  - kind: ServiceAccount
+    name: quota-creation-sa
+    namespace: default
+---
+#Permission
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: perms-sa
+  namespace: default
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: perms-sa
+rules:
+  - verbs:
+      - '*'
+    apiGroups:
+      - ''
+      - rbac.authorization.k8s.io
+      - authorization.openshift.io
+      - security.openshift.io
+    resources:
+      - rolebindings
+      - roles
+      - securitycontextconstraints
+  - verbs:
+      - get
+      - list
+      - watch
+      - update
+      - create
+    apiGroups:
+      - user.openshift.io
+    resources:
+      - groups
+  - verbs:
+      - get
+      - list
+      - create
+    apiGroups:
+      - '*'
+    resources:
+      - serviceaccounts
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: perms-sa1
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: perms-sa
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: perms-sa2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: perms-sa
+subjects:
+  - kind: ServiceAccount
+    name: perms-sa
+    namespace: default
+---
+#servicemesh
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: servicemesh-creation-sa
+  namespace: default
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: servicemesh-creation-sa
+rules:
+  - verbs:
+      - get
+      - list
+      - create
+      - patch
+    apiGroups:
+      - '*'
+    resources:
+      - servicemeshmemberrolls
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: servicemesh-creation-sa
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: servicemesh-creation-sa
+subjects:
+  - kind: ServiceAccount
+    name: servicemesh-creation-sa
+    namespace: default

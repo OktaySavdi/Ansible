@@ -1,6 +1,6 @@
 ---
 - name: operator Upgrade
-  hosts: localhost
+  hosts: operator_upgrade
   connection: local
   gather_facts: false
   roles:

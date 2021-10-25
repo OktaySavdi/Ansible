@@ -74,3 +74,34 @@
     project_sm_name: "{{ prj_sm_name }}"
     smmr_name: "{{ prj_smmr_name }}"
     action_smmr: "add"
+
+# 6.- Add project to ServiceMeshMemberRolls in PROD environment
+- name: Role ocp_smmr
+  include_role:
+    name: ocp_smmr_NEW
+  vars:
+    api_url: "{{ url }}"
+    ocp_username: "{{ usr }}"
+    ocp_password: "{{ passwd }}"
+    ocp_token: "{{ sa_token }}"
+    ocp_verify_ssl: false
+    project_name: "{{ prj_name }}-{{ suffix_name }}"
+    project_sm_name: "{{ prj_sm_name }}"
+    smmr_name: "{{ prj_smmr_name }}"
+    action_smmr: "add"
+  when: "'lab' not in group_names"
+  
+# 7.- Set Permissions for each environment projects (DEV, TEST, QA and PROD)
+- name: Role set_permissions
+  include_role:
+    name: set_permissions_NEW
+  vars:
+    api_url: "{{ url }}"
+    ocp_username: "{{ usr }}"
+    ocp_password: "{{ passwd }}"
+    ocp_token: "{{ sa_token }}"
+    ocp_verify_ssl: false
+    project_name: "{{ prj_name }}-{{ suffix_name }}"
+    grup: "MyMail-Group1-Name"
+    grup2: "MyMail-Group2-Name"
+  when: prj_action == "create"

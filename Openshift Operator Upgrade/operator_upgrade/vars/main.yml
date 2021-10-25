@@ -1,0 +1,14 @@
+cluster: ocpcluster1
+actions: get
+namespace: oktay-dev
+usermail: oktaysav@mydomain.com
+Job_id: 425348
+
+token_ocpcluster1: "<token>"
+server_ocpcluster1: "https://api.ocpcluster1.hb.oc.local:6443"
+
+token_ocpcluster2: "<token>"
+server_ocpcluster2: "https://api.ocpcluster2.hb.oc.local:6443"
+
+token_ocpcluster3: "<token>"
+server_ocpcluster3: "https://api.ocpcluster3.hb.oc.local:6443"

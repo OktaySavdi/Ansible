@@ -1,9 +1,26 @@
 ---
+# Task for getting token
+- name: OCP | egress | Set the OCP API token value and rescue_retries control variable
+  set_fact:  
+    token: "{{ egress_creation_sa }}"
+    rescue_retries: 0
+  no_log: true
+
+- name: check egress ip to namespace
+  k8s:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    kind: NetNamespace
+    name: "{{ project_name }}"
+  register: check_egress_exist
+  
 # Task for getting next available IP from Infoblox
 - name: Get next ip
   set_fact:
     next_ipaddr: "{{ lookup('nios_next_ip', '10.10.10.10.0/21', provider={'host': 'ipmanager', 'username': 'MyOCPUser', 'password':  MyOCPUser_password }) }}"
   delegate_to: localhost
+  when: check_egress_exist.result.egressIPs is not defined
 
 # Task for IPv4 reservation on Infoblox
 - name:  Dynamically add host record to next available ip
@@ -21,13 +38,7 @@
       password: "{{ MyOCPUser_password }}"
   connection: local
   delegate_to: localhost
-
-# Task for getting token
-- name: OCP | ServiceMeshMemberRolls | Set the OCP API token value and rescue_retries control variable
-  set_fact:  
-    token: "{{ egress_creation_sa }}"
-    rescue_retries: 0
-  no_log: true
+  when: check_egress_exist.result.egressIPs is not defined
 
 # Task for assign egress IPs to namespace
 - name: Assign egress ip to namespace
@@ -43,3 +54,4 @@
     resource_definition: |
       egressIPs:
       - "{{ next_ipaddr | first }}"
+  when: check_egress_exist.result.egressIPs is not defined

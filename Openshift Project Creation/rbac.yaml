@@ -235,14 +235,31 @@ metadata:
   name: servicemesh-creation-sa
 rules:
   - verbs:
-      - get
-      - list
-      - create
-      - patch
+      - 'get'
+      - 'list'
+      - 'update'
+      - 'patch'
     apiGroups:
       - '*'
+      - project.openshift.io
     resources:
+      - namespaces
+      - projects
+      - pods
+  - verbs:
+      - 'get'
+      - 'list'
+      - 'update'
+      - 'patch'
+    apiGroups:
+      - '*'
+      - 'maistra.io'
+      - 'apiextensions.k8s.io'
+    resources:
+      - servicemeshmemberrolls.maistra.io
+      - servicemeshmembers.maistra.io
       - servicemeshmemberrolls
+      - servicemeshmembers
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

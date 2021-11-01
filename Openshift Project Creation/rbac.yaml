@@ -247,10 +247,7 @@ rules:
       - projects
       - pods
   - verbs:
-      - 'get'
-      - 'list'
-      - 'update'
-      - 'patch'
+      - '*'
     apiGroups:
       - '*'
       - 'maistra.io'

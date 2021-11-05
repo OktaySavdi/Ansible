@@ -1,0 +1,20 @@
+bastion:
+   hosts:
+     bastion-test-01:
+       ansible_host: 10.10.10.10
+       ocp_cluster_name: myocpclustertest1
+     bastion-test-02:
+       ansible_host: 10.10.10.11
+       ocp_cluster_name: myocpclustertest2
+     bastion-prod-01:
+       ansible_host: 10.10.10.12
+       ocp_cluster_name: myocpclusterprod1
+     bastion-prod-02:
+       ansible_host: 10.10.10.13
+       ocp_cluster_name: myocpclusterprod2
+     bastion-lab-01:
+       ansible_host: 10.10.10.14
+       ocp_cluster_name: myocpclusterlab1
+     bastion-lab-02:
+       ansible_host: 10.10.10.15
+       ocp_cluster_name: myocpclusterlab2

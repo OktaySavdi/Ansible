@@ -1,0 +1,66 @@
+---
+- name: OCP Certificate Check
+  hosts: bastion
+  environment:
+    KUBECONFIG: "/opt/installation/{{ ocp_cluster_name }}/kubeconfig"
+  gather_facts: no
+  tasks:
+    - name: Check Certificate
+      shell: |
+        cat << 'EOF' > /tmp/cert_{{ ocp_cluster_name }}_check.sh
+        if [ -f "/opt/installation/{{ ocp_cluster_name }}/kubeconfig" ]; then 
+           export KUBECONFIG=/opt/installation/{{ ocp_cluster_name }}/kubeconfig
+        else 
+           export KUBECONFIG=/root/installation/{{ ocp_cluster_name }}/kubeconfig
+        fi
+          
+        function check_certs () {
+           name="$1"
+           cert="$2"
+         
+           now_epoch=$( date +%s )
+           expiry_date=$cert
+           expiry_epoch=$( date -d "$expiry_date" +%s )
+           expiry_days="$(( ($expiry_epoch - $now_epoch) / (3600 * 24) ))"
+           if [[ expiry_days -le '60' ]]; then
+               echo -e "[ $name ] certificate will expire after $expiry_days days\n"
+           fi    
+           #echo "[ $name ] certificate will expire after $expiry_days days"
+        }
+   
+        #api-server
+        node=$(oc get nodes --no-headers | head -n 1 | awk '{print $1}' | cut -d- -f2)
+        apiserver=$(oc get secret -n openshift-config {{ ocp_cluster_name }}-$node-apiserver-tls -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+        
+        #ingress
+        cm_name=$(oc get configmap -n openshift-config --field-selector=metadata.name="custom-ca" -o=jsonpath="{.items[*]['metadata.name']}")
+        ingress=$(oc get cm -n openshift-config $cm_name -ojsonpath='{.data.ca-bundle\.crt}' | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+        
+        #Kubelet
+        kubelet=$(oc get cm -n openshift-kube-apiserver-operator kube-apiserver-to-kubelet-client-ca -ojsonpath='{.data.ca-bundle\.crt}' | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+        
+        check_certs "ApiServer" "$apiserver"
+        check_certs "Ingress" "$ingress"
+        check_certs "Kubelet" "$kubelet"
+        EOF
+        chmod +x /tmp/cert_{{ ocp_cluster_name }}_check.sh
+
+    - name: Check Certificate
+      shell: /tmp/cert_{{ ocp_cluster_name }}_check.sh
+      register: cert_status
+   
+    - name: Send result as mail
+      mail:
+        host: myhost.mydomain.com
+        port: 25
+        from: ansible@mydomain.com
+        to: myteam@mymail.com
+        subject: OCP Certificate Check [ IMPORTANT ]
+        body: |
+           Report Openshift Certificate Will Be Expire
+
+           Cluster : [ {{ ocp_cluster_name }} ]
+
+           {{ cert_status.stdout }} 
+      delegate_to: localhost
+      when: cert_status.stdout|length > 0

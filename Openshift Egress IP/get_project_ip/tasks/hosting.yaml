@@ -1,0 +1,24 @@
+- name: Hosting Openshift Bank
+  shell: |
+    echo -e "CLUSTER: mycluster1 - Addres: [$(curl -s -XGET -H "Authorization: Bearer {{ mycluster1 }}" -H 'Accept: application/json' "https://api.mycluster1.mydomain.com:6443/apis/network.openshift.io/v1/netnamespaces/{{ namespace }}-prod" --insecure | jq -r '.egressIPs[]' || true)]\n"
+    echo -e  "CLUSTER: mycluster2 - Addres: [$(curl -s -XGET -H "Authorization: Bearer {{ mycluster2 }}" -H 'Accept: application/json' "https://api.mycluster2.fw.mydomain.com:6443/apis/network.openshift.io/v1/netnamespaces/{{ namespace }}-prod" --insecure | jq -r '.egressIPs[]' || true)]\n"
+    echo -e  "Test Subnet (dev,test,qa): - Addres: [ 10.10.11.0/22]\n"
+  register: result
+  when: inventory_hostname  == "hosting-prod-02"
+  
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Project Egress IP Request - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Egress Job Result for Namespace [ {{ namespace }} ]: 
+        
+        {{ result.stdout }}
+
+        Note: If the result is empty, make sure your project name is correct or exist.
+  delegate_to: localhost
+  when: inventory_hostname  == "hosting-prod-01"

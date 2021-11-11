@@ -1,0 +1,14 @@
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "Project Egress IP Request - Smart JOB_ID [{{ job_id }}]"
+    body: |
+        Egress Job Result for Namespace [ {{ namespace }} ]: 
+        
+        Test Subnet (dev,test,qa): - Addres: [10.10.10.0/24]
+  delegate_to: localhost
+  when: inventory_hostname  == "cluster-lab-01"

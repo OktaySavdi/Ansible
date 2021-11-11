@@ -1,7 +1,8 @@
-project_name: letter-of-guarantee
+namespace: letter-of-guarantee
+cluster: Lab
 
-mycluster1: <token> https://api.mycluster1.hb.oc.local:6443
+mycluster1: <token>
 
-mycluster2: <token> https://api.mycluster2.hb.oc.local:6443
+mycluster2: <token>
 
-mycluster3: <token> https://api.mycluster3.hb.oc.local:6443
+mycluster3: <token>

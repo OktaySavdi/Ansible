@@ -1,8 +1,13 @@
+**Required**
+```
+kubectl-who-can - > https://github.com/aquasecurity/kubectl-who-can/releases
+```
+
 **Check Syntax**
 ```
 ansible-playbook -i inventory.yaml delete_project.yaml --syntax-check
 ```
 **Run Playbook**
 ```
-ansible-playbook -i inventory.yaml delete_project.yaml --extra-vars "cluster=ocp-cluster1 namespace=oktay-dev" -vvv
+ansible-playbook -i inventory.yaml all.yaml --extra-vars
 ```

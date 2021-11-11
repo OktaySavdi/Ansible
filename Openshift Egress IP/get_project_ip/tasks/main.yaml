@@ -1,2 +1,15 @@
 ---
-- include_tasks: get_project_ip_.yaml
+- include_tasks: ark.yaml
+  when: 
+    - cluster == "ARK Openshift Bank"
+    - "'prod' in group_names"
+
+- include_tasks: hosting.yaml
+  when: 
+    - cluster == "Hosting Openshift Bank"
+    - "'hosting-prod' in group_names"
+
+- include_tasks: lab.yaml
+  when: 
+    - cluster == "Lab"
+    - "'lab' in group_names"

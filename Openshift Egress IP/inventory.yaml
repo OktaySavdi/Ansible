@@ -1,54 +1,3 @@
-# Inventory for DEV environment
-dev:
-  hosts:
-    cluster-dev-01:
-      ansible_connection: local
-      url: "https://api.mytestcluster1.mydomain.com:6443"
-      delete_project_token: 'HDFDFHKHKJDHFKHDFUIYEUIRJLKJFDKNVIYF'
-    cluster-dev-02:
-      ansible_connection: local
-      url: "https://api.mytestcluster2.mydomain.com:6443"
-      delete_project_token: 'PIERNCCMOERYEIEURERPOEIPILKJFDKNVIYF'
-  vars:
-    job_id: 12345
-    usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay-dev
-    cluster: ocp-cluster1
-
-# Inventory for TEST environment
-test:
-  hosts:
-    cluster-test-01:
-      ansible_connection: local
-      url: "https://api.mytestcluster1.mydomain.com:6443"
-      delete_project_token: 'CNLQEOPEIYDBCDJKPEORIRJLKJFDKNVIYF'
-    cluster-test-02:
-      ansible_connection: local
-      url: "https://api.mytestcluster2.mydomain.com:6443"
-      delete_project_token: 'BVXPOEWWSDUIPOVCMŞSDLRJLKJFDKNVIYF'
-  vars:
-    job_id: 12345
-    usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay-dev
-    cluster: ocp-cluster1
-
-# Inventory for QA environment
-qa:
-  hosts:
-    cluster-qa-01:
-      ansible_connection: local
-      url: "https://api.mytestcluster1.mydomain.com:6443"
-      delete_project_token: 'POIIUVCVMNSDOYEUIRJLKJFDKNVIYF'
-    cluster-qa-02:
-      ansible_connection: local
-      url: "https://api.mytestcluster2.mydomain.com:6443"
-      delete_project_token: 'OKVNSDKJISDSGYEUIRJLKJFDKNVIYF'
-  vars:
-    job_id: 12345
-    usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay-dev
-    cluster: ocp-cluster1
-  
 # Inventory for PROD environment
 prod:
   hosts:
@@ -63,58 +12,9 @@ prod:
   vars:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    network: 192.168.20.10/24
-    namespace: oktay-dev
+    namespace: oktay-prod
     cluster: ocp-cluster1
   
-hosting-dev:
-  hosts:
-    cluster-hosting-dev-01:
-      ansible_connection: local
-      url: "https://api.hosting-dev-cluster1.mydomain.com:6443"
-      delete_project_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
-    cluster-hosting-dev-02:
-      ansible_connection: local
-      url: "https://api.hosting-dev-cluster2.mydomain.com:6443"
-      delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
-  vars:
-    job_id: 12345
-    usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay-dev
-    cluster: ocp-cluster1
-    
-hosting-test:
-  hosts:
-    cluster-hosting-test-01:
-      ansible_connection: local
-      url: "https://api.hosting-test-cluster1.mydomain.com:6443"
-      delete_project_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
-    cluster-hosting-test-02:
-      ansible_connection: local
-      url: "https://api.hosting-test-cluster2.mydomain.com:6443"
-      delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
-  vars:
-    job_id: 12345
-    usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay-dev
-    cluster: ocp-cluster1
-
-hosting-qa:
-  hosts:
-    cluster-hosting-qa-01:
-      ansible_connection: local
-      url: "https://api.hosting-qa-cluster1.mydomain.com:6443"
-      delete_project_token: 'PITMVUXTYPOKLVNMRJLKJFDKNVIYF'
-    cluster-hosting-qa-02:
-      ansible_connection: local
-      url: "https://api.hosting-qa-cluster2.mydomain.com:6443"
-      delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
-  vars:
-    job_id: 12345
-    usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay-dev
-    cluster: ocp-cluster1
-
 hosting-prod:
   hosts:
     cluster-hosting-prod-01:
@@ -128,8 +28,7 @@ hosting-prod:
   vars:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    network: 192.168.10.10/24
-    namespace: oktay-dev
+    namespace: oktay-prod
     cluster: ocp-cluster1
 
 lab:
@@ -145,5 +44,5 @@ lab:
   vars:
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay-dev
+    namespace: oktay-lab
     cluster: ocp-cluster1

@@ -12,7 +12,7 @@
   mail:
     host: myhost.mydomain.com
     port: 25
-    sender: ansible@garanti.com.tr
+    sender: ansible@mydomain.com
     to: "{{ usermail }}"
     subject: "Project Delete - Smart JOB_ID [{{ job_id }}]"
     body: |

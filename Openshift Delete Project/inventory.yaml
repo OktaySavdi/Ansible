@@ -1,3 +1,20 @@
+# Inventory for DEV environment
+dev:
+  hosts:
+    cluster-dev-01:
+      ansible_connection: local
+      url: "https://api.mytestcluster1.mydomain.com:6443"
+      delete_project_token: 'HDFDFHKHKJDHFKHDFUIYEUIRJLKJFDKNVIYF'
+    cluster-dev-02:
+      ansible_connection: local
+      url: "https://api.mytestcluster2.mydomain.com:6443"
+      delete_project_token: 'PIERNCCMOERYEIEURERPOEIPILKJFDKNVIYF'
+  vars:
+    cluster: cluster1
+    namespace: oktay-dev
+    job_id: 12345
+    usermail: oktaysav@garantibbva.com.tr
+  
 # Inventory for PROD environment
 prod:
   hosts:
@@ -10,11 +27,10 @@ prod:
       url: "https://api.myprodcluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    cluster: cluster1
+    namespace: oktay-dev
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    network: 192.168.20.10/24
-    namespace: oktay-dev
-    cluster: ocp-cluster1
   
 hosting-dev:
   hosts:
@@ -27,10 +43,10 @@ hosting-dev:
       url: "https://api.hosting-dev-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    cluster: cluster1
+    namespace: oktay-dev
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay-dev
-    cluster: ocp-cluster1
     
 hosting-prod:
   hosts:
@@ -43,11 +59,10 @@ hosting-prod:
       url: "https://api.hosting-prod-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    cluster: cluster2
+    namespace: oktay-dev
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    network: 192.168.10.10/24
-    namespace: oktay-dev
-    cluster: ocp-cluster1
 
 lab:
   hosts:
@@ -60,7 +75,7 @@ lab:
       url: "https://api.myhosting-lab-cluster2.mydomain.com:6443"
       delete_project_token: 'MBXCKJSDUOIINBVDFRLKJFDKNVIYF'
   vars:
+    cluster: cluster2
+    namespace: oktay-dev
     job_id: 12345
     usermail: oktaysav@garantibbva.com.tr
-    namespace: oktay-dev
-    cluster: ocp-cluster1

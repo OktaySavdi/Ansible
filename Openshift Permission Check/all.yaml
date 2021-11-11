@@ -1,0 +1,43 @@
+- name: login to ocp
+  shell: oc login "{{ url }}" -u "{{ usr }}" -p "{{ passwd }}"
+
+- name: get permission list
+  shell: kubectl-who-can create namespace | grep -vE "openshift|SUBJECT|subjects" | awk 'NR>1 {print $2}' > /opt/permission_check/clusters/{{ ocp_cluster_name }}
+
+- name: create compare file
+  shell: |
+    cat << 'EOF' > /tmp/permission_{{ ocp_cluster_name }}_check.sh
+    #!/bin/bash
+    echo "################# {{ ocp_cluster_name }} #################" >> /opt/permission_check/result/result_{{ tower_job_id }}.txt
+    while read line
+     do
+       line1=`grep -ie "${line}" /opt/permission_check/white_list `
+       if [ $? -ne 0 ] ; then
+         echo $line >> /opt/permission_check/result/result_{{ tower_job_id }}.txt
+       fi
+     done < /opt/permission_check/clusters/{{ ocp_cluster_name }}
+    EOF
+    chmod +x /tmp/permission_{{ ocp_cluster_name }}_check.sh
+
+- name: run result of permission
+  shell: /tmp/permission_{{ ocp_cluster_name }}_check.sh
+
+- name: delete old result file
+  shell: find /opt/permission_check/result/result_*.txt -type f -ctime +2 -exec rm -rf {} \;
+  when: inventory_hostname  == "cluster-lab-01"
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "[ Imported ] Check the users who are cluster-admin"
+    attach: /opt/permission_check/result/result_{{ tower_job_id }}.txt
+    body: |
+        Report From Cluster-Admin List [ Weekly ]
+
+        Please check the List and remove unnecessary permissions!!
+  delegate_to: localhost
+  when: inventory_hostname  == "cluster-lab-01"

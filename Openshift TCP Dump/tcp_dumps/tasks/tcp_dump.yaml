@@ -2,6 +2,16 @@
   raw: |
     echo {{pod_name}}-$(date +"%m-%d-%Y-%H-%M-%S").pcap
   register: tcpdump_filename
+ 
+ - name: get kubeconfig path
+  shell:
+    cmd: |
+      if [ -f "/opt/installation/{{ cluster }}/kubeconfig" ]; then 
+         echo "/opt/installation/{{ cluster }}/kubeconfig"
+      else
+         echo "/data/installation/{{ cluster }}/kubeconfig"
+      fi
+  register: path_result
 
  - name: check pod exist
   shell: oc get po -A | grep "{{ pod_name }}" | wc -l
@@ -20,7 +30,7 @@
 - name: get node ip addres
   shell: oc get node $(oc get po -A -o wide | grep "{{ pod_name }}" | awk '{print $8}') -o wide --no-headers | awk '{print $6}'
   environment:
-    KUBECONFIG: "/root/files/ocp/installation/{{ cluster }}/kubeconfig"
+    KUBECONFIG: "{{ path_result.stdout | trim }}"
   register: get_node_ip_address
 
 - name: get tcp dump

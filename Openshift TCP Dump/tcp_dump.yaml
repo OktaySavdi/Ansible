@@ -1,0 +1,69 @@
+- name: OCP | Project | Launch playbook for environment
+  hosts: dev
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: myftpservername
+    ftp_path: tcpdump
+    cluster: cluster1
+    pod_name: web-cache-v0-13-d426r
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+      when: cluster == "dev-cluster1" or cluster == "dev-cluster2"
+
+- name: OCP | Project | delete user
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: myftpservername
+    ftp_path: tcpdump
+    cluster: cluster1
+    pod_name: web-cache-v0-13-d426r
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+      when: cluster == "prod-cluster1" or cluster == "prod-cluster2"
+
+- name: OCP | Project | delete user
+  hosts: hosting-test
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: myftpservername
+    ftp_path: tcpdump
+    cluster: cluster1
+    pod_name: web-cache-v0-13-d426r
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+      when: cluster == "hosting-test-cluster1" or cluster == "hosting-test-cluster2"
+
+- name: OCP | Project | delete user
+  hosts: hosting-prod
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: myftpservername
+    ftp_path: tcpdump
+    cluster: cluster1
+    pod_name: web-cache-v0-13-d426r
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+      when: cluster == "hosting-prod-cluster1" or cluster == "hosting-prod-cluster2"
+
+- name: OCP | Project | delete user
+  hosts: lab
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: myftpservername
+    ftp_path: tcpdump
+    cluster: cluster1
+    pod_name: web-cache-v0-13-d426r
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+      when: cluster == "lab-cluster1" or cluster == "lab-cluster2"

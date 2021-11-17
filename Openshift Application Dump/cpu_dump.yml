@@ -1,0 +1,32 @@
+- name: get kubeconfig path
+  shell:
+    cmd: |
+      if [ -f "/opt/{{ cluster }}/auth/kubeconfig" ]; then 
+         echo "/opt/{{ cluster }}/auth/kubeconfig"
+      else
+         echo "/root/{{ cluster }}/auth/kubeconfig"
+      fi
+  register: path_result
+  
+- name: check pod exist
+  shell: oc get po -A | grep "{{ pod_name }}" | wc -l
+  environment:
+    KUBECONFIG: "{{ path_result.stdout | trim }}"
+  register: check_pod_exist
+
+- name: message for pod exist
+  debug:
+    msg: "The pod is doesn't exist - {{ pod_name }}"
+  when: check_pod_exist.stdout == "0"
+
+- meta: end_play
+  when: check_pod_exist.stdout == "0"
+
+- name: "Get dump for cpu"
+  shell: oc exec {{ pod_name }} -c "$(echo {{ pod_name }} | rev | cut -d "-" -f3- | rev)" -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" -- jcmd 1 Thread.print > /tmp/{{ pod_name }}-threadprint.txt
+  environment:
+    KUBECONFIG: "{{ path_result.stdout | trim }}"
+  register: check_pod_exist
+
+- name: "copy dump file to ftp"
+  shell: curl -T /tmp/{{ pod_name }}-threadprint.txt ftp://{{ftp_server}}/{{ftp_path}}/{{ pod_name }}-threadprint.txt && rm -rf /tmp/{{ pod_name }}-threadprint.txt

@@ -1,0 +1,57 @@
+- name: write telnet script into file
+  shell: |
+    cat << 'EOF' > /tmp/telnet_{{ cluster }}_control.sh
+
+    DEST=$1
+    PORT=$2
+    NAMESPACE=$3
+    CLUSTER=$4
+    
+    if [ -f "/opt/{{ cluster }}/auth/kubeconfig" ]; then 
+       export KUBECONFIG=/opt/{{ cluster }}/auth/kubeconfig
+    else 
+       export KUBECONFIG=/root/{{ cluster }}/auth/kubeconfig
+    fi
+
+    if [[ $(oc get project | awk '{print $1}' | grep -v openshift | grep -xc $NAMESPACE) -eq 0 ]]; then
+        echo "Namespace/Project name $NAMESPACE not found"
+        exit 0
+    fi
+
+    if [[ $(oc get po -n $NAMESPACE | grep -ic telnet-kontrol) -eq 1 ]]; then
+        oc delete po $(oc get po -n $NAMESPACE | grep -i telnet-kontrol | awk '{print $1}' ) -n $NAMESPACE --grace-period=0 --force
+    fi
+
+    result=$(oc -n $NAMESPACE run -it --rm telnet-kontrol-$RANDOM --image=registry.redhat.io/rhel8/support-tools:latest --restart=Never -- echo $(timeout 2 curl -v telnet://$DEST:$PORT 2>&1))
+    if [[ $(echo $result | grep -ic "Connected") -eq 1 ]]; then
+        echo "Access Available" | awk '{print "***" $0}'
+    elif [[ $(echo $result | grep -ic "refused") -eq 1 ]]; then
+        echo "No access or no service on port" | awk '{print "***" $0}'
+    else
+        echo "No connection" | awk '{print "***" $0}'
+    fi
+    EOF
+    chmod +x /tmp/telnet_{{ cluster }}_control.sh
+  ignore_errors: true
+
+- name: Telnet Control
+  shell: "/tmp/telnet_{{ cluster }}_control.sh {{ dest }} {{ port }} {{ namespace }} {{ cluster }}"
+  register: telnet_status
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "OCP Telnet Control - Smart JOB_ID [{{ job_id }}]"
+    body: |
+       Telnet Control Result:
+           
+       Destination: [ {{ dest }} ]
+       Port: [ {{ port }} ]
+       Namespace: [ {{ namespace }} ]
+       Cluster : [ {{ cluster }} ]
+       Status: [ {{ telnet_status.stdout }} ]
+  delegate_to: localhost

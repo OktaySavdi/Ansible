@@ -1,5 +1,203 @@
----
-- name: Get dumps on pods
-  hosts: all
-  roles:
-      - get_dumps
+- name: OCP | Project | Application Dump lab environment | MEMORY
+  hosts: lab
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: lab-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: memory_dump.yml
+      when: 
+        - cluster == "lab-ocpcluster1" or cluster == "lab-ocpcluster2"
+        - choose == "memory"
+
+- name: OCP | Project | Application Dump lab environment | CPU
+  hosts: lab
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: lab-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: cpu_dump.yml
+      when: 
+        - cluster == "lab-ocpcluster1" or cluster == "lab-ocpcluster2"
+        - choose == "cpu"
+
+- name: OCP | Project | Application Dump lab environment | GC
+  hosts: lab
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: lab-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: gc_collect.yml
+      when: 
+        - cluster == "lab-ocpcluster1" or cluster == "lab-ocpcluster2"
+        - choose == "gc"
+
+- name: OCP | Project | Application Dump lab environment | TOP
+  hosts: lab
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: lab-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: top_result.yml
+      when: 
+        - cluster == "lab-ocpcluster1" or cluster == "lab-ocpcluster2"
+        - choose == "top"
+
+- name: OCP | Project | Application Dump test environment | MEMORY
+  hosts: test
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: test-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Application Dump for environment
+      import_tasks: memory_dump.yml
+      when: 
+        - cluster == "test-ocpcluster1" or cluster == "test-ocpcluster2"
+        - choose == "memory"
+
+- name: OCP | Project | Application Dump test environment | CPU
+  hosts: test
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: test-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Application Dump for environment
+      import_tasks: cpu_dump.yml
+      when: 
+        - cluster == "test-ocpcluster1" or cluster == "test-ocpcluster2"
+        - choose == "cpu"
+
+- name: OCP | Project | Application Dump test environment | GC
+  hosts: test
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: test-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Application Dump for environment
+      import_tasks: gc_collect.yml
+      when: 
+        - cluster == "test-ocpcluster1" or cluster == "test-ocpcluster2"
+        - choose == "gc"
+
+- name: OCP | Project | Application Dump test environment | TOP
+  hosts: test
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: test-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Application Dump for environment
+      import_tasks: top_result.yml
+      when: 
+        - cluster == "test-ocpcluster1" or cluster == "test-ocpcluster2"
+        - choose == "top"
+
+- name: OCP | Project | Application Dump ark prod environment | MEMORY
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: prod-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: memory_dump.yml
+      when: 
+        - cluster == "prod-ocpcluster1" or cluster == "prod-ocpcluster2"
+        - choose == "memory"
+
+- name: OCP | Project | Application Dump ark prod environment | CPU
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: prod-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: cpu_dump.yml
+      when: 
+        - cluster == "prod-ocpcluster1" or cluster == "prod-ocpcluster2"
+        - choose == "cpu"
+
+- name: OCP | Project | Application Dump ark prod environment | GC
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: prod-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: gc_collect.yml
+      when: 
+        - cluster == "prod-ocpcluster1" or cluster == "prod-ocpcluster2"
+        - choose == "gc"
+
+- name: OCP | Project | Application Dump ark prod environment | TOP
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  vars:
+    ftp_server: my_ftp_adress
+    ftp_path: tcpdump
+    pod_name: mypod-8473-v1-vfdj
+    cluster: prod-ocpcluster1
+    choose: memory
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: top_result.yml
+      when: 
+        - cluster == "prod-ocpcluster1" or cluster == "prod-ocpcluster2"
+        - choose == "top"

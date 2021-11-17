@@ -1,0 +1,23 @@
+# Inventory for lab servers
+lab:
+   hosts:
+     mybastion01:
+       ansible_host: 10.10.10.10
+   vars:
+     usermail: oktaysavdi@mydomain.com
+
+# Inventory for test servers
+test:
+   hosts:
+     mybastion02:
+       ansible_host: 10.10.11.10
+   vars:
+     usermail: oktaysavdi@mydomain.com
+
+# Inventory for prod servers
+prod:
+   hosts:
+     mybastion03:
+       ansible_host: 10.10.12.10
+   vars:
+     usermail: oktaysavdi@mydomain.com

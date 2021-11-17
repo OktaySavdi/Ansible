@@ -1,8 +1,0 @@
-- name: "OpenShift CLI login"
-  shell: oc login --token "{{ vars['token_' + cluster ] }}" --insecure-skip-tls-verify=false
-  
-- name: "Get dump for gc collect"
-  shell: oc exec {{ pod_name }} -c "$(echo {{ pod_name }} | rev | cut -d "-" -f3- | rev)" -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" -- jcmd 1 GC.class_histogram > /tmp/{{ pod_name }}-GC_class_histogram.txt
-
-- name: "copy dump file to ftp"
-  shell: curl -T /tmp/{{ pod_name }}-GC_class_histogram.txt ftp://{{ftp_server}}/{{ftp_path}}/{{ pod_name }}-GC_class_histogram.txt && rm -rf /tmp/{{ pod_name }}-GC_class_histogram.txt

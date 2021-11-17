@@ -5,6 +5,10 @@ lab:
        ansible_host: 10.10.10.10
    vars:
      usermail: oktaysavdi@mydomain.com
+     namespace: oktay-dev
+     dest: mywebserver
+     port: 443
+     cluster: ocp-cluster1
 
 # Inventory for test servers
 test:
@@ -13,6 +17,10 @@ test:
        ansible_host: 10.10.11.10
    vars:
      usermail: oktaysavdi@mydomain.com
+     namespace: oktay-dev
+     dest: mywebserver
+     port: 443
+     cluster: ocp-cluster1
 
 # Inventory for prod servers
 prod:
@@ -21,3 +29,7 @@ prod:
        ansible_host: 10.10.12.10
    vars:
      usermail: oktaysavdi@mydomain.com
+     namespace: oktay-dev
+     dest: mywebserver
+     port: 443
+     cluster: ocp-cluster1

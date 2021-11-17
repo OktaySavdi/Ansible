@@ -1,0 +1,32 @@
+- name: OCP | Project | Telnet lab environment
+  hosts: lab
+  gather_facts: no
+  serial: 1
+  vars:
+    usermail: oktaysavdi@mydomain.com
+    namespace: oktay-dev
+    dest: mywebserver
+    port: 443
+    cluster: ocp-cluster1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+      when: cluster == "lab-cluster1" or cluster == "lab-cluster2"
+
+- name: OCP | Project | Telnet lab environment
+  hosts: test
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+      when: cluster == "test-cluster1" or cluster == "test-cluster2"
+
+- name: OCP | Project | Telnet test environment
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Telnet for environment
+      import_tasks: all.yaml
+      when: cluster == "prod-cluster1" or cluster == "prod-cluster2"

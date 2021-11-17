@@ -1,0 +1,33 @@
+# Inventory for lab servers
+lab:
+   hosts:
+     mybastion01:
+       ansible_host: 10.10.10.10
+   vars:
+     usermail: oktaysavdi@mydomain.com
+     cluster: ocp-cluster1
+     pod_name: mypod-8473-v1-vfdj
+     choose: memory
+
+# Inventory for test servers
+test:
+   hosts:
+     mybastion02:
+       ansible_host: 10.10.11.10
+   vars:
+     usermail: oktaysavdi@mydomain.com
+     cluster: ocp-cluster1
+     pod_name: mypod-8473-v1-vfdj
+     choose: memory
+
+
+# Inventory for prod servers
+prod:
+   hosts:
+     mybastion03:
+       ansible_host: 10.10.12.10
+   vars:
+     usermail: oktaysavdi@mydomain.com
+     cluster: ocp-cluster1
+     pod_name: mypod-8473-v1-vfdj
+     choose: memory

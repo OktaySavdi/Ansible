@@ -1,15 +1,41 @@
-- name: "OpenShift CLI login"
-  shell: oc login --token "{{ vars['token_' + cluster ] }}" --insecure-skip-tls-verify=false
+- name: get kubeconfig path
+  shell:
+    cmd: |
+      if [ -f "/opt/{{ cluster }}/auth/kubeconfig" ]; then 
+         echo "/opt/{{ cluster }}/auth/kubeconfig"
+      else
+         echo "/root/{{ cluster }}/auth/kubeconfig"
+      fi
+  register: path_result
+
+- name: check pod exist
+  shell: oc get po -A | grep "{{ pod_name }}" | wc -l
+  environment:
+    KUBECONFIG: "{{ path_result.stdout | trim }}"
+  register: check_pod_exist
+
+- name: message for pod exist
+  debug:
+    msg: "The pod is doesn't exist - {{ pod_name }}"
+  when: check_pod_exist.stdout == "0"
+
+- meta: end_play
+  when: check_pod_exist.stdout == "0"
   
 - name: "Get dump for heap"
   shell: oc exec {{ pod_name }} -c "$(echo {{ pod_name }} | rev | cut -d "-" -f3- | rev)" -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" -- jcmd 1 GC.heap_dump /tmp/{{ pod_name }}-heap.hprof
+  environment:
+    KUBECONFIG: "{{ path_result.stdout | trim }}"
 
 - name: "Get dump file to local server"
   shell: oc -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" rsync {{ pod_name }}:/tmp/{{ pod_name }}-heap.hprof /tmp/.
+  environment:
+    KUBECONFIG: "{{ path_result.stdout | trim }}"
 
 - name: "Remove dump file on pods"
   shell: oc exec {{ pod_name }} -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" -- rm /tmp/{{ pod_name }}-heap.hprof
+  environment:
+    KUBECONFIG: "{{ path_result.stdout | trim }}"
 
 - name: "copy dump file to ftp"
   shell: curl -T /tmp/{{ pod_name }}-heap.hprof ftp://{{ftp_server}}/{{ftp_path}}/{{ pod_name }}-heap.hprof && rm -rf /tmp/{{ pod_name }}-heap.hprof
-  #shell: sftp -b /tmp/{{ pod_name }}-heap.hprof anonymous@pgarftplog01:/tcpdump/ 

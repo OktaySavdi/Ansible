@@ -22,13 +22,11 @@
         oc delete po $(oc get po -n $NAMESPACE | grep -i telnet-kontrol | awk '{print $1}' ) -n $NAMESPACE --grace-period=0 --force
     fi
 
-    result=$(oc -n $NAMESPACE run -it --rm telnet-kontrol-$RANDOM --image=registry.redhat.io/rhel8/support-tools:latest --restart=Never -- echo $(timeout 2 curl -v telnet://$DEST:$PORT 2>&1))
-    if [[ $(echo $result | grep -ic "Connected") -eq 1 ]]; then
-        echo "Access Available" | awk '{print "***" $0}'
-    elif [[ $(echo $result | grep -ic "refused") -eq 1 ]]; then
-        echo "No access or no service on port" | awk '{print "***" $0}'
+    result=$(oc -n $NAMESPACE run -it --rm telnet-kontrol-$RANDOM --image=registry.redhat.io/rhel8/support-tools:latest --restart=Never -- timeout 2 bash -c "</dev/tcp/$DEST/$PORT" && echo "Connected" || echo "TRY")
+    if [[ $(echo $result | grep -ic Connected) -eq 1 ]]; then
+        echo "Erisim Var" | awk '{print "***" $0}'
     else
-        echo "No connection" | awk '{print "***" $0}'
+        echo "Erisim Yok" | awk '{print "***" $0}'
     fi
     EOF
     chmod +x /tmp/telnet_{{ cluster }}_control.sh

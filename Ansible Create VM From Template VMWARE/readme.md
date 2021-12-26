@@ -29,11 +29,12 @@ Edit the main.yml file to define the vcenter info
 
 ## Install PreRequest For VmWare
 
-    yum install -y python27-python-pip
-    scl enable python27 bash
-    which pip
-    pip -V
-    pip install pyvmomi
+    #yum install -y python27-python-pip
+    yum install -y python36 python36-devel python36-setuptools
+    easy_install-3.6 pip
+    which pip3
+    pip3 -V
+    pip3 install pyvmomi
 
 ## Execution
 

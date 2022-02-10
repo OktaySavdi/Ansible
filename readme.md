@@ -210,8 +210,8 @@ ansible-inventory --yaml -i origin_inventory --list --output destination_invento
 | become_user | ansible_become_user |
 | become_password | ansible_become_pass |
 
-vi ansible.cfg
 ```
+vi ansible.cfg
 [defaults]
 inventory=inventory.yml
 remote_user=devops

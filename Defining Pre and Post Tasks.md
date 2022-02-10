@@ -9,6 +9,16 @@ you can use instead of tasks to do this:
 The following playbook provides an example with pre_tasks, roles, tasks, post_tasks, and
 handlers sections. It is unusual for a play to contain all of these sections.
 
+For example, if you write the tasks section before the roles section, Ansible still executes the roles 
+before the tasks in the tasks section. For readability, however, it is a good practice to organize
+your play in the order of execution: pre_tasks, roles, tasks, and post_tasks. Handlers are
+usually at the end.
+
+Ansible executes and flushes notified handlers at several points during a run: after the pre_tasks
+section, after the roles and tasks sections, and after the post_tasks section. This means
+that a handler can run more than once, at different times during the play execution, if notified in
+multiple sections.
+
 ```yml
 - name: Deploying New Application Version
   hosts: webservers

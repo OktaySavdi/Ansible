@@ -209,6 +209,17 @@ ansible-inventory --yaml -i origin_inventory --list --output destination_invento
 | become_method | ansible_become_method |
 | become_user | ansible_become_user |
 | become_password | ansible_become_pass |
+```
+[defaults]
+inventory=inventory.yml
+remote_user=devops
+
+[privilege_escalation]
+become=true
+become_method=sudo
+become_user=root
+become_ask_pass=false
+```
 
 ### Privilege Escalation in Tasks
 ```yaml

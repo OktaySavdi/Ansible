@@ -257,6 +257,68 @@ become_ask_pass=false
      - role: role-name
        become: true
 ```
+### Controlling Task Execution
+```yaml
+- name: operator Upgrade
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  roles:
+      - operator_upgrade
+---
+- name: Executing a role as a task
+  hosts: remote.example.com
+  tasks:
+    - name: A normal task
+      debug:
+        msg: 'first task'
+    - name: A task to include role2 here
+      include_role:
+        name: role2
+```
+### Listening to Handlers
+```yaml
+- name: Testing the listen directive
+  hosts: localhost
+  gather_facts: no
+  become: no
+  tasks:
+    - debug:
+        msg: Trigerring the handlers
+      notify: My handlers
+      changed_when: true
+  handlers:
+  # As an example, this handler is also triggered because
+  # its name matches the notification, but no two handlers
+  # can have the same name.
+  - name: My handlers
+    debug:
+      msg: Second handler was notified
+```
+### Controlling Order of Host Execution
+```yaml
+- name: Testing host order
+  hosts: web_servers
+  order: sorted
+  tasks:
+```
+```
+inventory
+  The inventory order. This is the default value.
+
+reverse_inventory
+  The reverse of the inventory order.
+
+sorted
+  The hosts in alphabetical order. Numbers sort before letters.
+
+reverse_sorted
+  The hosts in reverse alphabetical order.
+
+shuffle
+  Random order every time you run the play.
+```
 ```yaml
 ```
 ```yaml

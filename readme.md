@@ -1,10 +1,5 @@
 
-# Ansible Installation Automation
-
--   Ansible 2.8.5
--   Compatible with most versions of RHEL 7.6
-
-# Ansible API
+## #Ansible API
 
 Ansible Tower API Example - https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html
 
@@ -27,7 +22,7 @@ curl --user myuser:mypassword https://myansible-srv/api/v2/jobs/122/stdout/?form
 curl --user myuser:mypassword https://myansible-srv/api/v2/jobs/122/stdout/?format=json
 ```
 
-## GIT
+## #GIT
 ```
 .gitignore
 git init
@@ -70,7 +65,7 @@ git checkout -b lab2
 git push origin lab
 git push --set-upstream origin lab
 ```
-## Inventory
+## #Inventory
 ```
 [server01]
 server01 ansible_host=10.10.10.10 ansible_ssh_pass=xxx ansible_ssh_user=user
@@ -203,7 +198,7 @@ dev:
 ```
 ansible-inventory --yaml -i origin_inventory --list --output destination_inventory.yml
 ```
-## Managing Task Execution
+## #Managing Task Execution
 
 ### Privilege Escalation by Configuration
 | Configuration or Playbook Directive | Connection Variable |

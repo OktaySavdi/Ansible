@@ -117,6 +117,7 @@ smtp_relay: smtp.lab.example.com
 lb_servers:
   hosts:
     servera.lab.example.com:
+      ansible_become: true
 web_servers:
   hosts:
     serverb.lab.example.com:
@@ -133,6 +134,7 @@ all:
     k8s-infra01:
       ansible_host: 10.10.10.11
   vars:
+    ansible_become: true
     smtp_relay: smtp.lab.example.com
   children:
     bastion:

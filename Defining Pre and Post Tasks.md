@@ -40,6 +40,7 @@ handlers sections. It is unusual for a play to contain all of these sections.
         return_content: yes
       register: result
       failed_when: "'OK' not in result.content"
+      
   post_tasks:
     - name: Enabling Nagios for this host
       nagios:

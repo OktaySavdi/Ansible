@@ -200,6 +200,17 @@ dev:
 ```
 ansible-inventory --yaml -i origin_inventory --list --output destination_inventory.yml
 ```
+# Inventory Vars 
+```yaml
+include_tasks: bootstrap-redhat.yml
+include_vars: "{{ item }}"
+import_tasks: 0020-verify-settings.yml
+import_playbook: deploy_apache.yml
+import_role:
+  name: etcdctl
+include_role:
+    name: myrole
+```
 ## #Managing Task Execution
 
 ### Privilege Escalation by Configuration
@@ -318,6 +329,142 @@ reverse_sorted
 
 shuffle
   Random order every time you run the play.
+```
+### Tags
+```yaml
+roles:
+  - { role: databases, tags: ['csh', 'httpd'] }
+
+ansible-playbook tags-exam.yml --list-tags
+ansible-playbook -i inventory.yml tags_exam.yml --tags httpd,csh
+ansible-playbook -i inventory.yml tags_exam.yml --tags=httpd --limit=httpd
+```
+```yaml
+- name: Setup web services
+  hosts: webservers
+  tags:
+    - setup
+```
+```yaml
+- hosts: bastion
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Install packages
+      shell: "echo deneme1"
+      tags: csh
+
+    - name: Install packages
+      shell: "echo deneme2"
+      tags: httpd
+    
+    - name: Install packages
+      shell: "echo deneme3"
+      tags: never           # If you assign the never tag to a task or play, Ansible will skip that task or play unless you specifically request it (--tags never).
+
+    - name: Install packages
+      shell: "echo deneme4"
+      tags: always           # If you assign the always tag to a task or play, Ansible will always run that task or play, unless you specifically skip it (--skip-tags always).
+```
+### Optimizing Execution for Speed
+```
+time ansible-playbook speed_facts.yml
+```
+**Disabling Fact Gathering**
+```
+- hosts: lab
+  gather_facts: no
+```
+**Increasing Parallelism**
+
+By increasing the forks value, Ansible runs each task simultaneously on more hosts at a time,
+and the playbook usually completes in less time. For example, if you set forks to 100, Ansible
+can attempt to open connections to all 100 hosts in the previous example simultaneously. This will
+place more load on the control node, which still needs enough time to communicate with each of
+the hosts.
+```
+[user@demo ~]$ cat ansible.cfg
+[defaults]
+inventory=inventory
+remote_user=devops
+forks=100 
+```
+**Avoiding Loops with the Package Manager Modules**
+
+Some modules accept a list of items to work on and do not require the use of a loop. This approach
+can increase efficiency, since the module will be called once rather than multiple times.
+```yaml
+tasks:
+- name: Ensure the packages are installed
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - httpd
+    - mod_ssl
+    - httpd-tools
+    - mariadb-server
+    - mariadb
+    - php
+    - php-mysqlnd
+---
+tasks:
+- name: Ensure the packages are installed
+  yum:
+    state: present
+    name: 
+      - httpd
+      - mod_ssl
+      - httpd-tools
+      - mariadb-server
+      - mariadb
+      - php
+      - php-mysqlnd
+```
+**Efficiently Copy Files to Managed Hosts**
+it is generally more efficient to use the synchronize module to copy large numbers of
+files to managed hosts. This module uses rsync in the background and is faster than the copy
+module in most cases.
+```yaml
+- name: Deploy the web content on the web servers
+  hosts: web_servers
+  become: True
+  gather_facts: False
+  tasks:
+    - name: Ensure web content is updated
+      synchronize:
+        src: web_content/
+        dest: /var/www/html
+```
+**Using Templates**
+```yaml
+- name: Configure the Apache HTTP Server
+  hosts: web_servers
+  become: True
+  gather_facts: False
+  tasks:
+    - name: Ensure proper configuration of the Apache HTTP Server
+      template:
+        src: httpd.conf.j2
+        dest: /etc/httpd/conf/httpd.conf
+```
+**Optimizing SSH connections**
+Establishing an SSH connection can be a slow process. When a play has many tasks and targets a
+large set of nodes, the overall time Ansible spends establishing these connections can significantly
+increase the global execution time of your playbook.
+```
+[ssh_connection]
+ssh_args = -o ControlMaster=auto -o ControlPersist=60s
+```
+**Profiling Playbook Execution with Callback plug-ins**
+```
+[user@demo ~]$ cat ansible.cfg
+[defaults]
+inventory=inventory
+remote_user=devops
+callback_whitelist=timer, profile_tasks, cgroup_perf_recap
+```
+```yaml
 ```
 ```yaml
 ```

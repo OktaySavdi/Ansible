@@ -422,6 +422,7 @@ tasks:
       - php-mysqlnd
 ```
 **Efficiently Copy Files to Managed Hosts**
+
 it is generally more efficient to use the synchronize module to copy large numbers of
 files to managed hosts. This module uses rsync in the background and is faster than the copy
 module in most cases.
@@ -449,6 +450,7 @@ module in most cases.
         dest: /etc/httpd/conf/httpd.conf
 ```
 **Optimizing SSH connections**
+
 Establishing an SSH connection can be a slow process. When a play has many tasks and targets a
 large set of nodes, the overall time Ansible spends establishing these connections can significantly
 increase the global execution time of your playbook.

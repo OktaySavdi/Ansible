@@ -1,4 +1,4 @@
-Before playbook run deploy vpa resource
+Before playbook run, deploy vpa resource
 
 ```
 oc get dc -A --no-headers -o jsonpath='{ range.items[*]}{"\t"}'NS:'{.metadata.namespace}':NAME:'{.metadata.name}{"\n"}' | grep -vE "openshift|kube|default" > config

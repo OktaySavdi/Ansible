@@ -1,0 +1,76 @@
+# Inventory for DEV environment
+dev:
+  hosts:
+    cluster-dev-01:
+      ansible_connection: local
+      url: "https://api.mytestcluster1.mydomain.com:6443"
+      usr: "myuser"
+      passwd: "123"
+    cluster-dev-02:
+      ansible_connection: local
+      url: "https://api.mytestcluster2.mydomain.com:6443"
+      usr: "myuser"
+      passwd: "123"
+  vars:
+    usermail: mygroup@mydomain.com
+  
+# Inventory for PROD environment
+prod:
+  hosts:
+    cluster-prod-01:
+      ansible_connection: local
+      url: "https://api.myprodcluster1.mydomain.com:6443"
+      usr: "myuser"
+      passwd: "123"
+    cluster-prod-02:
+      ansible_connection: local
+      url: "https://api.myprodcluster2.mydomain.com:6443"
+      usr: "myuser"
+      passwd: "123"
+  vars:
+    usermail: mygroup@mydomain.com
+  
+hosting-dev:
+  hosts:
+    cluster-hosting-dev-01:
+      ansible_connection: local
+      url: "https://api.hosting-dev-cluster1.mydomain.com:6443"
+      usr: "myuser"
+      passwd: "123"
+    cluster-hosting-dev-02:
+      ansible_connection: local
+      url: "https://api.hosting-dev-cluster2.mydomain.com:6443"
+      usr: "myuser"
+      passwd: "123"
+  vars:
+    usermail: mygroup@mydomain.com
+    
+hosting-prod:
+  hosts:
+    cluster-hosting-prod-01:
+      ansible_connection: local
+      url: "https://api.hosting-prod-cluster1.mydomain.com:6443"
+      usr: "myuser"
+      passwd: "123"
+    cluster-hosting-prod-02:
+      ansible_connection: local
+      url: "https://api.hosting-prod-cluster2.mydomain.com:6443"
+      usr: "myuser"
+      passwd: "123"
+  vars:
+    usermail: mygroup@mydomain.com
+
+lab:
+  hosts:
+    cluster-hosting-lab-01:
+      ansible_connection: local
+      url: "https://api.myhosting-lab-cluster2.mydomain.com:6443"
+      usr: "myuser"
+      passwd: "123"
+    cluster-hosting-lab-02:
+      ansible_connection: local
+      url: "https://api.myhosting-lab-cluster2.mydomain.com:6443"
+      usr: "myuser"
+      passwd: "123"
+  vars:
+    usermail: mygroup@mydomain.com

@@ -9,7 +9,7 @@
     cat << 'EOF' > /tmp/resource_{{ ocp_cluster_name }}_check.sh
     #!/bin/bash
     echo "################# {{ ocp_cluster_name }} #################" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
-    echo "namespace;app_name;requests-limits;target_resource;upperBound_resource" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
+    echo "namespace;app_name;requests;limits;target_resource;upperBound_resource" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
     while read -r i;do 
     if [[ $(oc get dc -n $i --no-headers | wc -l) != 0 ]]; then
        oc get dc -n $i --no-headers | awk '{print $1}' > result_{{ ocp_cluster_name }}

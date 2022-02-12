@@ -1,0 +1,39 @@
+- name: OCP | Project | Check Resource ark test environment
+  hosts: dev
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+
+- name: OCP | Project | Check Resource ark prod environment
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+
+- name: OCP | Project | Check Resource hosting test environment
+  hosts: hosting-test
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml    
+
+- name: OCP | Project | Check Resource hosting prod environment
+  hosts: hosting-prod
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml
+
+- name: OCP | Project | Check Resource lab environment
+  hosts: lab
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: OCP | Project | Launch playbook for environment
+      import_tasks: all.yaml

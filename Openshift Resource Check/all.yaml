@@ -15,7 +15,7 @@
        oc get dc -n $i --no-headers | awk '{print $1}' > result_{{ ocp_cluster_name }}
        while read -r app;do
           ARRAY=()
-          result_of_dc=$(oc get dc $app -n $i -o jsonpath='{.metadata.namespace};{.metadata.name};{..resources.requests};{..resources.limits}')
+          result_of_dc=$(oc get dc $app -n $i -o jsonpath='{.metadata.namespace};{.metadata.name};{..resources.requests};{..resources.limits};')
           result_of_vpa=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].target};{.status.recommendation.containerRecommendations[*].upperBound}')
           ARRAY+=($result_of_dc $result_of_vpa)
           echo "${ARRAY[@]}" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
@@ -25,7 +25,7 @@
        oc get deploy -n $i --no-headers | awk '{print $1}' > result
        while read -r app;do
          ARRAY=()
-         result_of_deploy=$(oc get deploy $app -n $i -o jsonpath='{.metadata.namespace};{.metadata.name};{..resources.requests};{..resources.limits}')
+         result_of_deploy=$(oc get deploy $app -n $i -o jsonpath='{.metadata.namespace};{.metadata.name};{..resources.requests};{..resources.limits};')
          result_of_vpa=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].target};{.status.recommendation.containerRecommendations[*].upperBound}')
          ARRAY+=($result_of_deploy $result_of_vpa)
          echo "${ARRAY[@]}" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv

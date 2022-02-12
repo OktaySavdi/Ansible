@@ -1,0 +1,59 @@
+- name: login to ocp
+  shell: oc login "{{ url }}" -u "{{ usr }}" -p "{{ passwd }}"
+  
+- name: get project names
+  shell: oc get project -A --no-headers | awk '{print $1}' | grep -vE "openshift|kube|default" > /tmp/config_{{ ocp_cluster_name }}
+
+- name: create compare file
+  shell: |
+    cat << 'EOF' > /tmp/resource_{{ ocp_cluster_name }}_check.sh
+    #!/bin/bash
+    echo "################# {{ ocp_cluster_name }} #################" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
+    echo "namespace;app_name;requests-limits;target_resource;upperBound_resource" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
+    while read -r i;do 
+    if [[ $(oc get dc -n $i --no-headers | wc -l) != 0 ]]; then
+       oc get dc -n $i --no-headers | awk '{print $1}' > result_{{ ocp_cluster_name }}
+       while read -r app;do
+          ARRAY=()
+          result_of_dc=$(oc get dc $app -n $i -o jsonpath='{.metadata.namespace};{.metadata.name};{..resources.requests};{..resources.limits}')
+          result_of_vpa=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].target};{.status.recommendation.containerRecommendations[*].upperBound}')
+          ARRAY+=($result_of_dc $result_of_vpa)
+          echo "${ARRAY[@]}" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
+          sed -i '/^$/d' /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
+       done < result_{{ ocp_cluster_name }} 
+    elif [[ $(oc get deploy -n $i --no-headers | wc -l) != 0 ]]; then
+       oc get deploy -n $i --no-headers | awk '{print $1}' > result
+       while read -r app;do
+         ARRAY=()
+         result_of_deploy=$(oc get deploy $app -n $i -o jsonpath='{.metadata.namespace};{.metadata.name};{..resources.requests};{..resources.limits}')
+         result_of_vpa=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].target};{.status.recommendation.containerRecommendations[*].upperBound}')
+         ARRAY+=($result_of_deploy $result_of_vpa)
+         echo "${ARRAY[@]}" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
+         sed -i '/^$/d' /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
+     done < result 
+    fi
+    done < /tmp/config_{{ ocp_cluster_name }}
+    EOF
+    chmod +x /tmp/resource_{{ ocp_cluster_name }}_check.sh
+    
+- name: run result of resources
+  shell: /tmp/resource_{{ ocp_cluster_name }}_check.sh
+
+- name: delete old result file
+  shell: find /opt/openshift/resource_check/result/result_*.csv -type f -ctime +2 -exec rm -rf {} \;
+  when: inventory_hostname  == "cluster-lab-03"
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: "{{ usermail }}"
+    subject: "[ Imported ] Please Compare Resource Descriptions"
+    attach: /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
+    body: |
+        Report From Resource List [ Weekly ]
+        Please check the List and compare resource descriptions!!
+  delegate_to: localhost
+  when: inventory_hostname  == "cluster-lab-01"

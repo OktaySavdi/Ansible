@@ -466,7 +466,156 @@ inventory=inventory
 remote_user=devops
 callback_whitelist=timer, profile_tasks, cgroup_perf_recap
 ```
-```yaml
+## Processing Variables Using Filters
+
+### Processing Data with Filters
+```
+{{ myname | capitalize }}
+{{ mynumber | string }}
+{{ variable | mandatory }} -> The default behavior from ansible and ansible.cfg is to fail if variables are undefined, but you can turn this off.
+{{ ( ansible_facts['date_time']['hour'] | int ) + 1 }}
+# => "11"
+```
+### Manipulating Lists
+```
+{{ [2, 4, 6, 8, 10, 12] | sum }}
+# => "42"
+{{ [ 2, 4, 6, 8, 10, 12 ] | random }}
+# => "4"
+{{ [ 2, 4, 6, 8, 10, 12 ] | length }}
+# => "6"
+{{ [ 2, 4, 6, 8, 10, 12 ] | first }}
+# => "2"
+{{ [ 2, 4, 6, 8, 10, 12 ] | last }}
+# => "12"
+```
+### Modifying the order of list elements
+```
+{{ [2, 4, 6, 8, 10, 12] | sort }}
+# => "2, 4, 6, 8, 10, 12"
+{{ [2, 4, 6, 8, 10, 12] | reverse }}
+# => "12,10,8,6,4,2"
+```
+### Merging lists
+```
+{{ [ 2, [4, [6, 8]], 10 ] | flatten }}
+# => "2,4,6,8,10"
+```
+### Operating on lists as sets
+```
+{{ [ 1, 1, 2, 2, 2, 3, 4, 4 ] | unique | list }}
+# => "1,2,3,4"
+{{ [ 2, 4, 6, 8, 10 ] | difference([2, 4, 6, 16]) }}
+# => "8,10"
+{{ [ 2, 4, 6, 8, 10 ] | intersect([2, 4, 6, 16]) }}
+# => "2,4,6"
+{{ [ 2, 4, 6, 8, 10 ] | union([2, 4, 6, 16]) }}
+# => "2,4,6,8,10,16"
+```
+### Manipulating Dictionaries
+```
+{{ {'A':1,'B':2} | combine({'B':4,'C':5}) }}
+# => "A:1,B:4,C:5"
+```
+### Hashing, Encoding, and Manipulating Strings
+```
+{{ 'oktay' | hash('sha1') }}
+# => "22771aca22f13b0e26b3011542bde186a5c47690"
+{{ 'secret_password' | password_hash('sha512') }}
+# => "$6$.NrPwkvUvIgPLtov$L4MUNQVBAv0e9lojupUQBUKfRGJuR5jPZCbAYzCQAogwmeclpWr3lNGg4ltsXe2usT.4J/fKbDjQs1NxYUJbV/"
+{{ 'âÉïôú' | b64encode }}
+# => "w6LDicOvw7TDug=="
+{{ 'w6LDicOvw7TDug==' | b64decode }}
+# => "âÉïôú"
+```
+### Formatting Text
+```
+{{ 'OKTAY' | lower }}
+# => "oktay"
+{{ 'oktay' | upper }}
+# => "OKTAY"
+{{ 'oktay' | capitalize }}
+# => "Oktay"
+```
+### Replacing text
+```
+{{ 'oktay, savdi' | replace('a','**') }}
+# => "okt**y, s**vdi"
+```
+### Manipulating JSON Data
+```
+{{ hosts | json_query('[*].name') }}
+# => "bastion, classroom"
+{{ hosts | to_json }}
+# => "[{\"name\": \"bastion\", \"ip\": [\"172.25.250.254\", \"172.25.252.1\"]}"
+```
+### Templating External Data using Lookups
+```
+{{ lookup('file', '/etc/hosts') }}
+# => "127.0.0.1   localhost"
+{{ lookup('template', 'roles/deneme/templates/my.template.j2') }}
+# => "oktay"
+{{ lookup('env','HOSTNAME') }}
+# => "bastion-k8s"
+{{ lookup('url', 'https://my.site.com/my.file') }}
+{{ lookup('file', 'my.file', errors='warn') | default("Default file content") }}
+# => "Default file content"
+{ query('lines','cat users.txt') }}
+# => "deneme"
+{{ query('file', '/etc/hosts')}}
+# => "127.0.0.1   localhost"
+{{ query('fileglob', '~/.bash*') }}
+# => "/root/.bash_logout,/root/.bashrc,/root/.bash_history"
+```
+### Working with Network Addresses Using Filters
+
+| Fact name | Description |
+|--|--|
+| ansible_facts['dns']['nameservers'] | The DNS nameservers used for name resolution by the managed host.|
+|ansible_facts['domain']|The domain for the managed host.|
+|ansible_facts['all_ipv4_addresses']| All the IPv4 addresses configured on the managed host.|
+|ansible_facts['all_ipv6_addresses']| All the IPv6 addresses configured on the managed host.|
+|ansible_facts['fqdn']|The fully-qualified domain name (DNS name) for the managed host.|
+|ansible_facts['hostname']|The unqualified hostname, the string in the FQDN before the first period.|
+```
+{{ my_hosts_list | ipaddr }}
+# => "10.10.10.10,10.10.10.11,10.10.10.12"
+{{ my_hosts_list | ipaddr('netmask') }}
+# => "255.255.192.0,255.255.254.0"
+```
+The **ipaddr** filter accepts the following options:
+
+**address** : Validates input values are valid IP addresses. If the input includes network prefix, it is stripped
+out.
+
+**net** : Validates input values are network ranges and return them in CIDR format.
+
+**host**: Ensures IP addresses conform to the equivalent CIDR prefix format.
+
+**prefix** :  Validates that the input host satisfies the host/prefix or CIDR format, and returns its prefix (size of the network's mask in bits)
+
+**host/prefix** : Validates the input value is in host/prefix format. That is, the host part is a usable IP address on the network and the prefix is a valid CIDR prefix.
+
+**network/prefix** : Validates the input value is in network/prefix format. That is, the network part is the network address (lowest IP address on the network), and the prefix is a valid CIDR prefix.
+
+**public or private** : Validates input IP addresses or network ranges are in ranges that are reserved by IANA to be public or private, respectively.
+
+**size** : Transform the input network range to the number of IP addresses in that range.
+
+**Any integer number (n).** : Transform a network range to the n-th element in that range. Negative numbers return the nth element from last.
+
+**network, netmask, and broadcast** : Validates that the input host satisfies the host/prefix or CIDR format, and transforms it into the network address (applies the netmask to the host), netmask, or broadcast address,respectively.
+
+**subnet** : Validates that the input host satisfies the host/prefix or CIDR format, and returns the subnet containing that host.
+
+**ipv4 and ipv6** : Validates input are valid network ranges and transform them into IPv4 and IPv6 formats,respectively.
+```
+{{ lookup('dig', 'example.com') }}
+{{ lookup('dig', 'example.com', 'qtype=MX') }}
+{{ lookup('dig', 'example.com/MX') }}
+{{ lookup('dig', 'example.com', '@4.4.8.8,4.4.4.4') }}
+{{ query('dig', 'example.com/MX') }}
+{{ lookup('dnstxt', ['test.example.com']) }}
 ```
 ```yaml
 ```

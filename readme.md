@@ -617,6 +617,58 @@ out.
 {{ query('dig', 'example.com/MX') }}
 {{ lookup('dnstxt', ['test.example.com']) }}
 ```
+# #Coordinating Rolling Updates
+
+### Host Delegation 
+
+delegate_to: localhost
+```yaml
+- hosts: webservers
+  serial: 5
+  tasks:
+    - name: Take out of load balancer pool
+      ansible.builtin.command: /usr/bin/take_out_of_pool {{ inventory_hostname }}
+      delegate_to: 127.0.0.1 # localhost
+```
+### Managing Rolling Updates
+```
+- name: Update Webservers
+  hosts: web_servers
+  serial: 2
+
+- name: Update Webservers
+  hosts: web_servers
+  serial: 25%
+
+- name: Update Webservers
+  hosts: web_servers
+  serial:
+    - 1
+    - 10%
+    - 25%
+
+The first batch contains one host, while the second batch contains 10 hosts (10% of 100). The third
+batch processes 25 hosts (25% of 100), leaving 64 unprocessed hosts (1 + 10 + 25 processed).
+Ansible continues executing the play in batch sizes of 25 hosts (25% of 100), until there are fewer
+than 25 unprocessed hosts remaining. In this example, the remaining 14 hosts are processed in the
+final batch (1 + 10 + 25 + 25 + 25 + 14 = 100).
+```
+### Specifying Failure Tolerance
+```
+- name: Update Webservers
+  hosts: web_servers
+  max_fail_percentage: 30%
+  serial:
+    - 2
+    - 10%
+    - 100%
+```
+### Running a Task Once
+```
+- name: Reactivate Hosts
+  shell: /sbin/activate.sh {{ active_hosts_string }}
+  run_once: yes
+```
 ```yaml
 ```
 ```yaml

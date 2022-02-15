@@ -9,15 +9,21 @@
     cat << 'EOF' > /tmp/resource_{{ ocp_cluster_name }}_check.sh
     #!/bin/bash
     echo "################# {{ ocp_cluster_name }} #################" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
-    echo "namespace;app_name;requests;limits;target_resource;upperBound_resource" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
+    echo "namespace;app_name;requests_cpu;requests_memory;limits_cpu;limits_memory;target_cpu;target_memory;upperBound_cpu;upper_memory" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
     while read -r i;do 
     if [[ $(oc get dc -n $i --no-headers | wc -l) != 0 ]]; then
        oc get dc -n $i --no-headers | awk '{print $1}' > result_{{ ocp_cluster_name }}
        while read -r app;do
           ARRAY=()
-          result_of_dc=$(oc get dc $app -n $i -o jsonpath='{.metadata.namespace};{.metadata.name};{..resources.requests};{..resources.limits};')
-          result_of_vpa=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].target};{.status.recommendation.containerRecommendations[*].upperBound}')
-          ARRAY+=($result_of_dc $result_of_vpa)
+          result_of_request_cpu=$(oc get dc $app -n $i -o jsonpath='{.metadata.namespace};{.metadata.name};{..resources.requests.cpu};')
+          result_of_request_mem=$(oc get dc $app -n $i -o jsonpath='{..resources.requests.memory};')
+          result_of_limit_cpu=$(oc get dc $app -n $i -o jsonpath='{..resources.limits.cpu};')
+          result_of_limit_mem=$(oc get dc $app -n $i -o jsonpath='{..resources.limits.memory};')
+          result_of_target_cpu=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].target.cpu};')
+          result_of_target_mem=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].target.memory};')
+          result_of_upper_cpu=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].upperBound.cpu};')
+          result_of_upper_mem=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].upperBound.memory};')
+          ARRAY+=($result_of_request_cpu $result_of_request_mem $result_of_limit_cpu $result_of_limit_mem $result_of_target_cpu $result_of_target_mem $result_of_upper_cpu $result_of_upper_mem)
           echo "${ARRAY[@]}" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
           sed -i '/^$/d' /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
        done < result_{{ ocp_cluster_name }} 
@@ -25,9 +31,15 @@
        oc get deploy -n $i --no-headers | awk '{print $1}' > result
        while read -r app;do
          ARRAY=()
-         result_of_deploy=$(oc get deploy $app -n $i -o jsonpath='{.metadata.namespace};{.metadata.name};{..resources.requests};{..resources.limits};')
-         result_of_vpa=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].target};{.status.recommendation.containerRecommendations[*].upperBound}')
-         ARRAY+=($result_of_deploy $result_of_vpa)
+         result_of_request_cpu=$(oc get deploy $app -n $i -o jsonpath='{.metadata.namespace};{.metadata.name};{..resources.requests.cpu};')
+         result_of_request_mem=$(oc get deploy $app -n $i -o jsonpath='{..resources.requests.memory};')
+         result_of_limit_cpu=$(oc get deploy $app -n $i -o jsonpath='{..resources.limits.cpu};')
+         result_of_limit_mem=$(oc get deploy $app -n $i -o jsonpath='{..resources.limits.memory};')
+         result_of_target_cpu=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].target.cpu};')
+         result_of_target_mem=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].target.memory};')
+         result_of_upper_cpu=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].upperBound.cpu};')
+         result_of_upper_mem=$(oc get vpa $app -n $i -o jsonpath='{.status.recommendation.containerRecommendations[*].upperBound.memory};')
+         ARRAY+=($result_of_request_cpu $result_of_request_mem $result_of_limit_cpu $result_of_limit_mem $result_of_target_cpu $result_of_target_mem $result_of_upper_cpu $result_of_upper_mem)
          echo "${ARRAY[@]}" >> /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
          sed -i '/^$/d' /opt/openshift/resource_check/result/result_{{ tower_job_id }}.csv
      done < result 

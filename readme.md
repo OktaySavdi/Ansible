@@ -78,6 +78,7 @@ delegate_to -> used if the place where the action needs to be done is elsewhere
 hostvars    -> used to get host's variable
 serial      -> allows you to process batches in batches (25%,50%,100%)
 run_once    -> used if it is desired to run once in each batch
+script      -> Allows a local script to be run on the server you want to run.
 
 command -> module is running job on sub system. via python. pipe or special commands like shell won't work (wants it to be python)
 shell   -> shell specific

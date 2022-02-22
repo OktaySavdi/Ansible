@@ -893,11 +893,6 @@ localhost : ok=26 changed=18 unreachable=0 failed=0
 The setup process completed successfully.
 Setup log saved to /var/log/tower/setup-2017-03-30-04:19:05.log
 ```
-or
-```
-./setup.sh -r # restore latest backup
-./setup.sh -r /tmp/tower-backup-2022-05-10-18:04:19.tar.gz # restore specific backup
-```
 ### Ansible Tower Configuration and Log Files
 ```
 The main configuration files for Ansible Tower are kept in the /etc/tower directory.

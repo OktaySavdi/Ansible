@@ -241,6 +241,17 @@ import_role:
   name: etcdctl
 include_role:
     name: myrole
+---
+- hosts: bastion
+  gather_facts: false
+  vars:
+    dns: 10.10.10.10
+  vars_files:
+    - /path/external_vars.yml
+  tasks:
+    - name: "{{ lab }}"
+      vars:
+        lab: myvar
 ```
 ### Defining Smart Host Filters
 ```

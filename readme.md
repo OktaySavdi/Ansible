@@ -92,6 +92,9 @@ shell   -> shell specific
 raw     -> used to run ssh with raw, if there is no python, it bypasses the ansible module subsystem.
 
 Tower   -> If you don't assign it to the credential organization, it will be private. System admin just used
+
+Import_role  -> If there is a syntax error, it will be seen from the beginning
+include_role -> syntax error when it is executed and when it reaches that stage.
 ```
 ### Import and Include
 ```yaml

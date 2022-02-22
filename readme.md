@@ -40,6 +40,9 @@ import_role:
   name: etcdctl
 include_role:
     name: myrole
+# Import Playbook
+- name: Deploy Web App
+  import_playbook: deploy_webapp.yml
 ---
 - hosts: bastion
   gather_facts: false

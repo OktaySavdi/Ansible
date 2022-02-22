@@ -42,6 +42,9 @@ ansible-playbook play1.yaml --vault-id ali@promp --vault-id veli@promp
 ### Galaxy
 ```
 ansible-galaxy init kubernetes
+ansible-galaxy list
+ansible-galaxy search --help
+ansible-galaxy install (we can call the role)
 ```
 ### Ansible Config
 ```
@@ -78,11 +81,12 @@ delegate_to -> used if the place where the action needs to be done is elsewhere
 hostvars    -> used to get host's variable
 serial      -> allows you to process batches in batches (25%,50%,100%)
 run_once    -> used if it is desired to run once in each batch
-script      -> Allows a local script to be run on the server you want to run.
+script      -> Allows a local script to be run on the server you want to run. It has a parameter called Creates. This makes the script idempotent.
 
+# All three are not idempotent and therefore not recommended.
 command -> module is running job on sub system. via python. pipe or special commands like shell won't work (wants it to be python)
 shell   -> shell specific
-raw     -> used to run ssh with raw
+raw     -> used to run ssh with raw, if there is no python, it bypasses the ansible module subsystem.
 
 Tower   -> If you don't assign it to the credential organization, it will be private. System admin just used
 ```

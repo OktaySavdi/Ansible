@@ -30,6 +30,28 @@ debug: msg="{{ hostvars[groups['bastion'][0]].ip }}"
 debug: msg="{{ groups['master'][0] }}"
 loop: "{{ groups['lbservers'] }}"
 ```
+### Inventory Vars 
+```yaml
+include_tasks: bootstrap-redhat.yml
+include_vars: "{{ item }}"
+import_tasks: 0020-verify-settings.yml
+import_playbook: deploy_apache.yml
+import_role:
+  name: etcdctl
+include_role:
+    name: myrole
+---
+- hosts: bastion
+  gather_facts: false
+  vars:
+    dns: 10.10.10.10
+  vars_files:
+    - /path/external_vars.yml
+  tasks:
+    - name: "{{ lab }}"
+      vars:
+        lab: myvar
+```
 ## #Ansible API
 
 Ansible Tower API Example - https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html
@@ -104,8 +126,6 @@ server01 ansible_host=10.10.10.10 ansible_ssh_pass=xxx ansible_ssh_user=user
 
 server2 ansible_ssh_host=192.168.1.10
 ```
-  
-
 ### Special Inventory Variables
 
 There are a number of variables that you can use to change how Ansible will connect to a host
@@ -230,28 +250,6 @@ dev:
 ### Converting from INI to YAML
 ```
 ansible-inventory --yaml -i origin_inventory --list --output destination_inventory.yml
-```
-### Inventory Vars 
-```yaml
-include_tasks: bootstrap-redhat.yml
-include_vars: "{{ item }}"
-import_tasks: 0020-verify-settings.yml
-import_playbook: deploy_apache.yml
-import_role:
-  name: etcdctl
-include_role:
-    name: myrole
----
-- hosts: bastion
-  gather_facts: false
-  vars:
-    dns: 10.10.10.10
-  vars_files:
-    - /path/external_vars.yml
-  tasks:
-    - name: "{{ lab }}"
-      vars:
-        lab: myvar
 ```
 ### Defining Smart Host Filters
 ```

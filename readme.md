@@ -2,22 +2,14 @@
 ```
 ansible-doc yum | grep -i example -A 20
 ansible-doc -t callback -l
+ansible-doc -t -l lookup 
 ansible-doc -t lookup k8s
-```
-### Backup - Restore
-```
-./setup.sh -b
-./setup.sh -r # restore latest backup
-./setup.sh -r /tmp/tower-backup-2022-05-10-18:04:19.tar.gz # restore specific backup
-```
-### Galaxy
-```
-ansible-galaxy init kubernetes
 ```
 ### CLI 
 ```
 ansible-playbook --syntax-check
 ansible -m ping -i inventory.yml all
+ansible servers --list-hosts
 ```
 ### SSH
 ```
@@ -29,6 +21,29 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub $host;
 debug: msg="{{ hostvars[groups['bastion'][0]].ip }}"
 debug: msg="{{ groups['master'][0] }}"
 loop: "{{ groups['lbservers'] }}"
+```
+### Vault
+```
+ansible-vault encrypt vars/myvar1.yaml
+ansible-vault view vars.yaml
+ansible-playbook playbok.yaml --ask-vault-pass
+```
+### Backup - Restore
+```
+./setup.sh -b
+./setup.sh -r # restore latest backup
+./setup.sh -r /tmp/tower-backup-2022-05-10-18:04:19.tar.gz # restore specific backup
+```
+### Galaxy
+```
+ansible-galaxy init kubernetes
+```
+### Ansible Config
+```
+./ansible.cfg
+~/ansible.cfg
+/etc/ansible/ansible.cfg
+export ANSIBLE_CONFIG=myfile
 ```
 ### Inventory Vars 
 ```yaml
@@ -728,8 +743,15 @@ final batch (1 + 10 + 25 + 25 + 25 + 14 = 100).
   shell: /sbin/activate.sh {{ active_hosts_string }}
   run_once: yes
 ```
-
 # #Tower 
+```
+cat ~/.tower_cli.cfg
+[general]
+host = tower.lab.example.com
+username = admin
+password = redhat 
+verify_ssl = false
+```
 ### Tower CLI
 ```
 tower-cli job_template list 
@@ -737,6 +759,7 @@ tower-cli job launch --job-template=12
 tower-cli job monior 32
 tower-cli job launch --job-template=12 --monitor
 tower-cli job launch --job-template=12 --monitor --extra-vars="my: value"
+tower-cli job lunch -J 'Demo Job Template'
 
 tower-cli job_template create -n API_Create_Users -d "Using API to create users" --project "My Project" --playbook create_users.yml --ask-variable-on-launch TRUE -i PRODUCTION --credential oktaysavdi
 ```

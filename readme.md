@@ -49,6 +49,14 @@ ansible-galaxy init kubernetes
 /etc/ansible/ansible.cfg
 export ANSIBLE_CONFIG=myfile
 ```
+### Run order of Ansible jobs
+```
+pre_tasks
+roles
+tasks
+post_tasks
+handlers
+```
 ### Inventory Vars
 ```
 - hosts: bastion
@@ -105,7 +113,15 @@ curl --user myuser:mypassword https://myansible-srv/api/v2/jobs/122/stdout/?form
 ```
 
 ## #GIT
+Documents
 ```
+https://marklodato.github.io/visual-git-guide/index-en.html
+https://www.youtube.com/watch?v=FyAAIHHClqI
+https://www.youtube.com/watch?v=Gg4bLk8cGNo
+```
+```
+alias graph='git log --all --decorate --oneline --graph'
+
 .gitignore
 git init
 git config --list --show-origin

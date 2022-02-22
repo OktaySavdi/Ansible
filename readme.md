@@ -24,6 +24,12 @@ ansible -m ping -i inventory.yml all
 ssh-keygen
 ssh-copy-id -i ~/.ssh/id_rsa.pub $host; 
 ```
+### Parse
+```
+debug: msg="{{ hostvars[groups['bastion'][0]].ip }}"
+debug: msg="{{ groups['master'][0] }}"
+loop: "{{ groups['lbservers'] }}"
+```
 ## #Ansible API
 
 Ansible Tower API Example - https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html

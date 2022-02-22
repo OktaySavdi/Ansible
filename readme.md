@@ -45,7 +45,8 @@ ansible-galaxy init kubernetes
 /etc/ansible/ansible.cfg
 export ANSIBLE_CONFIG=myfile
 ```
-### Inventory Vars 
+### Inventory Vars
+```
 - hosts: bastion
   gather_facts: false
   vars:

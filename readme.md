@@ -1,6 +1,7 @@
 ### Help commands 
 ```
 ansible-doc yum | grep -i example -A 20
+ansible-doc -l | grep ntp
 ansible-doc -t callback -l
 ansible-doc -t -l lookup 
 ansible-doc -t lookup k8s

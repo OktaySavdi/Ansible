@@ -465,13 +465,19 @@ ssh_args = -o ControlMaster=auto -o ControlPersist=60s
 ```
 **Profiling Playbook Execution with Callback plug-ins**
 ```
+cgcreate -a user:user -t user:user -g cpuacct,memory,pids:ansible_profile
+callback_whitelist=cgroup_perf_recap
+[callback_cgroup_perf_recap]
+control_group=ansible_profile
+```
+```
 [user@demo ~]$ cat ansible.cfg
 [defaults]
 inventory=inventory
 remote_user=devops
 callback_whitelist=timer, profile_tasks, cgroup_perf_recap
 ```
-## Processing Variables Using Filters
+## #Processing Variables Using Filters
 
 ### Processing Data with Filters
 ```
@@ -675,7 +681,7 @@ final batch (1 + 10 + 25 + 25 + 25 + 14 = 100).
   run_once: yes
 ```
 
-# Tower 
+# #Tower 
 ### Tower CLI
 ```
 tower-cli job_template list 

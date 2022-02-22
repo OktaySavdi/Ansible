@@ -31,6 +31,7 @@ loop: "{{ groups['lbservers'] }}"
 ansible-vault encrypt vars/myvar1.yaml
 ansible-vault view vars.yaml
 ansible-playbook playbok.yaml --ask-vault-pass
+ansible-playbook play1.yaml --vault-id ali@promp --vault-id veli@promp
 ```
 ### Backup - Restore
 ```
@@ -77,6 +78,10 @@ delegate_to -> used if the place where the action needs to be done is elsewhere
 hostvars -> used to get host's variable
 serial -> allows you to process batches in batches (25%,50%,100%)
 run_once -> used if it is desired to run once in each batch
+
+command -> module is running job on sub system. via python. pipe or special commands like shell won't work (wants it to be python)
+shell   -> shell specific
+raw     -> used to run ssh with raw
 ```
 ### Import and Include
 ```yaml

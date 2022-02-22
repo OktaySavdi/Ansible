@@ -578,6 +578,7 @@ ssh_args = -o ControlMaster=auto -o ControlPersist=60s
 **Profiling Playbook Execution with Callback plug-ins**
 ```
 cgcreate -a user:user -t user:user -g cpuacct,memory,pids:ansible_profile
+cgexec -g cpuacct,memory,pids:ansible_profile ansible-playbook myhandler.yml
 ```
 ```
 [user@demo ~]$ cat ansible.cfg

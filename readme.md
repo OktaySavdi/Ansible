@@ -200,7 +200,7 @@ dev:
 ```
 ansible-inventory --yaml -i origin_inventory --list --output destination_inventory.yml
 ```
-# Inventory Vars 
+### Inventory Vars 
 ```yaml
 include_tasks: bootstrap-redhat.yml
 include_vars: "{{ item }}"

@@ -72,7 +72,7 @@ handlers
   vars:
     dns: 10.10.10.10
   vars_files:
-    - /path/external_vars.yml #change
+  - /path/external_vars.yml #change
   tasks:
     - name: "{{ lab }}"
       vars:

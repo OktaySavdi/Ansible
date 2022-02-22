@@ -14,6 +14,9 @@ ansible-lint    -> gives information about the format
 ansible-playbook --syntax-check
 ansible -m ping -i inventory.yml all
 ansible servers --list-hosts
+ansible ungrouped --list-hosts
+ansible localhost --list-hosts
+ansible all --list-hosts
 ```
 ### SSH
 ```

@@ -73,15 +73,17 @@ handlers
 ```
 ### Info 
 ```
-lookup -> can be used to view files
+lookup      -> can be used to view files
 delegate_to -> used if the place where the action needs to be done is elsewhere
-hostvars -> used to get host's variable
-serial -> allows you to process batches in batches (25%,50%,100%)
-run_once -> used if it is desired to run once in each batch
+hostvars    -> used to get host's variable
+serial      -> allows you to process batches in batches (25%,50%,100%)
+run_once    -> used if it is desired to run once in each batch
 
 command -> module is running job on sub system. via python. pipe or special commands like shell won't work (wants it to be python)
 shell   -> shell specific
 raw     -> used to run ssh with raw
+
+Tower   -> If you don't assign it to the credential organization, it will be private. System admin just used
 ```
 ### Import and Include
 ```yaml

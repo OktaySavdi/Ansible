@@ -36,10 +36,15 @@ include_tasks: bootstrap-redhat.yml
 include_vars: "{{ item }}"
 import_tasks: 0020-verify-settings.yml
 import_playbook: deploy_apache.yml
+
+# Import Role
 import_role:
   name: etcdctl
+
+# Include Role
 include_role:
-    name: myrole
+  name: myrole
+    
 # Import Playbook
 - name: Deploy Web App
   import_playbook: deploy_webapp.yml

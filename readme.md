@@ -46,6 +46,18 @@ ansible-galaxy init kubernetes
 export ANSIBLE_CONFIG=myfile
 ```
 ### Inventory Vars 
+- hosts: bastion
+  gather_facts: false
+  vars:
+    dns: 10.10.10.10
+  vars_files:
+    - /path/external_vars.yml
+  tasks:
+    - name: "{{ lab }}"
+      vars:
+        lab: myvar
+```
+### Import and Include
 ```yaml
 include_tasks: bootstrap-redhat.yml
 include_vars: "{{ item }}"
@@ -63,17 +75,6 @@ include_role:
 # Import Playbook
 - name: Deploy Web App
   import_playbook: deploy_webapp.yml
----
-- hosts: bastion
-  gather_facts: false
-  vars:
-    dns: 10.10.10.10
-  vars_files:
-    - /path/external_vars.yml
-  tasks:
-    - name: "{{ lab }}"
-      vars:
-        lab: myvar
 ```
 ## #Ansible API
 

@@ -1,4 +1,29 @@
-
+# help commands 
+```
+ansible-doc yum | grep -i example -A 20
+ansible-doc -t callback -l
+ansible-doc -t lookup k8s
+```
+# Backup - Restore
+```
+./setup.sh -b
+./setup.sh -r # restore latest backup
+./setup.sh -r /tmp/tower-backup-2022-05-10-18:04:19.tar.gz # restore specific backup
+```
+# Galaxy
+```
+ansible-galaxy init kubernetes
+```
+# CLI 
+```
+ansible-playbook --syntax-check
+ansible -m ping -i inventory.yml all
+```
+# SSH
+```
+ssh-keygen
+ssh-copy-id -i ~/.ssh/id_rsa.pub $host; 
+```
 ## #Ansible API
 
 Ansible Tower API Example - https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html

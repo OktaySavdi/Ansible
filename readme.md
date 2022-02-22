@@ -70,6 +70,14 @@ handlers
       vars:
         lab: myvar
 ```
+### Info 
+```
+lookup -> can be used to view files
+delegate_to -> used if the place where the action needs to be done is elsewhere
+hostvars -> used to get host's variable
+serial -> allows you to process batches in batches (25%,50%,100%)
+run_once -> used if it is desired to run once in each batch
+```
 ### Import and Include
 ```yaml
 include_tasks: bootstrap-redhat.yml

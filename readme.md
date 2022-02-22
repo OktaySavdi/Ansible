@@ -52,7 +52,7 @@ export ANSIBLE_CONFIG=myfile
   vars:
     dns: 10.10.10.10
   vars_files:
-    - /path/external_vars.yml
+    - /path/external_vars.yml #change
   tasks:
     - name: "{{ lab }}"
       vars:

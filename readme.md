@@ -211,6 +211,11 @@ import_role:
 include_role:
     name: myrole
 ```
+### Defining Smart Host Filters
+```
+ansible_facts.ansible_distribution:RedHat
+ansible_facts.ansible_pkg_mgr:yum
+```
 ## #Managing Task Execution
 
 ### Privilege Escalation by Configuration
@@ -669,9 +674,122 @@ final batch (1 + 10 + 25 + 25 + 25 + 14 = 100).
   shell: /sbin/activate.sh {{ active_hosts_string }}
   run_once: yes
 ```
-```yaml
+
+# Tower 
+### Tower CLI
 ```
-```yaml
+tower-cli job_template list 
+tower-cli job launch --job-template=12
+tower-cli job monior 32
+tower-cli job launch --job-template=12 --monitor
+tower-cli job launch --job-template=12 --monitor --extra-vars="my: value"
+
+tower-cli job_template create -n API_Create_Users -d "Using API to create users" --project "My Project" --playbook create_users.yml --ask-variable-on-launch TRUE -i PRODUCTION --credential oktaysavdi
 ```
-```yaml
+### Setting Team Roles
+```
+tower-cli role grant --user 'joe' --target-team 'Operators' --type 'admin'
+tower-cli role grant --user 'jennifer' --target-team 'Architects' --type 'read'
+```
+### Uploading a Static Inventory
+```
+awx-manage inventory_import --source=inventory/ --inventory-name="My Tower Inventory"
+awx-manage inventory_import --source=./my_inventory_file --inventory-name="My Tower Inventory"
+awx-manage inventory_import --source=inventory/ --inventory-name="My Tower Inventory" --overwrite
+```
+
+### Starting, Stopping, and Restarting Ansible Tower
+```
+ansible-tower-service
+ansible-tower-service status
+ansible-tower-service restart
+supervisorctl status
+```
+### Changing the Ansible Tower Admin Password
+```
+awx-manage changepassword admin
+
+#create a new Ansible Tower superuser, with administrative privileges if needed.
+awx-manage createsuperuser
+```
+### Configuring TLS/SSL for Ansible Tower
+The TLS configuration for the Nginx web server is defined in the /etc/nginx/nginx.conf
+Nginx configuration file. The server block, which listens for SSL connections on port 443,
+contains the relevant configuration directives. In particular, this shows that the TLS certificate is /
+etc/tower/tower.cert and the matching private key is /etc/tower/tower.key:
+```
+server {
+    listen 443 default_server ssl;
+    listen 127.0.0.1:80 default_server;
+    listen [::1]:80 default_server;
+    # If you have a domain name, this is where to add it
+    server_name _;
+    keepalive_timeout 65;
+    ssl_certificate /etc/tower/tower.cert; #####change
+    ssl_certificate_key /etc/tower/tower.key; #####change
+    ssl_session_cache shared:SSL:50m;
+    ssl_session_timeout 1d;
+```
+```
+[root@tower tower]# ls -l /etc/tower/tower.*
+-rw-------. 1 awx awx 1281 Mar 31 23:32 tower.cert
+-rw-------. 1 awx awx 1704 Mar 31 23:32 tower.key
+```
+Use the ansible-tower-service restart command to restart Ansible Tower.
+
+### Backing Up and Restoring Ansible Tower
+As the root user, locate the Ansible Tower installation directory and change into that directory.
+
+### Backup
+```
+[root@tower ~]# find / -name ansible*
+/root/ansible-tower-setup-bundle-3.3.1-1.el7
+[root@tower ansible-tower-setup-bundle-3.3.1-1.el7]# ./setup.sh -b
+...output omitted...
+RUNNING HANDLER [backup : Remove the backup tarball.] **************************
+changed: [localhost] => {"changed": true, "path": "/var/backups/tower/towerbackup-
+2017-03-29-08:34:43.tar.gz", "state": "absent"}
+PLAY RECAP *********************************************************************
+localhost : ok=24 changed=16 unreachable=0 failed=0
+```
+### Restore
+```
+[root@tower ansible-tower-setup-bundle-3.3.1-1.el7]# ./setup.sh -r
+...output omitted...
+00ms", "Result": "success", "RootDirectoryStartOnly": "no",
+"RuntimeDirectoryMode": "0755", "SameProcessGroup": "no", "SecureBits":
+PLAY RECAP *********************************************************************
+localhost : ok=26 changed=18 unreachable=0 failed=0
+The setup process completed successfully.
+Setup log saved to /var/log/tower/setup-2017-03-30-04:19:05.log
+```
+or
+```
+./setup.sh -r # restore latest backup
+./setup.sh -r /tmp/tower-backup-2022-05-10-18:04:19.tar.gz # restore specific backup
+```
+### Ansible Tower Configuration and Log Files
+```
+The main configuration files for Ansible Tower are kept in the /etc/tower directory.
+
+Perhaps the most important of these files for the Ansible Tower application is the /etc/tower/
+settings.py file, which specifies the locations for job output, project storage, and other
+directories.
+
+A number of other key files for Ansible Tower are kept in the /var/lib/awx directory. This directory includes:
+• /var/lib/awx/public/static: for static root directory (this is the location of your Django based application files).
+• /var/lib/awx/projects: projects root directory (in the subdirectories of this directory Ansible Tower will store project based files - for example git repository files).
+• /var/lib/awx/job_status: Job status output from playbooks is stored in this file. 
+
+The Ansible Tower application log files are stored in one of two centralized locations:
+• /var/log/tower/
+• /var/log/supervisor/
+
+Ansible Tower server errors are logged in the /var/log/tower/ directory. Some key files in the /var/log/tower/ directory include:
+• /var/log/tower/tower.log, the main log for the Ansible Tower application.
+• /var/log/tower/setup*.log, which are logs of runs of the setup.sh script to install, backup, or restore the Ansible Tower server.
+• /var/log/tower/task_system.log, which logs various system housekeeping tasks (suchas the removal of the record of old job runs).
+
+The /var/log/supervisor/ directory stores log files for services, daemons, and applications managed by supervisord. 
+The supervisord.log file in this directory is the main log file for the service that controls all of these daemons. The other files contain log information about the activity of those daemons.
 ```

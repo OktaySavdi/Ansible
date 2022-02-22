@@ -4,6 +4,10 @@ ansible-doc yum | grep -i example -A 20
 ansible-doc -t callback -l
 ansible-doc -t -l lookup 
 ansible-doc -t lookup k8s
+
+--sytax-check   -> does playbook validation
+--check         -> dry-run (but no certainty. tells not to use)
+ansible-lint    -> gives information about the format
 ```
 ### CLI 
 ```

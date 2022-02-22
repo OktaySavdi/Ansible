@@ -371,7 +371,7 @@ ansible-playbook -i inventory.yml tags_exam.yml --tags=httpd --limit=httpd
       shell: "echo deneme4"
       tags: always           # If you assign the always tag to a task or play, Ansible will always run that task or play, unless you specifically skip it (--skip-tags always).
 ```
-### Optimizing Execution for Speed
+### #Optimizing Execution for Speed
 ```
 time ansible-playbook speed_facts.yml
 ```

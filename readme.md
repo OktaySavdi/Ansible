@@ -1,4 +1,4 @@
-### help commands 
+### Help commands 
 ```
 ansible-doc yum | grep -i example -A 20
 ansible-doc -t callback -l

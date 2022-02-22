@@ -96,6 +96,9 @@ Tower   -> If you don't assign it to the credential organization, it will be pri
 
 Import_role  -> If there is a syntax error, it will be seen from the beginning
 include_role -> syntax error when it is executed and when it reaches that stage.
+
+Fork   -> does each task a certain number of times, how many servers should I connect to at the same time. The purpose of the fork is performance.
+Serial -> runs the complete playbook on so many servers. it can also be given as a percentage. To test the playbook a certain number of times by dividing it into serial sets, to progress in a controlled manner.
 ```
 ### Import and Include
 ```yaml

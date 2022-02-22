@@ -551,9 +551,6 @@ ssh_args = -o ControlMaster=auto -o ControlPersist=60s
 **Profiling Playbook Execution with Callback plug-ins**
 ```
 cgcreate -a user:user -t user:user -g cpuacct,memory,pids:ansible_profile
-callback_whitelist=cgroup_perf_recap
-[callback_cgroup_perf_recap]
-control_group=ansible_profile
 ```
 ```
 [user@demo ~]$ cat ansible.cfg
@@ -561,6 +558,9 @@ control_group=ansible_profile
 inventory=inventory
 remote_user=devops
 callback_whitelist=timer, profile_tasks, cgroup_perf_recap
+
+[callback_cgroup_perf_recap]
+control_group=ansible_profile
 ```
 ## #Processing Variables Using Filters
 

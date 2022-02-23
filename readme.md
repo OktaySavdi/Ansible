@@ -385,9 +385,9 @@ become_ask_pass=false
 ```yaml
 - name: Example play with one role
   hosts: localhost
-   roles:
-     - role: role-name
-       become: true
+  roles:
+    - role: role-name
+      become: true
 ```
 ### Controlling Task Execution
 ```yaml

@@ -192,6 +192,7 @@ git checkout lab
 git checkout -b lab2
 git push origin lab
 git push --set-upstream origin lab
+git push origin --delete lab
 ```
 ## #Inventory
 ```

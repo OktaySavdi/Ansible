@@ -323,6 +323,38 @@ dev:
      prj_action: create
      new_quota: ml
 ```
+```
+all: # keys must be unique, i.e. only one 'hosts' per group
+  hosts:
+    test1:
+    test2:
+      host_var: value
+  vars:
+    group_all_var: value
+  children:   # key order does not matter, indentation does
+    other_group:
+      children:
+        group_x:
+          hosts:
+            test5   # Note that one machine will work without a colon
+        #group_x:
+        #    hosts:
+        #        test5  # But this won't
+        #        test7  #
+        group_y:
+          hosts:
+            test6:  # So always use a colon
+      vars:
+        g2_var2: value3
+      hosts:
+        test4:
+          ansible_host: 127.0.0.1
+    last_group:
+      hosts:
+          test1 # same host as above, additional group membership
+      vars:
+          group_last_var: value
+```
 ### Converting from INI to YAML
 ```
 ansible-inventory --yaml -i origin_inventory --list --output destination_inventory.yml

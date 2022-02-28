@@ -304,8 +304,8 @@ dev:
       http_port=80
       proxy=proxy3webserver.com
   vars:
-    smtp: 25
-    https: 443
+    ansible_become: true
+    smtp_relay: smtp.lab.example.com
   children:
     bastion:
       hosts:

@@ -303,6 +303,9 @@ dev:
       ansible_host: 10.175.10.97
       http_port=80
       proxy=proxy3webserver.com
+  vars:
+    smtp: 25
+    https: 443
   children:
     bastion:
       hosts:

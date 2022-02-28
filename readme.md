@@ -297,14 +297,12 @@ dev:
   hosts:
     bastion-k8s:
       ansible_host: 10.175.10.98
-    vars:
-      http_port=80
-      proxy=proxy.webserver.com
+      http_port=8080
+      proxy=proxy2webserver.com
     k8s-infra01:
       ansible_host: 10.175.10.97
-    vars:
       http_port=80
-      proxy=proxy.webserver.com
+      proxy=proxy3webserver.com
   children:
     bastion:
       hosts:

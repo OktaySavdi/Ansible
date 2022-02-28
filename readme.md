@@ -142,6 +142,19 @@ curl --user myuser:mypassword https://myansible-srv/api/v2/jobs/{{job_id}}/stdou
 curl --user myuser:mypassword https://myansible-srv/api/v2/jobs/122/stdout/?format=txt
 curl --user myuser:mypassword https://myansible-srv/api/v2/jobs/122/stdout/?format=json
 ```
+### Api on Playbook
+```yaml
+- name: Use the token
+  uri:
+    url: "https://{{ tower_host }}/api/v2/job_templates/{{ template_name | urlencode }}/launch/"
+    method: POST
+    validate_certs: false
+    return_content: true
+    status_code: 201
+    headers:
+      Authorization: "Bearer {{ response['json']['token'] }}"
+      Content-Type: "application/json"
+```
 
 ## #GIT
 Documents

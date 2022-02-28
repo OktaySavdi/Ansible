@@ -297,12 +297,12 @@ dev:
   hosts:
     bastion-k8s:
       ansible_host: 10.175.10.98
-      http_port=8080
-      proxy=proxy2webserver.com
+      http_port: 8080
+      proxy: proxy2webserver.com
     k8s-infra01:
       ansible_host: 10.175.10.97
-      http_port=80
-      proxy=proxy3webserver.com
+      http_port: 80
+      proxy: proxy3webserver.com
   vars:
     ansible_become: true
     smtp_relay: smtp.lab.example.com

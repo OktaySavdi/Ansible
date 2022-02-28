@@ -743,7 +743,7 @@ control_group=ansible_profile
 {{ query('fileglob', '~/.bash*') }}
 # => "/root/.bash_logout,/root/.bashrc,/root/.bash_history"
 {{ supplementary_groups['jonfoo'] | default(omit) }}
-# => "The default filter can also take the special value omit, which causes the value to remain undefined if it had no value initially'
+# => "The default filter can also take the special value omit, which causes the value to remain undefined if it had no value initially"
 ```
 ### Working with Network Addresses Using Filters
 

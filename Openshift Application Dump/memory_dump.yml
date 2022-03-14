@@ -23,7 +23,8 @@
   when: check_pod_exist.stdout == "0"
   
 - name: "Get dump for heap"
-  shell: oc exec {{ pod_name }} -c "$(echo {{ pod_name }} | rev | cut -d "-" -f3- | rev)" -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" -- jcmd $(ps -ef | grep java | grep -v grep | head -n 1 | awk '{print $2}') GC.heap_dump /tmp/{{ pod_name }}-heap.hprof
+  shell: for id in `oc exec {{ pod_name }} -c $(echo {{ pod_name }} | rev | cut -d "-" -f3- | rev) -n $(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}') -- ps -f | grep java | grep -v grep | head -n 1 | awk '{print $2}'`; do oc exec {{ pod_name }} -c $(echo {{ pod_name }} | rev | cut -d "-" -f3- | rev) -n $(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}') -- jcmd $id GC.heap_dump /tmp/{{ pod_name }}-heap.hprof; done
+  #oc exec {{ pod_name }} -c "$(echo {{ pod_name }} | rev | cut -d "-" -f3- | rev)" -n "$(oc get po --all-namespaces | grep -i {{ pod_name }} | awk '{print $1}')" -- jcmd $(ps -ef | grep java | grep -v grep | head -n 1 | awk '{print $2}') GC.heap_dump /tmp/{{ pod_name }}-heap.hprof
   environment:
     KUBECONFIG: "{{ path_result.stdout | trim }}"
 

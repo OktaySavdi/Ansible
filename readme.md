@@ -174,6 +174,7 @@ git config --global user.name "cloud.user"
 git config --global user.email "cloud@email.com"
 git config --global push.default simple
 
+git config credential.helper store
 git config --global credential.helper cache
 git config --global credential.helper 'cache --timeout=3600'
 

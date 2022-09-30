@@ -9,6 +9,17 @@ ansible-doc -t callback -l
 --sytax-check   -> does playbook validation
 --check         -> dry-run (but no certainty. tells not to use)
 ansible-lint    -> gives information about the format
+
+
+ansible-navigator images
+cat ~/.ansible-navigator.yml
+ansible-navigator inventory
+
+ansible-navigator run playbook.yml --mode stdout
+ansible-navigator run playbook.yml --mode stdout --check -v
+
+ansible-navigator
+:doc debug
 ```
 ### CLI 
 ```

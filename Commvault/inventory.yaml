@@ -1,0 +1,13 @@
+# Inventory for jumpserver servers
+jumpserver:
+   hosts:
+     mybastion01:
+       ansible_host: 10.10.10.10
+   vars:
+     cluster_ip: "10.100.100.100"
+     cluster_name: "test-commvault"
+     commvault_env: stg
+     username: "svc_hce-commvault@gtstg.lan"
+     password: "1111"
+     webUrl: "my-commvault-stg.com"
+     sa_token: "hfsjkdfhjksdhfjks......"

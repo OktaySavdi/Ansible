@@ -1,0 +1,173 @@
+- name: get token to commvault
+  ansible.builtin.uri:
+    url: "https://{{ webUrl }}/webconsole/api/Login"
+    validate_certs: no
+    method: POST
+    body_format: json
+    headers:
+      Accept: application/json
+      Content-Type: application/json
+    body: '{
+      "username": "{{ username }}",
+      "password": "{{ password }}"
+    }'
+    status_code: 200
+    timeout: 30
+  register: result
+   
+- name: add k8s cluster on commvault
+  ansible.builtin.uri:
+    url: "https://{{ webUrl }}/webconsole/api/Client"
+    validate_certs: no
+    method: POST
+    body_format: json
+    headers:
+      Authorization: "{{ result.json.token.split(' ')[1] }}"
+      Accept: application/json
+      Content-Type: application/json
+    body: '{
+      "clientInfo": {
+        "clientType": 12,
+        "virtualServerClientProperties": {
+          "virtualServerInstanceInfo": {
+            "vsInstanceType": 20,
+            "k8s": {
+              "secretName": "svc-simpana",
+              "secretKey": "{{ sa_token }}",
+              "secretType": "ServiceAccount",
+              "endpointurl": "https://{{ cluster_ip }}:6443"
+            },
+            "associatedClients": {
+              "memberServers": [
+                {
+                  "client": {
+                    "clientId": 3,
+                    "clientName": "{{ plan }}",
+                    "_type_": 3
+                  }
+                }
+              ]
+            },
+            "vmwareVendor": {
+              "vcenterHostName": "https://{{ cluster_ip }}:6443"
+            }
+          }
+        }
+      },
+      "entity": {
+        "clientName": "{{ cluster_name }}"
+        }
+    }'
+    status_code: 200
+    timeout: 30
+  register: add_cluster
+
+- name: get subclient id
+  ansible.builtin.uri:
+    url: "https://{{ webUrl }}/webconsole/api/GetId?backupset=defaultBackupSet&agent=Virtual%20Server&clientname={{ cluster_name }}&subclient=default"
+    validate_certs: no
+    method: GET
+    body_format: json
+    headers:
+      Authorization: "{{ result.json.token.split(' ')[1] }}"
+      Accept: application/json
+      Content-Type: application/json
+    status_code: 200
+    timeout: 30
+  register: group_id
+  when: add_cluster.json.response.errorCode == 0
+
+- name: update application group
+  ansible.builtin.uri:
+    url: "https://{{ webUrl }}/webconsole/api/Subclient/{{ group_id.json.subclientId }}"
+    validate_certs: no
+    method: POST
+    body_format: json
+    headers:
+      Authorization: "{{ result.json.token.split(' ')[1] }}"
+      Accept: application/json
+      Content-Type: application/json
+    body: '{
+      "subClientProperties": {
+      "commonProperties": {
+        "isSnapBackupEnabled": false,
+        "numberOfBackupStreams": 5,
+        "enableBackup": true,
+        "snapCopyInfo": {
+          "isSnapBackupEnabled": false,
+          "transportModeForVMWare": 0,
+          "snapToTapeSelectedEngine": {
+            "snapShotEngineId": 82,
+            "snapShotEngineName": "Kubernetes CSI Snap"
+          }
+        }
+      },
+      "planEntity": {
+        "planSummary": "RPOHours:24,NumberOfCopies:2,PrimaryStorageRetention:1 Month,PrimaryStorageType:Disk,AssociatedEntitiesCount:34",
+        "planName": "{{ plan }}",
+        "planId": 1,
+        "isActive": true,
+        "subtype": "Server",
+        "type": "MSP",
+        "rpoInMinutes": 1440
+      },
+      "vmContentOperationType": 2,
+      "vmFilterOperationType": "1",
+      "vmDiskFilterOperationType": "1",
+      "vmContent": {
+        "children": [
+          {
+            "allOrAnyChildren": true,
+            "equalsOrNotEquals": true,
+            "guestCredentialAssocId": 0,
+            "type": "Selector",
+            "path": "",
+            "displayName": "Application:backup=true",
+            "name": "Selector",
+            "value": "Application:backup=true"
+          },
+          {
+            "allOrAnyChildren": true,
+            "equalsOrNotEquals": true,
+            "guestCredentialAssocId": 0,
+            "type": "Selector",
+            "path": "",
+            "displayName": "Namespaces:backup=true",
+            "name": "Selector",
+            "value": "Namespaces:backup=true"
+          },
+          {
+            "allOrAnyChildren": true,
+            "equalsOrNotEquals": true,
+            "guestCredentialAssocId": 0,
+            "type": "Selector",
+            "path": "",
+            "displayName": "Volumes:backup=true",
+            "name": "Selector",
+            "value": "Volumes:backup=true"
+          }
+        ]
+      }
+     }
+    }'
+    status_code: 200
+    timeout: 30
+  register: update_cluster
+  when: add_cluster.json.response.errorCode == 0
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: myteam@mydomain.com
+    subject: Adding k8s cluster to commvault - {{ cluster_name }}
+    body: |
+        Report From Commvault [ Success ]
+
+        if you are seeing this mail, it means that you have successfully completed the comvault integration with Ansible :D
+
+        "New cluster [ {{ cluster_name }} - {{ cluster_ip }} ] has been added to Commvault"
+  delegate_to: localhost
+  when: add_cluster.json.response.errorCode == 0

@@ -1,0 +1,30 @@
+- name: K8S | Project | Commvault jumpserver prod environment
+  hosts: jumpserver
+  gather_facts: no
+  serial: 1
+  vars_files:
+    - vault.yml
+  vars:
+    webUrl: my-commvault-prod.com
+    plan: MY-Prod-K8S-Default
+    username: my-prod-sp@mydomain.com
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: all.yaml
+      when: commvault_env == "prod"
+
+- name: K8S | Project | Commvault jumpserver stg environment
+  hosts: jumpserver
+  gather_facts: no
+  serial: 1
+  vars_files:
+    - vault.yml
+  vars:
+    webUrl: my-commvault-stg.com
+    plan: MY-STG-K8S-Default
+    username: my-stg-sp@mydomain.com
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: all.yaml
+      when: commvault_env == "stg"
+

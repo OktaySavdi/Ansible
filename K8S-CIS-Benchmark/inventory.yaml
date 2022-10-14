@@ -1,0 +1,7 @@
+# Inventory for jumpserver servers
+jumpserver:
+   hosts:
+     mybastion01:
+       ansible_host: 10.10.10.10
+   vars:
+     cluster_master1: 100.100.100.100

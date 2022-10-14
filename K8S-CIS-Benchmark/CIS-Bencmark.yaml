@@ -1,0 +1,7 @@
+- name: K8S | Project | CIS-Benchmark jumpserver stg environment
+  hosts: jumpserver
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: all.yaml

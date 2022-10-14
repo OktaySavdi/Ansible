@@ -1,0 +1,28 @@
+- name: K8S | CIS Benchmark
+  shell: |
+    ssh -o StrictHostKeyChecking=no vmware-system-user@{{ cluster_master1 }} << 'EOF'
+    sudo -i
+    if [ ! -f "/root/kube-bench" ]; then
+       curl -L -o kube-bench.tar https://github.com/aquasecurity/kube-bench/releases/download/v0.6.8/kube-bench_0.6.8_linux_amd64.tar.gz
+       tar -xvf /root/kube-bench.tar
+       rm -rf /root/kube-bench.tar  
+    fi
+    ./kube-bench run --targets master,node,etcd --config-dir=/root/cfg --noremediations --nosummary --nototals | grep -vwE "kubelet-certificate-authority|tls-cert-file|etcd:etcd|anonymous-auth|Container Network Interface|EventRateLimit"
+    EOF
+  register: cis
+  ignore_errors: true
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: myteam@mydomain.com
+    subject: Ansible CIS-Benchmark-STG - {{ inventory_hostname }}
+    body: |
+        Report From CIS-Benchmark  [ monthly ] - https://www.cisecurity.org/benchmark/kubernetes
+
+        {{ cis.stdout.split('\n'' ') | to_yaml(indent=8, width=1337) }}
+  delegate_to: localhost
+

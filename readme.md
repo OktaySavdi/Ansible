@@ -165,6 +165,27 @@ curl --user myuser:mypassword https://myansible-srv/api/v2/jobs/122/stdout/?form
     headers:
       Authorization: "Bearer {{ response['json']['token'] }}"
       Content-Type: "application/json"
+---
+- name: Use the token
+  ansible.builtin.uri:
+    url: "https://{{ tower_host }}/api/v2/job_templates/57/launch/"
+    method: POST
+    validate_certs: no
+    return_content: true
+    status_code: 201
+    body_format: json
+    force_basic_auth: yes
+    user: "{{ svc_user }}"
+    password: "{{ svc_pwd }}"
+    headers:
+      Accept: application/json
+      Content-Type: "application/json"
+    body:
+      extra_vars:
+        commvault_env: "{{ commvault_env }}"
+        cluster_name: "{{ cluster_name }}"
+        cluster_ip: "{{ Cluster_ip.stdout_lines[-3][:-3] | regex_search('(?:[0-9]{1,3}\\.){3}[0-9]{1,3}') }}"
+        sa_token: "{{ svc_token.stdout_lines[-1] }}"
 ```
 
 ## #GIT

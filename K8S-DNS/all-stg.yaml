@@ -1,0 +1,67 @@
+- name: Remove comment/description from IPAM record (if required)
+  ansilabnl.micetro.dnsrecord:
+    state: "{{ dns_state }}"
+    ipaddress: "{{ ip_address }}"
+    properties:
+      comment: "{{ ipam_comment }}"
+      description: "{{ ipam_description }}"
+    provider:
+      mmurl: "{{ url }}"
+      user: "{{ user }}"
+      password: "{{ password }}"
+  delegate_to: localhost
+  connection: local
+  become: no
+  when: dns_state == 'absent' and dns_rrtype == 'A' and (ipam_comment != '' or ipam_description != '')
+
+- name: Manage DNS record {{ dns_name }} in zone {{ dns_zone }}
+  ansilabnl.micetro.dnsrecord:
+    state: "{{ dns_state }}"
+    dnszone: "{{ dns_zone }}"
+    name: "{{ dns_name }}"
+    rrtype: "{{ dns_rrtype }}"
+    data: "{{ ip_address  }}"
+    ttl: "{{ dns_ttl }}"
+    comment: "{{ dns_comment }}"
+    save_comment: "{{ save_comment }}"
+    provider:
+      mmurl: "{{ url }}"
+      user: "{{ user }}"
+      password: "{{ password }}"
+  delegate_to: localhost
+  connection: local
+  become: no
+  register: dns_record
+
+- name: Add comment/description to IPAM record (if required)
+  ansilabnl.micetro.dnsrecord:
+    state: "{{ dns_state }}"
+    ipaddress: "{{ ip_address }}"
+    properties:
+      comment: "{{ ipam_comment }}"
+      description: "{{ ipam_description }}"
+    provider:
+      mmurl: "{{ url }}"
+      user: "{{ user }}"
+      password: "{{ password }}"
+  delegate_to: localhost
+  connection: local
+  become: no
+  when: dns_state == 'present' and dns_rrtype == 'A' and (ipam_comment != '' or ipam_description != '')
+
+- name: Sending an e-mail SMTP servers
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: myteam@mydomain.com
+    subject: Create a DNS Record for the K8S Cluster - {{ dns_name }}
+    body: |
+        Report From DNS [ Success ]
+
+        if you are seeing this mail, it means that you have successfully completed the DNS integration with Ansible
+
+        "New cluster [ {{ dns_name }} - {{ ip_address }} ] has been added to DNS Record on [ {{ dns_zone }} ]"
+  delegate_to: localhost
+  when: dns_record.message == ""

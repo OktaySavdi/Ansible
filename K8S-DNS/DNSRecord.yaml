@@ -1,0 +1,50 @@
+- name: K8S | Project | DNS A Record prod environment
+  hosts: localhost
+  gather_facts: no
+  serial: 1
+  vars_files:
+    - vault.yaml
+  vars:
+    url: "https://dns-mgmt.mydomain.com"
+    user: "smy_svc_user@mydomain.local"
+    password: "*****"
+    dns_rrtype: 'A'
+    dns_zone: "mydomain1.local"
+    ip_address: "10.10.10.10"
+    dns_name: "prod-k8s-cluster"
+    dns_state: present
+    dns_ttl: 3600
+    dns_comment: "kubernetes dns A record"
+    ipam_comment: ""
+    ipam_description: ""
+    save_comment: "Modified by mm_dnsrecord"
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: all-prod.yaml
+      when: env == "prod"
+      
+
+- name: K8S | Project | DNS A Record stg environment
+  hosts: localhost
+  gather_facts: no
+  serial: 1
+  vars_files:
+    - vault.yaml
+  vars:
+    url: "https://dns-mgmt.mydomain.com"
+    user: "smy_svc_user@mydomain.local"
+    password: "*****"
+    dns_rrtype: 'A'
+    dns_zone: "mydomain2.local"
+    ip_address: "10.10.10.10"
+    dns_name: "test-k8s-cluster"
+    dns_state: present
+    dns_ttl: 3600
+    dns_comment: "kubernetes dns A record"
+    ipam_comment: ""
+    ipam_description: ""
+    save_comment: "Modified by mm_dnsrecord"
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: all-stg.yaml
+      when: env == "stg"

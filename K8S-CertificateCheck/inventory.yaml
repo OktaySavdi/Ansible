@@ -1,0 +1,18 @@
+jumpserver:
+  hosts:    
+    my-jump-cluster:
+      ansible_host: 10.10.10.10
+      cluster_master1: 172.10.10.10
+      
+prod:
+  hosts:    
+    my-prod-cluster:
+      ansible_host: 10.10.10.10
+      cluster_master1: 172.16.0.10
+
+stg:
+  hosts:
+    my-stg-cluster:
+      ansible_host: 10.10.10.10
+      cluster_master1: 172.16.0.16
+

@@ -1,0 +1,60 @@
+---
+- name: K8S | Certificate Shell Script
+  shell: |
+    ssh -o StrictHostKeyChecking=no jbx@10.10.10.10 -i /opt/login/ssh-key_jump.key << 'EOF'
+    sudo -i
+    ssh -o StrictHostKeyChecking=no vmware-system-user@{{ cluster_master1 }}
+    sudo -i
+    cat << 'EOF' > /tmp/cert_{{ inventory_hostname }}_check.sh
+    function check_certs () {
+    name="$1"
+    cert="$2"
+    now_epoch=$( date +%s )
+    expiry_date=$cert
+    expiry_epoch=$( date -d "$expiry_date" +%s )
+    expiry_days="$(( ($expiry_epoch - $now_epoch) / (3600 * 24) ))"
+    if [[ expiry_days -le '60' ]]; then
+        echo -e "[ {{ inventory_hostname }} ] certificate will expire after $expiry_days days\n"
+    fi    
+    }
+    #api-server
+    apiserver=$(cat /etc/kubernetes/pki/apiserver.crt | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+            
+    #etcd
+    etcd=$(cat /etc/kubernetes/pki/etcd/server.crt | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+            
+    #Kubelet
+    kubelet=$(cat /var/lib/kubelet/pki/kubelet.crt | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+            
+    check_certs "ApiServer" "$apiserver"
+    check_certs "Etcd" "$etcd"
+    check_certs "Kubelet" "$kubelet"
+    EOF
+  ignore_errors: false
+
+- name: K8S | Check Certificate
+  shell:  |
+    ssh -o StrictHostKeyChecking=no jbx@10.10.10.10 -i /opt/login/ssh-key_jump.key << 'EOF'
+    sudo -i
+    ssh -o StrictHostKeyChecking=no vmware-system-user@{{ cluster_master1 }}
+    sudo -i
+    chmod +x /tmp/cert_{{ inventory_hostname }}_check.sh
+    /tmp/cert_{{ inventory_hostname }}_check.sh
+    EOF
+  register: cert_status
+
+- name: Send result as mail
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: myteam@mydomain.com
+    subject: K8S Clusters Certificate Check [ IMPORTANT ]
+    body: |
+       Report Kubernetes Certificate Will Be Expire
+       Cluster : [ {{ inventory_hostname }} ]
+
+       {{ cert_status.stdout }} 
+  delegate_to: localhost
+  when: ("ApiServer" in cert_status.stdout) or ("Etcd" in cert_status.stdout) or ("Kubelet" in cert_status.stdout)

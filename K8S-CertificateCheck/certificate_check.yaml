@@ -1,0 +1,24 @@
+- name: K8S | Project | Check Certificate jumpserver stg environment
+  hosts: jumpserver
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: all-stg.yaml
+
+- name: K8S | Project | Check Certificate stg environment
+  hosts: stg
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: all-stg.yaml
+
+- name: K8S | Project | Check Certificate prod environment
+  hosts: prod
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: all-prod.yaml
+

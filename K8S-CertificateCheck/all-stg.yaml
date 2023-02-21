@@ -12,7 +12,7 @@
     expiry_epoch=$( date -d "$expiry_date" +%s )
     expiry_days="$(( ($expiry_epoch - $now_epoch) / (3600 * 24) ))"
     if [[ expiry_days -le '60' ]]; then
-        echo -e "[ {{ inventory_hostname }} ] certificate will expire after $expiry_days days\n"
+        echo -e "[ $name ] certificate will expire after $expiry_days days\n"
     fi    
     }
     #api-server

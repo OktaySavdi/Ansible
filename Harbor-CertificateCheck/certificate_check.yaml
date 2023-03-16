@@ -1,0 +1,19 @@
+- name: Harbor | Project | Check Certificate harbor-stg environment
+  hosts: harbor-stg
+  gather_facts: no
+  serial: 1
+  vars_files:
+    - vault.yaml
+  tasks:
+    - name: Harbor | Project | Launch playbook for environment
+      import_tasks: all-stg.yaml
+
+- name: Harbor | Project | Check Certificate harbor-prod environment
+  hosts: harbor-prod
+  gather_facts: no
+  serial: 1
+  vars_files:
+    - vault.yaml
+  tasks:
+    - name: Harbor | Project | Launch playbook for environment
+      import_tasks: all-prod.yaml

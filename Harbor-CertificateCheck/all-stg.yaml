@@ -1,0 +1,69 @@
+- name: K8S | Certificate Shell Script
+  shell: | 
+    cat << 'EOF' > /opt/HCE_Check_Cert/cert_{{ inventory_hostname }}_check.sh
+    function check_certs () {
+    name="$1"
+    cert="$2"
+    now_epoch=$( date +%s )
+    expiry_date=$cert
+    expiry_epoch=$( date -d "$expiry_date" +%s )
+    expiry_days="$(( ($expiry_epoch - $now_epoch) / (3600 * 24) ))"
+    if [[ expiry_days -le '360' ]]; then
+        echo -e "[ $name ] certificate will expire after $expiry_days days\n"
+    fi    
+    }
+    #harborweb
+    harborweb=$(kubectl get secret -n harbor-instance harbor-stg-atix -o jsonpath='{.data.ca\.crt}' | base64 -d | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+
+    #chartmuseum
+    chartmuseum=$(kubectl get secret -n harbor-instance stg-harbor-chartmuseum-crt -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+            
+    #core
+    core=$(kubectl get secret -n harbor-instance stg-harbor-core-crt -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+            
+    #jobservice
+    jobservice=$(kubectl get secret -n harbor-instance stg-harbor-jobservice-crt -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+    
+    #portal
+    portal=$(kubectl get secret -n harbor-instance stg-harbor-portal-crt -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+
+    #registry
+    registry=$(kubectl get secret -n harbor-instance stg-harbor-registry-crt -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+
+    #trivy
+    trivy=$(kubectl get secret -n harbor-instance stg-harbor-trivy-crt -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2)
+
+    check_certs "HarborWeb" "$harborweb"   
+    check_certs "Chartmuseum" "$chartmuseum"
+    check_certs "Core" "$core"
+    check_certs "Jobservice" "$jobservice"
+    check_certs "Portal" "$portal"
+    check_certs "Registry" "$registry"
+    check_certs "Trivy" "$trivy"    
+    EOF
+  ignore_errors: true
+
+- name: K8S | Check Certificate
+  shell:  |
+    export KUBECTL_VSPHERE_PASSWORD='{{ tkc_stg_passwd }}'
+    kubectl-vsphere login --server={{ supervisor }} --vsphere-username={{ supervisor_user }} --tanzu-kubernetes-cluster-namespace={{ supervisor_ns }} --tanzu-kubernetes-cluster-name={{ cluster_name }} --insecure-skip-tls-verify > /dev/null 2>&1
+    kubectl config use-context {{ cluster_name }} > /dev/null 2>&1
+    chmod +x /opt/HCE_Check_Cert/cert_{{ inventory_hostname }}_check.sh
+    /opt/HCE_Check_Cert/cert_{{ inventory_hostname }}_check.sh
+  register: cert_status
+
+- name: Send result as mail
+  become: false
+  mail:
+    host:  myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: myteam@mydomain.com
+    subject: Harbor Certificate Check [ IMPORTANT ]
+    body: |
+       Report : Harbor Certificate Will Be Expire
+       Secret : [ {{ inventory_hostname }} ]
+
+       {{ cert_status.stdout }} 
+  delegate_to: localhost
+  when: ("HarborWeb" in cert_status.stdout) or ("Chartmuseum" in cert_status.stdout) or ("Core" in cert_status.stdout) or ("Jobservice" in cert_status.stdout) or ("Portal" in cert_status.stdout) or ("Trivy" in cert_status.stdout) or ("Registry" in cert_status.stdout)

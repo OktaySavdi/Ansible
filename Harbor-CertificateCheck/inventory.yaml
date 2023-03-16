@@ -1,0 +1,21 @@
+harbor-stg:
+  hosts:
+    stg-harbor1:
+      ansible_host: 10.10.10.1
+      supervisor_ns: "ns-harbor-01"
+  vars:
+    supervisor: "stg-tanzu.mydomain.com"
+    supervisor_user: "svc_hce_vsphere@gtstg.lan"
+    cluster_name: "stg-harbor1"
+    tkc_stg_passwd: "1111"
+
+harbor-prod:
+  hosts:
+    prod-harbor1:
+      ansible_host: 10.10.10.1
+      supervisor_ns: "ns-harbor-01"
+  vars:
+    supervisor: "prod-tanzu.mydomain.com"
+    supervisor_user: "svc_hce_vsphere@gtat.lan"
+    cluster_name: "prod-harbor1"
+    tkc_prod_passwd: "1111"

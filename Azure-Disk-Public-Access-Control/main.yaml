@@ -1,0 +1,53 @@
+- name: Check disk public access status
+  hosts: jumpserver  # Run the task on the Ansible control node
+  gather_facts: no  # We don't need facts for this task
+  vars_files:
+    - vault.yaml
+  tasks:
+    - name: Get disk public access status
+      shell: |
+        cat << 'EOF' > /opt/HCE/public_access_enabled_disks_check.sh
+        #!/bin/bash
+        echo "################# List of Public Access Enabled Sisk #################" > /opt/HCE/public_access_enabled_disks.txt
+        
+        az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
+
+        for sub in $(az account list --all --query '[].name' -o tsv); do
+          for rg in $(az group list --subscription $sub --query '[].name' -o tsv); do
+              for disk in $(az disk list --resource-group $rg --subscription $sub --query '[].name' -o tsv); do
+                  echo "Subscription: $sub | RG: $rg | Disk: $disk | Disk Public Access: $(az disk show --name $disk --resource-group $rg --subscription $sub --query 'publicNetworkAccess' -o tsv)" | grep "Disk Public Access: Enabled"  >> /opt/HCE/public_access_enabled_disks.txt
+              done
+          done
+        done 2> /dev/null
+        EOF
+        chmod +x /opt/HCE/public_access_enabled_disks_check.sh
+
+    - name: Save disk public access status to a file
+      shell: /opt/HCE/public_access_enabled_disks_check.sh
+    
+    - name: Read the contents of public_access_enabled_disks.txt
+      slurp:
+        src: /opt/HCE/public_access_enabled_disks.txt  # Replace with the actual path to your public_access_enabled_disks.txt file
+      register: file_content
+
+    - name: Check file contains 
+      set_fact:
+        contains_enabled: "{{ 'Disk Public Access: Enabled' in file_content.content | b64decode | string }}"
+    
+    - name: Sending an e-mail SMTP servers
+      become: false
+      mail:
+        host: myhost.mydomain.com
+        port: 25
+        sender: ansible@mydomain.com
+        to: myteam@mydomain.com
+        subject: "[ Imported ] Check which disk is publicly accessible"
+        attach: /opt/HCE/public_access_enabled_disks.txt
+        body: |
+            Public Access Enabled Disks List Report [ Weekly ]
+    
+            Please check the list and change the Disk Network!!
+      when: contains_enabled
+
+    - name: delete result file
+      shell: rm -rf /opt/HCE/public_access_enabled*

@@ -1,4 +1,5 @@
-## Creating DNS A record for Kubernetes API cluster IP 
+## Azure ServicePrincipal Check
+
 **Check Syntax**
 ```
 ansible-playbook main.yaml --syntax-check

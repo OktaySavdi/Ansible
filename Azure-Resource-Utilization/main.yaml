@@ -14,7 +14,7 @@
 
     - name: Check file contains 
       set_fact:
-        content_found: "{{ file_content.stdout | length > 0 }}"
+        lines_found: "{{ file_content.content | b64decode | split('\n') }}"
     
     - name: Send Email with Azure Resource Utilization
       become: false
@@ -29,7 +29,7 @@
             Azure Resource Utilization Report [ Monthly ]
     
             Please check the list and Report the Service Owner!!
-      when: content_found
+      when: lines_found
 
     - name: delete result file
       shell: rm -rf "/opt/HCE/HCE_Azure_Resources_utilization/Azure_Resources_Utilization.txt"

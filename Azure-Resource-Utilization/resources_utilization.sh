@@ -4,8 +4,14 @@
 subscription_id=$1
 
 # Set the output file
-out_file="/opt/HCE/HCE_Azure_Resources_utilization/Azure_Resources_Utilization.txt"
-echo "" > $out_file
+out_file="orphaned_resources.txt"
+
+# the title of the report
+echo "*****************************************************************" > $out_file
+echo "********************* General Resources Report ******************" >> $out_file
+echo "*********************  $(date +'%d-%m-%Y')   *****************************" >> $out_file
+echo "*****************************************************************" >> $out_file
+
 
 # Function to find orphaned resources for a given resource type
 find_orphaned_resources() {
@@ -13,16 +19,17 @@ find_orphaned_resources() {
     local query_expression=$2
     local subscription_id=$3
 
-    # Find Subscription name
-    local subscription=$(az account list --query "[?id=='$subscription_id'].name" --output tsv)
+    # Get the subscription by ID
+    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
 
     local orphaned_resources=($(az $resource_type list --subscription $subscription_id --query "$query_expression" --output tsv))
 
     if [ ${#orphaned_resources[@]} -gt 0 ]; then
-        echo "[$subscription][Orphaned $resource_type:]" >> $out_file
+        echo "[$subscription_name] - Orphaned $resource_type" >> $out_file
         for orphaned_resource in "${orphaned_resources[@]}"; do
             echo "$orphaned_resource" >> $out_file
         done
+        echo "*****************************************************************" >> $out_file
     fi
 }
 
@@ -30,11 +37,11 @@ find_orphaned_resources() {
 find_orphaned_subnets() {
     local subscription_id=$1
 
+    # Get the subscription by ID
+    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
+
     # Get a list of Subnets in the subscription
     local vnets=$(az network vnet list --subscription $subscription_id --query "[].{Name:name, ResourceGroup:resourceGroup}" --output json)
-
-    # Find Subscription name
-    local subscription=$(az account list --query "[?id=='$subscription_id'].name" --output tsv)
 
     # Loop through each  Subnets
     for vnet in $(echo "$vnets" | jq -c '.[]'); do
@@ -44,13 +51,14 @@ find_orphaned_subnets() {
         local orphaned_subnets=($(az network vnet subnet list --subscription $subscription_id --vnet-name $vnet_name --resource-group $resource_group --query '[?ipConfigurations[0]==`null`].id' --output tsv))
 
         if [ ${#orphaned_subnets[@]} -gt 0 ]; then
-            echo "[$subscription][Orphaned Subnets:]" >> $out_file
+            echo "[$subscription_name] - Orphaned Subnets:" >> $out_file
             for subnet in "${orphaned_subnets[@]}"; do
                 if [ -n "$subnet" ]; then
                     echo "$subnet" >> $out_file
                 fi
             done
         fi
+        echo "*****************************************************************" >> $out_file
     done
 }
 
@@ -58,8 +66,8 @@ find_orphaned_subnets() {
 find_orphaned_resource_groups() {
     local subscription_id=$1
 
-    # Find Subscription name
-    local subscription=$(az account list --query "[?id=='$subscription_id'].name" --output tsv)
+    # Get the subscription by ID
+    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
 
     # Check each resource group for the presence of resources
     orphans_rg=()
@@ -72,10 +80,11 @@ find_orphaned_resource_groups() {
 
     if [ "${#orphans_rg[@]}" -gt 0 ]; then
         # Print orphaned resource groups
-        echo "[$subscription][Orphaned Resource Groups:]" >> $out_file
+        echo "[$subscription_name] - Orphaned Resource Groups:" >> $out_file
         for orphan_rg in "${orphans_rg[@]}"; do
-            echo "/subscriptions/$subscription_id/resourceGroups/$orphan_rg" >> $out_file
+            echo "$orphan_rg" >> $out_file
         done
+        echo "*****************************************************************" >> $out_file
     fi
 }
 
@@ -84,8 +93,8 @@ check_vm_utilization() {
 
     az account set --subscription=$subscription_id
 
-    # Find Subscription name
-    local subscription=$(az account list --query "[?id=='$subscription_id'].name" --output tsv)
+    # Get the subscription by ID
+    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
 
     # Get a list of all VMs in the subscription
     vms=$(az vm list --query "[].{Id:id, ResourceGroup:resourceGroup}" --output json)
@@ -94,7 +103,7 @@ check_vm_utilization() {
     for vm in $(echo "$vms" | jq -c '.[]'); do
         vmId=$(echo "$vm" | jq -r '.Id')
         resourceGroupName=$(echo "$vm" | jq -r '.ResourceGroup')
-
+    
         # Get current date in UTC
         endDate=$(date -u +"%Y-%m-%dT%H:%MZ")
 
@@ -106,13 +115,14 @@ check_vm_utilization() {
 
         # Get memory utilization for the last three months
         memoryUtilization=$(az monitor metrics list --resource "$vmId" --resource-group "$resourceGroupName" --start-time "$startDate" --end-time "$endDate" --interval 1d --metric "Available Memory Bytes" --query "value[].timeseries[].data[].average" --output tsv | awk '{s+=$1} END {print s/NR}')
-
+        
         # Check if the difference is over 40%
         if (( $(echo "$cpuUtilization < 30" | bc -l) )) || (( $(echo "$memoryUtilization < 40" | bc -l) )); then
-            echo -e "[$subscription][Percentage CPU:] $cpuUtilization% and [Percentage Memory:] $memoryUtilization%"
-            echo -e "$vmId"
+            echo -e "[$subscription_name] - [Percentage CPU] $cpuUtilization% and [Percentage Memory] $memoryUtilization%" >> $out_file
+            echo -e "$vmId" >> $out_file
         fi
     done
+    echo "*****************************************************************" >> $out_file
 }
 
 if [ -z "$subscription_id" ]; then
@@ -132,8 +142,8 @@ if [ -z "$subscription_id" ]; then
         find_orphaned_resources "network nat gateway" '[?subnets==`null`].id' $subscription_id
         find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id
         find_orphaned_resource_groups $subscription_id
-                check_vm_utilization $subscription_id
-    done
+		check_vm_utilization $subscription_id
+    done   
 else
     # Call individual functions for each resource type
         find_orphaned_resources "appservice plan" "[?numberOfSites == \`0\`].id" $subscription_id
@@ -149,7 +159,7 @@ else
         find_orphaned_resources "network nat gateway" '[?subnets==`null`].id' $subscription_id
         find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id
         find_orphaned_resource_groups $subscription_id
-                check_vm_utilization $subscription_id
+		check_vm_utilization $subscription_id
 fi
 
 echo "Orphaned resources check completed. Check $out_file for details."

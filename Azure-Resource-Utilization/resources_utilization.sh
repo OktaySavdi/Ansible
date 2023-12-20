@@ -4,7 +4,7 @@
 subscription_id=$1
 
 # Set the output file
-out_file="orphaned_resources.txt"
+out_file="Azure_Resources_Utilization.txt"
 
 # the title of the report
 echo "*****************************************************************" > $out_file
@@ -142,7 +142,7 @@ if [ -z "$subscription_id" ]; then
         find_orphaned_resources "network nat gateway" '[?subnets==`null`].id' $subscription_id
         find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id
         find_orphaned_resource_groups $subscription_id
-		check_vm_utilization $subscription_id
+	check_vm_utilization $subscription_id
     done   
 else
     # Call individual functions for each resource type
@@ -159,7 +159,7 @@ else
         find_orphaned_resources "network nat gateway" '[?subnets==`null`].id' $subscription_id
         find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id
         find_orphaned_resource_groups $subscription_id
-		check_vm_utilization $subscription_id
+        check_vm_utilization $subscription_id
 fi
 
 echo "Orphaned resources check completed. Check $out_file for details."

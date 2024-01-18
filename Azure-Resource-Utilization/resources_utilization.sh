@@ -84,7 +84,7 @@ find_orphaned_resource_groups() {
         for orphan_rg in "${orphans_rg[@]}"; do
             echo "$orphan_rg" >> $out_file
         done
-        echo "*****************************************************************" >> $out_file
+        echo "************************** Last 3 Months ************************" >> $out_file
     fi
 }
 
@@ -132,12 +132,12 @@ if [ -z "$subscription_id" ]; then
         find_orphaned_resources "appservice plan" "[?numberOfSites == \`0\`].id" $subscription_id
         find_orphaned_resources "vm availability-set" "[?length(virtualMachines) == \`0\`].id" $subscription_id
         find_orphaned_resources "disk" '[?managedBy==`null`].[id]' $subscription_id
-        find_orphaned_resources "network public-ip" "[?ipConfiguration==null].id" $subscription_id
+        find_orphaned_resources "network public-ip" "[?ipConfiguration==null && natGateway==null].id" $subscription_id
         find_orphaned_resources "network nic" "[?virtualMachine==null && privateEndpoint==null && networkSecurityGroup==null].id" $subscription_id
         find_orphaned_resources "network nsg" "[?subnets==null && networkInterfaces==null].id" $subscription_id
         find_orphaned_resources "network route-table" '[?subnets==`null`].[id]' $subscription_id
         find_orphaned_resources "network lb" '[?backendAddressPools[0]==`null`].id' $subscription_id
-        find_orphaned_resources "network vnet" '[?subnets[0].ipConfigurations[0]==`null`].id' $subscription_id
+        find_orphaned_resources "network vnet" '[?subnets[0]==null].id' $subscription_id
         find_orphaned_subnets $subscription_id
         find_orphaned_resources "network nat gateway" '[?subnets==`null`].id' $subscription_id
         find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id
@@ -149,12 +149,12 @@ else
         find_orphaned_resources "appservice plan" "[?numberOfSites == \`0\`].id" $subscription_id
         find_orphaned_resources "vm availability-set" "[?length(virtualMachines) == \`0\`].id" $subscription_id
         find_orphaned_resources "disk" '[?managedBy==`null`].[id]' $subscription_id
-        find_orphaned_resources "network public-ip" "[?ipConfiguration==null].id" $subscription_id
+        find_orphaned_resources "network public-ip" "[?ipConfiguration==null && natGateway==null].id"" $subscription_id
         find_orphaned_resources "network nic" "[?virtualMachine==null && privateEndpoint==null && networkSecurityGroup==null].id" $subscription_id
         find_orphaned_resources "network nsg" "[?subnets==null && networkInterfaces==null].id" $subscription_id
         find_orphaned_resources "network route-table" '[?subnets==`null`].[id]' $subscription_id
         find_orphaned_resources "network lb" '[?backendAddressPools[0]==`null`].id' $subscription_id
-        find_orphaned_resources "network vnet" '[?subnets[0].ipConfigurations[0]==`null`].id' $subscription_id
+        find_orphaned_resources "network vnet" '[?subnets[0]==null].id' $subscription_id
         find_orphaned_subnets $subscription_id
         find_orphaned_resources "network nat gateway" '[?subnets==`null`].id' $subscription_id
         find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id

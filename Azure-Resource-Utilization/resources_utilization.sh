@@ -3,6 +3,8 @@
 # Main function to call other functions based on the resource type
 subscription_id=$1
 
+az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
+
 # Set the output file
 out_file="Azure_Resources_Utilization.txt"
 
@@ -84,12 +86,13 @@ find_orphaned_resource_groups() {
         for orphan_rg in "${orphans_rg[@]}"; do
             echo "$orphan_rg" >> $out_file
         done
-        echo "************************** Last 3 Months ************************" >> $out_file
+        echo "*****************************************************************" >> $out_file
     fi
 }
 
 check_vm_utilization() {
     local subscription_id=$1
+    local output_added=false
 
     az account set --subscription=$subscription_id
 
@@ -118,6 +121,10 @@ check_vm_utilization() {
         
         # Check if the difference is over 40%
         if (( $(echo "$cpuUtilization < 30" | bc -l) )) || (( $(echo "$memoryUtilization < 40" | bc -l) )); then
+	    if [ "$output_added" = false ]; then
+                echo "************************** Performance (Last 3 Months) ************************" >> $out_file
+                output_added=true
+            fi
             echo -e "[$subscription_name] - [Percentage CPU] $cpuUtilization% and [Percentage Memory] $memoryUtilization%" >> $out_file
             echo -e "$vmId" >> $out_file
         fi
@@ -141,6 +148,7 @@ if [ -z "$subscription_id" ]; then
         find_orphaned_subnets $subscription_id
         find_orphaned_resources "network nat gateway" '[?subnets==`null`].id' $subscription_id
         find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id
+	find_orphaned_resources "snapshot" "[?timeCreated<='$(date -u -d '7 days ago' +'%Y-%m-%dT%H:%MZ')'].id" $subscription_id
         find_orphaned_resource_groups $subscription_id
 	check_vm_utilization $subscription_id
     done   
@@ -158,6 +166,7 @@ else
         find_orphaned_subnets $subscription_id
         find_orphaned_resources "network nat gateway" '[?subnets==`null`].id' $subscription_id
         find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id
+	find_orphaned_resources "snapshot" "[?timeCreated<='$(date -u -d '7 days ago' +'%Y-%m-%dT%H:%MZ')'].id" $subscription_id
         find_orphaned_resource_groups $subscription_id
         check_vm_utilization $subscription_id
 fi

@@ -43,6 +43,7 @@ create_report_file() {
     find_orphaned_subnets $subscription_id
     find_orphaned_resources "network nat gateway" '[?subnets==`null`].id' $subscription_id
     find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id
+    find_orphaned_resources "snapshot" "[?timeCreated<='$(date -u -d '7 days ago' +'%Y-%m-%dT%H:%MZ')'].id" $subscription_id
     find_orphaned_resource_groups $subscription_id
     check_vm_utilization $subscription_id
 
@@ -133,12 +134,13 @@ find_orphaned_resource_groups() {
         for orphan_rg in "${orphans_rg[@]}"; do
             echo "$orphan_rg" >> $report_file
         done
-        echo "************************** Last 3 Months ************************" >> $report_file
+        echo "*****************************************************************" >> $report_file
     fi
 }
 
 check_vm_utilization() {
     local subscription_id=$1
+    local output_added=false
 
     az account set --subscription=$subscription_id
 
@@ -167,6 +169,10 @@ check_vm_utilization() {
 
         # Check if the difference is over 40%
         if (( $(echo "$cpuUtilization < 30" | bc -l) )) || (( $(echo "$memoryUtilization < 40" | bc -l) )); then
+            if [ "$output_added" = false ]; then
+                echo "************************** Performance (Last 3 Months) ************************" >> $out_file
+                output_added=true
+            fi
             echo -e "[$subscription_name] - [Percentage CPU] $cpuUtilization% and [Percentage Memory] $memoryUtilization%" >> $report_file
             echo -e "$vmId" >> $report_file
         fi

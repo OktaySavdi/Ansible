@@ -4,6 +4,9 @@
 output_dir="orphaned_resources_reports"
 email_subject="Orphaned Resources Report in Azure"
 
+# Array to track processed storage accounts for each subscription
+declare -A processed_accounts
+
 # Login Azure via SP
 az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
 
@@ -13,6 +16,7 @@ subscriptions=(
             "SUBSCRIPTION_NAME_3:team1@mydomain.com,team2@mydomain.comm"
             #"SUBSCRIPTION_NAME_3:owner3@example.com"
         )
+
 
 # Function to create a report file for a subscription
 create_report_file() {
@@ -46,6 +50,7 @@ create_report_file() {
     find_orphaned_resources "snapshot" "[?timeCreated<='$(date -u -d '7 days ago' +'%Y-%m-%dT%H:%MZ')'].id" $subscription_id
     find_orphaned_resource_groups $subscription_id
     check_vm_utilization $subscription_id
+    check_storage_accounts $subscription_id
 
     if grep -q "Orphaned" "$report_file"; then
         # Send email to the specific owner_email
@@ -170,7 +175,7 @@ check_vm_utilization() {
         # Check if the difference is over 40%
         if (( $(echo "$cpuUtilization < 30" | bc -l) )) || (( $(echo "$memoryUtilization < 40" | bc -l) )); then
             if [ "$output_added" = false ]; then
-                echo "************************** Performance (Last 3 Months) ************************" >> $out_file
+                echo "************************** Performance (Last 3 Months) ************************" >> $report_file
                 output_added=true
             fi
             echo -e "[$subscription_name] - [Percentage CPU] $cpuUtilization% and [Percentage Memory] $memoryUtilization%" >> $report_file
@@ -178,6 +183,75 @@ check_vm_utilization() {
         fi
     done
     echo "*****************************************************************" >> $report_file
+}
+
+check_storage_accounts() {
+    local subscription_id=$1
+
+    az account set --subscription=$subscription_id
+
+    # Get a list of storage accounts in the subscription
+    storage_accounts=$(az storage account list --query '[].name' --output tsv)
+    
+    # Loop through each storage account
+    for storage_account in $storage_accounts; do
+    
+        account_key=$(az storage account keys list --account-name $storage_account --query '[0].value' --output tsv)
+        
+        # Get a list of containers in the storage account
+        containers=$(az storage container list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+    
+        # Get the list of file shares in the storage account
+        fileShares=$(az storage share list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+    
+        if [ ! -z "$containers" ]; then
+            # Loop through each container
+            for container in $containers; do
+                # Get total size of all blobs in the specified container
+                total_size=$(az storage blob list --account-name $storage_account --container-name $container --account-key $account_key --query "[].properties.contentLength" --output tsv | paste -sd+ - | bc)
+                # Convert bytes to gigabytes for better readability
+                total_size_gb=$(echo "scale=2; $total_size / (1024*1024*1024)" | bc)
+                type=Blob
+                
+                check_and_print $storage_account $container $total_size_gb $type $subscription_id
+            done
+        fi
+    
+        if [ ! -z "$fileShares" ]; then
+            # Loop through each file share
+            for share in $fileShares; do
+                usedCapacity=$(az storage share stats --account-name $storage_account --account-key $account_key  --name $share --query 'usageStats[0].usageInBytes' --output tsv)
+                # Convert bytes to gigabytes for better readability
+                used_capacity_gb=$(echo "scale=2; $usedCapacity / (1024*1024*1024)" | bc)
+                type=FileShare
+                
+                check_and_print $storage_account $share $used_capacity_gb $type $subscription_id
+            done
+        fi
+    done
+}
+
+# Function to check if total size is over 100 GB and print the result
+check_and_print() {
+    local storage_account=$1
+    local container_or_share=$2
+    local total_size_gb=$3
+    local type=$4
+    local subscription_id=$5
+
+    # Get the subscription by ID
+    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
+
+    if (( $(echo "$total_size_gb > 100 || $total_size_gb == 0" | bc -l) )); then
+       # Check if the storage account has been processed for this subscription
+       if [[ "${processed_accounts["$storage_account"]}" != "true" ]]; then
+           echo -e "[$subscription_name] - Storage Account Consumption:" >> $report_file
+           echo -e $storage_account >> $report_file
+           # Mark the storage account as processed for this subscription
+           processed_accounts["$storage_account"]="true"
+       fi
+       echo -e "\t- $type: $container_or_share  Used Capacity: ${total_size_gb} GB" >> $report_file
+    fi
 }
 
 # Create the output directory

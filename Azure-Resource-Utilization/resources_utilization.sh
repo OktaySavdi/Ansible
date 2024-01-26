@@ -9,7 +9,7 @@ declare -A processed_accounts
 az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
 
 # Set the output file
-out_file="Azure_Resources_Utilization.txt"
+out_file="/opt/HCE/HCE_Azure_Resources_utilization/Azure_Resources_Utilization.txt"
 
 # the title of the report
 echo "*****************************************************************" > $out_file
@@ -146,36 +146,34 @@ check_storage_accounts() {
     # Loop through each storage account
     for storage_account in $storage_accounts; do
     
-        account_key=$(az storage account keys list --account-name $storage_account --query '[0].value' --output tsv)
+        account_key=$(timeout 10 az storage account keys list --account-name $storage_account --query '[0].value' --output tsv)
         
         # Get a list of containers in the storage account
-        containers=$(az storage container list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+        containers=$(timeout 10 az storage container list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
     
         # Get the list of file shares in the storage account
-        fileShares=$(az storage share list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+        fileShares=$(timeout 10 az storage share list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
     
         if [ ! -z "$containers" ]; then
             # Loop through each container
             for container in $containers; do
                 # Get total size of all blobs in the specified container
-                total_size=$(az storage blob list --account-name $storage_account --container-name $container --account-key $account_key --query "[].properties.contentLength" --output tsv | paste -sd+ - | bc)
+                total_size=$(timeout 10 az storage blob list --account-name $storage_account --container-name $container --account-key $account_key --query "[].properties.contentLength" --output tsv | paste -sd+ - | bc)
                 # Convert bytes to gigabytes for better readability
                 total_size_gb=$(echo "scale=2; $total_size / (1024*1024*1024)" | bc)
-                type=Blob
                 
-                check_and_print $storage_account $container $total_size_gb $type $subscription_id
+                check_and_print $storage_account $container $total_size_gb "Blob" $subscription_id
             done
         fi
     
         if [ ! -z "$fileShares" ]; then
             # Loop through each file share
             for share in $fileShares; do
-                usedCapacity=$(az storage share stats --account-name $storage_account --account-key $account_key  --name $share --query 'usageStats[0].usageInBytes' --output tsv)
+                usedCapacity=$(timeout 10 az storage share stats --account-name $storage_account --account-key $account_key  --name $share --query 'usageStats[0].usageInBytes' --output tsv)
                 # Convert bytes to gigabytes for better readability
                 used_capacity_gb=$(echo "scale=2; $usedCapacity / (1024*1024*1024)" | bc)
-                type=FileShare
                 
-                check_and_print $storage_account $share $used_capacity_gb $type $subscription_id
+                check_and_print $storage_account $share $used_capacity_gb "FileShare" $subscription_id
             done
         fi
     done

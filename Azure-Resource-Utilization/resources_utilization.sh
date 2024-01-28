@@ -20,7 +20,7 @@ declare -A processed_subscriptions
 az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
 
 # Set the output file
-out_file="/opt/HCE/HCE_Azure_Resources_utilization/Azure_Resources_Utilization.txt"
+out_file="Azure_Resources_Utilization.txt"
 
 # the title of the report
 echo "*****************************************************************" > $out_file

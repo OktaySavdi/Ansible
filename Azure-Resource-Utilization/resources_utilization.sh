@@ -1,5 +1,12 @@
 #!/bin/bash
 
+###############################################################
+##  Name:  Oktay SAVDI
+##  Date:  01.02.2024
+##  Call:  ./resources_utilization.sh
+##  Call:  ./resources_utilization.sh "<subscription_id>"
+###############################################################
+
 #set -x
 #set -e
 

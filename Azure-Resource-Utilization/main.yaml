@@ -4,12 +4,24 @@
   vars_files:
     - vault.yaml
   tasks:
-    - name: Save disk public access status to a file
-      shell: /opt/HCE/HCE_Azure_Resources_utilization/resources_utilization.sh
+    tasks:
+    - name: Save resource utilization status to a file asynchronously
+      shell: /opt/resources_utilization.sh
+      async: 7200  # Set the timeout to 3 hours (3 hours * 60 minutes * 60 seconds)
+      poll: 0  # Start the job and don't wait for completion immediately
+      register: job_result
+    
+    - name: Wait for the asynchronous job to finish
+      async_status:
+        jid: "{{ job_result.ansible_job_id }}"
+      register: job_status
+      until: job_status.finished
+      retries: 120  # Poll every minute for 2 hours
+      delay: 60  # Wait for 60 seconds between each poll
     
     - name: Read the contents of Azure_Resources_Utilization.txt
       slurp:
-        src: "/opt/HCE/HCE_Azure_Resources_utilization/Azure_Resources_Utilization.txt"  # Replace with the actual path to your Azure_Resources_Utilization.txt file
+        src: "/opt/Azure_Resources_Utilization.txt"  # Replace with the actual path to your Azure_Resources_Utilization.txt file
       register: file_content
 
     - name: Check file contains 
@@ -24,7 +36,7 @@
         sender: ansible@mydomain.com
         to: myteam@mydomain.com
         subject: "[ Warning ] Azure Resource Utilization Report"
-        attach: "/opt/HCE/HCE_Azure_Resources_utilization/Azure_Resources_Utilization.txt"
+        attach: "/opt/Azure_Resources_Utilization.txt"
         body: |
             Azure Resource Utilization Report [ Monthly ]
     
@@ -32,5 +44,5 @@
       when: lines_found
 
     - name: delete result file
-      shell: rm -rf "/opt/HCE/HCE_Azure_Resources_utilization/Azure_Resources_Utilization.txt"
+      shell: rm -rf "/opt/Azure_Resources_Utilization.txt"
 

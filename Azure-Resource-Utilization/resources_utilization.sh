@@ -17,10 +17,15 @@ subscription_id=$1
 declare -A processed_accounts
 declare -A processed_subscriptions
 
+# Set the output file
+email_subject="Orphaned Resources Report in Azure"
+owner_email="mymail@mydomain.com"
+
+
 az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
 
 # Set the output file
-out_file="Azure_Resources_Utilization.txt"
+out_file="/opt/HCE/HCE_Azure_Resources_utilization/Azure_Resources_Utilization.txt"
 
 # the title of the report
 echo "*****************************************************************" > $out_file
@@ -184,7 +189,7 @@ check_storage_accounts() {
     storage_accounts=$(az storage account list --query '[].name' --output tsv)
 
     for storage_account in $storage_accounts; do
-        account_key=$(timeout 60 az storage account keys list --account-name $storage_account --query '[0].value' --output tsv)
+        account_key=$(timeout 30 az storage account keys list --account-name $storage_account --query '[0].value' --output tsv)
         check_storage_account $storage_account $account_key $subscription_id
     done
     echo "*****************************************************************" >> $out_file
@@ -199,19 +204,19 @@ check_storage_account() {
     local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
 
     # Get a list of containers in the storage account
-    containers=$(timeout 60 az storage container list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+    containers=$(timeout 30 az storage container list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
 
     for container in $containers; do
-        total_size=$(timeout 60 az storage blob list --account-name $storage_account --container-name $container --account-key $account_key --query "[].properties.contentLength" --output tsv | paste -sd+ - | bc)
+        total_size=$(timeout 30 az storage blob list --account-name $storage_account --container-name $container --account-key $account_key --query "[].properties.contentLength" --output tsv | paste -sd+ - | bc)
         total_size_gb=$(echo "scale=2; $total_size / (1024*1024*1024)" | bc)
         check_and_print $storage_account $container $total_size_gb "Blob" $subscription_id
     done
 
     # Get the list of file shares in the storage account
-    fileShares=$(timeout 60 az storage share list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+    fileShares=$(timeout 30 az storage share list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
 
     for share in $fileShares; do
-        usedCapacity=$(timeout 60 az storage share stats --account-name $storage_account --account-key $account_key --name $share --query 'usageStats[0].usageInBytes' --output tsv)
+        usedCapacity=$(timeout 30 az storage share stats --account-name $storage_account --account-key $account_key --name $share --query 'usageStats[0].usageInBytes' --output tsv)
         used_capacity_gb=$(echo "scale=2; $usedCapacity / (1024*1024*1024)" | bc)
         check_and_print $storage_account $share $used_capacity_gb "FileShare" $subscription_id
     done
@@ -243,6 +248,16 @@ check_and_print() {
         echo -e "\t- $type: $container_or_share  Used Capacity: ${total_size_gb} GB" >> "$out_file"
     fi
 }
+
+# Function to send an email with the report attached
+send_email() {
+    local recipient=$1
+    local attachment=$2
+
+    # Use mail command to send the email with the attachment
+    mail -s "$email_subject" "$recipient" < "$attachment"
+}
+
 
 if [ -z "$subscription_id" ]; then
     # If subscription ID is not provided, get all subscription IDs
@@ -283,6 +298,12 @@ else
         find_orphaned_resource_groups $subscription_id
         check_vm_utilization $subscription_id
         check_storage_accounts $subscription_id
+fi
+
+if grep -q "Orphaned" "$out_file"; then
+        # Send email to the specific owner_email
+        send_email "$owner_email" "$out_file"
+        echo "Orphaned resources check completed"
 fi
 
 echo "Orphaned resources check completed. Check $out_file for details."

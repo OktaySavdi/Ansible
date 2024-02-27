@@ -150,6 +150,6 @@
         {% if ("Update" in result.stdout) %}
         "Project Permission Job Result is [Success]: Cluster - [{{ inventory_hostname }}] - Authorized for Project - [{{ namespace }}]"
         {% else %}
-        "Project Permission Job Result is [FAILED] : Cluster - [{{ inventory_hostname }}] - Failed to authorize project. Please Contact with GTBulutPlatformTeknolojileri@garantibbva.com.tr teams"
+        "Project Permission Job Result is [FAILED] : Cluster - [{{ inventory_hostname }}] - Failed to authorize project. Please Contact with mygroup@mydomain.com teams"
         {% endif %}        
   delegate_to: localhost

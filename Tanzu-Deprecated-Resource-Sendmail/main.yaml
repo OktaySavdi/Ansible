@@ -1,0 +1,10 @@
+- name: Check TKG Depracated resources
+  hosts: jumpserver  # Run the task on the Ansible control node
+  gather_facts: no  # We don't need facts for this task
+  vars_files:
+    - vault.yaml
+  tasks:
+    - name: Save resource utilization status to a file
+      shell: "nohup /opt/Check_Deprecated_Resources/tkg_deprecated_resources_reports.sh > /dev/null 2>&1 &"
+      async: 0
+      poll: 0

@@ -12,6 +12,7 @@
         mode: u+rwx,g-rwx,o-rwx
 
     - name: Get Service principals clien secret status
+      no_log: True
       shell: |
         cat << 'EOF' > /opt/HCE/Out_of_standart_SP_check.sh
         !/bin/bash

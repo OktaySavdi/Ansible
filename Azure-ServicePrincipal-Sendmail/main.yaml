@@ -5,6 +5,7 @@
     - vault.yaml
   tasks:
     - name: Get Service principals client status
+      no_log: True
       shell: |
         cat << 'EOF' > /opt/HCE/Out_of_standart_SP_sendmail.sh
         #!/bin/bash

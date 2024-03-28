@@ -5,6 +5,7 @@
     - vault.yaml
   tasks:
     - name: Get disk public access status
+      no_log: True
       shell: |
         cat << 'EOF' > /opt/HCE/public_access_enabled_disks_check.sh
         #!/bin/bash

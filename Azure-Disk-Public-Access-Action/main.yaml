@@ -1,11 +1,23 @@
 - name: Disk Public Access Action
   hosts: jumpserver  # Run the task on the Ansible control node
   gather_facts: no  # We don't need facts for this task
+  vars:
+    myhash: "b06a8bxxxxxxxxxxxxxxxxxxxxx0b2294d23"
   vars_files:
     - vault.yaml
   tasks:
+    - name: Get the MD5 hash of the file
+      ansible.builtin.shell: "md5sum /opt/mydir/disk_access_changes.sh | awk '{print $1}'"
+      register: file_hash_output
+
     - name: change disk public access
       shell: /opt/mydir/disk_access_changes.sh
+      when: file_hash_output.stdout == myhash
+
+    - name: Fail the playbook if hashes do not match
+      ansible.builtin.fail:
+        msg: "Hashes do not match. File integrity compromised."
+      when: file_hash_output.stdout != myhash
     
     - name: Read the contents of disk_access_changes.log
       slurp:

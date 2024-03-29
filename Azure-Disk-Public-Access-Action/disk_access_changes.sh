@@ -65,7 +65,7 @@ function disk_changes () {
          disk_id=$(az disk-access list -g $vnet_resource_group --query [].id -o tsv)
          
          # Disable public access for the disk
-         #az disk update --name $disk_name --resource-group $resource_group --network-access-policy AllowPrivate --disk-access $disk_id > /dev/null 2>&1
+         az disk update --name $disk_name --resource-group $resource_group --network-access-policy AllowPrivate --disk-access $disk_id --public-network-access Disabled > /dev/null 2>&1
 
          # Log that public access is enabled for the disk
          log_message "[UPDATED] [$subscription_name] Public access disabled for disk: $disk_name disk-access: $(echo $disk_id | awk -F'/' '{print $NF}')"
@@ -85,7 +85,7 @@ function disk_changes () {
          disk_id=$(az disk-access list -g $vnet_resource_group --query [].id -o tsv)
          
          # Disable public access for the disk
-         #az disk update --name $disk_name --resource-group $resource_group --network-access-policy AllowPrivate --disk-access $disk_id > /dev/null 2>&1
+         az disk update --name $disk_name --resource-group $resource_group --network-access-policy AllowPrivate --disk-access $disk_id --public-network-access Disabled > /dev/null 2>&1
 
          # Log that public access is enabled for the disk
          log_message "[UPDATED] [$subscription_name] Public access disabled for disk: $disk_name disk-access: $(echo $disk_id | awk -F'/' '{print $NF}')"

@@ -3,12 +3,25 @@
   gather_facts: no  # We don't need facts for this task
   vars_files:
     - vault.yaml
+  vars:
+    myhash: "1bc5xxxxxxxxxxxxxxx16ffae4e33"
   tasks:
     tasks:
+      - name: Get the MD5 hash of the file
+        ansible.builtin.shell: "md5sum /opt/resources_utilization.sh | awk '{print $1}'"
+         register: file_hash_output
+
       - name: Save resource utilization status to a file asynchronously
         shell: "nohup /opt/resources_utilization.sh > /dev/null 2>&1 &"
         async: 0
         poll: 0   
+        when: file_hash_output.stdout == myhash
+
+      - name: Fail the playbook if hashes do not match
+        ansible.builtin.fail:
+          msg: "Hashes do not match. File integrity compromised."
+        when: file_hash_output.stdout != myhash
+    
     #- name: Save resource utilization status to a file asynchronously
     #  shell: /opt/resources_utilization.sh
     #  async: 7200  # Set the timeout to 3 hours (3 hours * 60 minutes * 60 seconds)

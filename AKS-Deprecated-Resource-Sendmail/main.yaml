@@ -1,10 +1,23 @@
 - name: Check AKS Depracated resources
   hosts: jumpserver  # Run the task on the Ansible control node
   gather_facts: no  # We don't need facts for this task
+  vars:
+    myhash: "fa4dxxxxxxxxxxxxxxxxxx3a4"
   vars_files:
     - vault.yaml
   tasks:
+    - name: Get the MD5 hash of the file
+      ansible.builtin.shell: "md5sum /opt/Check_Deprecated_Resources/aks_deprecated_resources_reports.sh | awk '{print $1}'"
+      register: file_hash_output
+
     - name: Save resource utilization status to a file
       shell: "nohup /opt/Check_Deprecated_Resources/aks_deprecated_resources_reports.sh > /dev/null 2>&1 &"
       async: 0
       poll: 0
+      when: file_hash_output.stdout == myhash
+
+    - name: Fail the playbook if hashes do not match
+      ansible.builtin.fail:
+        msg: "Hashes do not match. File integrity compromised."
+      when: file_hash_output.stdout != myhash
+

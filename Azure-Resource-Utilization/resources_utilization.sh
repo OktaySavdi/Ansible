@@ -2,7 +2,7 @@
 
 ###############################################################
 ##  Name:  Oktay SAVDI
-##  Date:  01.02.2024
+##  Date:  15.04.2024
 ##  Call:  ./resources_utilization.sh
 ##  Call:  ./resources_utilization.sh "<subscription_id>"
 ###############################################################
@@ -25,7 +25,7 @@ owner_email="mymail@mydomain.com"
 az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
 
 # Set the output file
-out_file="/opt/HCE/HCE_Azure_Resources_utilization/Azure_Resources_Utilization.txt"
+out_file="/opt/Azure_Resources_utilization/Azure_Resources_Utilization.txt"
 
 # the title of the report
 echo "*****************************************************************" > $out_file
@@ -181,73 +181,132 @@ check_vm_utilization() {
     echo "*****************************************************************" >> $out_file
 }
 
-check_storage_accounts() {
+check_storage_account_size(){
     local subscription_id=$1
-    az account set --subscription=$subscription_id
+    local output_added=false
 
-    # Get a list of storage accounts in the subscription
-    storage_accounts=$(az storage account list --query '[].name' --output tsv)
+    # Get the current date
+    current_date=$(date -u +"%Y-%m-%d")
 
-    for storage_account in $storage_accounts; do
-        account_key=$(timeout 30 az storage account keys list --account-name $storage_account --query '[0].value' --output tsv)
-        check_storage_account $storage_account $account_key $subscription_id
-    done
-    echo "*****************************************************************" >> $out_file
-}
+    # Calculate the previous working day (assuming Mon-Fri are working days)
+    prev_working_day=$(date -u -d "yesterday" +"%Y-%m-%d")
 
-check_storage_account() {
-    local storage_account=$1
-    local account_key=$2
-    local subscription_id=$3
+    # Set the subscription for Azure CLI commands
+    az account set --subscription $subscription_id
 
     # Get the subscription by ID
     local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
 
-    # Get a list of containers in the storage account
-    containers=$(timeout 30 az storage container list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+    # Get the list of storage accounts in the subscription
+    storage_accounts=$(az storage account list --query "[].id" -o tsv)
 
-    for container in $containers; do
-        total_size=$(timeout 30 az storage blob list --account-name $storage_account --container-name $container --account-key $account_key --query "[].properties.contentLength" --output tsv | paste -sd+ - | bc)
-        total_size_gb=$(echo "scale=2; $total_size / (1024*1024*1024)" | bc)
-        check_and_print $storage_account $container $total_size_gb "Blob" $subscription_id
-    done
+    # Loop through each storage account
+    for account in $storage_accounts; do
 
-    # Get the list of file shares in the storage account
-    fileShares=$(timeout 30 az storage share list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+        # Get the UsedCapacity metric data for the storage account
+        metric_data=$(az monitor metrics list --resource $account --metric "UsedCapacity" --interval PT1H --start-time $prev_working_day"T00:00:00Z" --end-time $current_date"T00:00:00Z" --output json)
 
-    for share in $fileShares; do
-        usedCapacity=$(timeout 30 az storage share stats --account-name $storage_account --account-key $account_key --name $share --query 'usageStats[0].usageInBytes' --output tsv)
-        used_capacity_gb=$(echo "scale=2; $usedCapacity / (1024*1024*1024)" | bc)
-        check_and_print $storage_account $share $used_capacity_gb "FileShare" $subscription_id
+        # Extract the first non-empty "Average" value
+        first_value=$(echo $metric_data | jq -r '.value[0].timeseries[0].data[0].average')
+        
+        # Check if the value is empty, and if so, find the next non-empty value
+        while [ -z "$first_value" ]; do
+            metric_data=$(echo $metric_data | jq '.value[0].timeseries[0].data[1:]')
+            first_value=$(echo $metric_data | jq -r '.[0].average')
+        done
+
+        sa_name=$(echo $account | awk -F'/' '{print $(NF)}')
+
+        # Convert the value from bytes to gigabytes and terabytes
+        gigabytes=$(echo "scale=2; $first_value / 1073741824" | bc)
+        terabytes=$(echo "scale=2; $first_value / 1099511627776" | bc)
+  
+        # Check if the value is over 100 GB or 0 GB
+        if (( $(echo "$gigabytes > 100 || $gigabytes == 0" | bc -l) )); then
+           # Check if the subscription header has been printed
+           if [ "$output_added" = false ]; then
+               echo -e "[$subscription_name] - Storage Account Consumption:" >> "$out_file"
+               output_added=true
+            fi
+
+            echo -e "$sa_name" >> "$out_file"
+            echo -e "\t- Total GB: $gigabytes" >> "$out_file"
+
+            # Check if the value is over 1 TB
+            if (( $(echo "$terabytes > 1" | bc -l) )); then
+                echo -e "\t- Total TB: $terabytes" >> "$out_file"
+            fi
+        fi
     done
 }
 
-check_and_print() {
-    local storage_account=$1
-    local container_or_share=$2
-    local total_size_gb=$3
-    local type=$4
-    local subscription_id=$5
-
-    # Get the subscription name by ID
-    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
-
-    if (( $(echo "$total_size_gb > 100 || $total_size_gb == 0" | bc -l) )); then
-        # Check if the subscription header has been printed
-        if [[ "${processed_subscriptions["$subscription_name"]}" != "true" ]]; then
-            echo -e "[$subscription_name] - Storage Account Consumption:" >> "$out_file"
-            processed_subscriptions["$subscription_name"]="true"
-        fi
-        # Check if the storage account has been processed for this subscription
-        if [[ "${processed_accounts["$storage_account"]}" != "true" ]]; then
-            echo -e $storage_account >> $out_file
-            # Mark the storage account as processed for this subscription
-            processed_accounts["$storage_account"]="true"
-        fi
-
-        echo -e "\t- $type: $container_or_share  Used Capacity: ${total_size_gb} GB" >> "$out_file"
-    fi
-}
+#check_storage_accounts() {
+#    local subscription_id=$1
+#    az account set --subscription=$subscription_id
+#
+#    # Get a list of storage accounts in the subscription
+#    storage_accounts=$(az storage account list --query '[].name' --output tsv)
+#
+#    for storage_account in $storage_accounts; do
+#        account_key=$(timeout 30 az storage account keys list --account-name $storage_account --query '[0].value' --output tsv)
+#        check_storage_account $storage_account $account_key $subscription_id
+#    done
+#    echo "*****************************************************************" >> $out_file
+#}
+#
+#check_storage_account() {
+#    local storage_account=$1
+#    local account_key=$2
+#    local subscription_id=$3
+#
+#    # Get the subscription by ID
+#    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
+#
+#    # Get a list of containers in the storage account
+#    containers=$(timeout 30 az storage container list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+#
+#    for container in $containers; do
+#        total_size=$(timeout 30 az storage blob list --account-name $storage_account --container-name $container --account-key $account_key --query "[].properties.contentLength" --output tsv | paste -sd+ - | bc)
+#        total_size_gb=$(echo "scale=2; $total_size / (1024*1024*1024)" | bc)
+#        check_and_print $storage_account $container $total_size_gb "Blob" $subscription_id
+#    done
+#
+#    # Get the list of file shares in the storage account
+#    fileShares=$(timeout 30 az storage share list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+#
+#    for share in $fileShares; do
+#        usedCapacity=$(timeout 30 az storage share stats --account-name $storage_account --account-key $account_key --name $share --query 'usageStats[0].usageInBytes' --output tsv)
+#        used_capacity_gb=$(echo "scale=2; $usedCapacity / (1024*1024*1024)" | bc)
+#        check_and_print $storage_account $share $used_capacity_gb "FileShare" $subscription_id
+#    done
+#}
+#
+#check_and_print() {
+#    local storage_account=$1
+#    local container_or_share=$2
+#    local total_size_gb=$3
+#    local type=$4
+#    local subscription_id=$5
+#
+#    # Get the subscription name by ID
+#    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
+#
+#    if (( $(echo "$total_size_gb > 100 || $total_size_gb == 0" | bc -l) )); then
+#        # Check if the subscription header has been printed
+#        if [[ "${processed_subscriptions["$subscription_name"]}" != "true" ]]; then
+#            echo -e "[$subscription_name] - Storage Account Consumption:" >> "$out_file"
+#            processed_subscriptions["$subscription_name"]="true"
+#        fi
+#        # Check if the storage account has been processed for this subscription
+#        if [[ "${processed_accounts["$storage_account"]}" != "true" ]]; then
+#            echo -e $storage_account >> $out_file
+#            # Mark the storage account as processed for this subscription
+#            processed_accounts["$storage_account"]="true"
+#        fi
+#
+#        echo -e "\t- $type: $container_or_share  Used Capacity: ${total_size_gb} GB" >> "$out_file"
+#    fi
+#}
 
 # Function to send an email with the report attached
 send_email() {
@@ -278,7 +337,8 @@ if [ -z "$subscription_id" ]; then
         find_orphaned_snapshot "snapshot" "[?timeCreated<='$(date -u -d '7 days ago' +'%Y-%m-%dT%H:%MZ')'].id" $subscription_id
         find_orphaned_resource_groups $subscription_id
         check_vm_utilization $subscription_id
-        check_storage_accounts $subscription_id
+        check_storage_account_size $subscription_id
+        #check_storage_accounts $subscription_id
     done
 else
         # Call individual functions for each resource type
@@ -297,7 +357,8 @@ else
         find_orphaned_snapshot "snapshot" "[?timeCreated<='$(date -u -d '7 days ago' +'%Y-%m-%dT%H:%MZ')'].id" $subscription_id
         find_orphaned_resource_groups $subscription_id
         check_vm_utilization $subscription_id
-        check_storage_accounts $subscription_id
+        check_storage_account_size $subscription_id
+        #check_storage_accounts $subscription_id
 fi
 
 if grep -q "Orphaned" "$out_file"; then

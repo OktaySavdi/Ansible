@@ -1,0 +1,4 @@
+resource_name1
+resource_name2
+resource_name3
+resource_name4

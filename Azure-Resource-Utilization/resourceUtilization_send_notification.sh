@@ -32,7 +32,7 @@ Your cooperation is greatly appreciated in this optimization process.
 If you have any questions or need assistance, please feel free to reach out.
 
 Thank you,
-Hybrid Cloud Engineering Team
+My Team
 EOF
 )
 

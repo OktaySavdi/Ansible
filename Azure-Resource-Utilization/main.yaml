@@ -6,7 +6,7 @@
   tasks:
     - name: Clone Private Git Repo
       git:
-        repo: "https://oauth2:{{ svc_token }}@ato-hce-git1.gtoffice.lan/hce/Script.git"
+        repo: "https://oauth2:{{ svc_token }}@mygitaddress.com/repo/Script.git"
         dest: "/opt/repos"
         update: yes
         force: yes

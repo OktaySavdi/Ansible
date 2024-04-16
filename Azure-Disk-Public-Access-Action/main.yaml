@@ -1,27 +1,30 @@
 - name: Disk Public Access Action
   hosts: jumpserver  # Run the task on the Ansible control node
   gather_facts: no  # We don't need facts for this task
-  vars:
-    myhash: "b06a8bxxxxxxxxxxxxxxxxxxxxx0b2294d23"
   vars_files:
     - vault.yaml
   tasks:
-    - name: Get the MD5 hash of the file
-      ansible.builtin.shell: "md5sum /opt/mydir/disk_access_changes.sh | awk '{print $1}'"
-      register: file_hash_output
+    - name: Clone Private Git Repo
+      git:
+        repo: "https://oauth2:{{ svc_token }}@mygitaddres.com/repos/Script.git"
+        dest: "/opt/repos"
+        update: yes
+        force: yes
+        clone: yes
+      no_log: true
+    
+    - name: Set Executable Mode for script
+      become: true
+      file:
+        path: "/opt/repos/Disable_Azure_Disk_Public_Access/disk_access_changes.sh"
+        mode: "a+x"
 
-    - name: change disk public access
-      shell: /opt/mydir/disk_access_changes.sh
-      when: file_hash_output.stdout == myhash
-
-    - name: Fail the playbook if hashes do not match
-      ansible.builtin.fail:
-        msg: "Hashes do not match. File integrity compromised."
-      when: file_hash_output.stdout != myhash
+    - name: Run AKS Deprecated Automation
+      shell: "/opt/repos/Disable_Azure_Disk_Public_Access/disk_access_changes.sh"
     
     - name: Read the contents of disk_access_changes.log
       slurp:
-        src: /opt/mydir/disk_access_changes.log
+        src: "/opt/repos/Disable_Azure_Disk_Public_Access/disk_access_changes.log"
       register: file_content
 
     - name: Check file contains 
@@ -36,10 +39,10 @@
         sender: ansible@mydomain.com
         to: myteam@mydomain.com
         subject: "[ INFO ] Public Disk Access is closed"
-        attach: /opt/mydir/disk_access_changes.log
+        attach: /opt/repos/Disable_Azure_Disk_Public_Access/disk_access_changes.log
         body: |
             Public Access Enabled Disks Action Report [ Daily ]
       when: contains_enabled
 
     - name: delete result file
-      shell: rm -rf /opt/mydir/disk_access_changes.log
+      shell: rm -rf "/opt/repos/Disable_Azure_Disk_Public_Access/disk_access_changes.log"

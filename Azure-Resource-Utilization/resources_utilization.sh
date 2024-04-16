@@ -20,7 +20,22 @@ declare -A processed_subscriptions
 # Set the output file
 email_subject="Orphaned Resources Report in Azure"
 owner_email="mymail@mydomain.com"
+BODY=$(cat <<EOF
+Hello Team,
 
+Please find the attached report for Azure Automation resource utilization. This report provides insights into the current usage and performance of our Azure Automation resources.
+
+The report includes details such as:
+- Orphan Resources
+- Snapshots older than 7 days
+- VMs Performance (Last 3 Months)
+- Storage Account Consumptions
+
+Please review the report and let people know if they have the resources above. 
+
+Thank you,
+EOF
+)
 
 az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
 
@@ -33,6 +48,18 @@ echo "********************* General Resources Report ******************" >> $out
 echo "*********************  $(date +'%d-%m-%Y')   *****************************" >> $out_file
 echo "*****************************************************************" >> $out_file
 
+# Function to check if a resource is exempted
+is_resource_exempted() {
+    local orphaned_resource=$1
+    local exempted_file="/opt/Azure_Resources_utilization/exempted_resources.txt"
+
+    # Check if the resource_id is in the exempted resources list
+    if grep -qFx "$orphaned_resource" "$exempted_file"; then
+        return 0  # Resource is exempted
+    else
+        return 1  # Resource is not exempted
+    fi
+}
 
 # Function to find orphaned resources for a given resource type
 find_orphaned_resources() {
@@ -48,7 +75,9 @@ find_orphaned_resources() {
     if [ ${#orphaned_resources[@]} -gt 0 ]; then
         echo "[$subscription_name] - Orphaned $resource_type" >> $out_file
         for orphaned_resource in "${orphaned_resources[@]}"; do
-            echo "$orphaned_resource" >> $out_file
+            if ! is_resource_exempted "$(echo $orphaned_resource | awk -F'/' '{print $(NF)}')"; then
+                echo "[warning] $orphaned_resource" >> $out_file
+            fi            
         done
         echo "*****************************************************************" >> $out_file
     fi
@@ -74,7 +103,9 @@ find_orphaned_snapshot() {
         echo "[$subscription_name] - Orphaned $resource_type" >> $out_file
 
         for orphaned_resource in "${orphaned_resources[@]}"; do
-            echo "$orphaned_resource" >> $out_file
+            if ! is_resource_exempted "$(echo $orphaned_resource | awk -F'/' '{print $(NF)}')"; then
+                  echo "[warning] $orphaned_resource" >> $out_file
+            fi            
         done
         echo "*****************************************************************" >> $out_file
     fi
@@ -105,7 +136,9 @@ find_orphaned_subnets() {
             fi            
             for subnet in "${orphaned_subnets[@]}"; do
                 if [ -n "$subnet" ]; then
-                    echo "$subnet" >> $out_file
+                    if ! is_resource_exempted "$(echo $subnet | awk -F'/' '{print $(NF)}')"; then
+                       echo "[warning] $subnet" >> $out_file
+                    fi                     
                 fi
             done
         fi
@@ -133,7 +166,9 @@ find_orphaned_resource_groups() {
         # Print orphaned resource groups
         echo "[$subscription_name] - Orphaned Resource Groups:" >> $out_file
         for orphan_rg in "${orphans_rg[@]}"; do
-            echo "$orphan_rg" >> $out_file
+            if ! is_resource_exempted "$orphan_rg"; then
+               echo "[warning] $orphan_rg" >> $out_file
+            fi              
         done
         echo "*****************************************************************" >> $out_file
     fi
@@ -156,26 +191,29 @@ check_vm_utilization() {
         vmId=$(echo "$vm" | jq -r '.Id')
         resourceGroupName=$(echo "$vm" | jq -r '.ResourceGroup')
 
-        # Get current date in UTC
-        endDate=$(date -u +"%Y-%m-%dT%H:%MZ")
+        if ! is_resource_exempted "$(echo $vmId | awk -F'/' '{print $(NF)}')"; then
 
-        # Calculate the start date as three months ago from the current date
-        startDate=$(date -u -d '3 months ago' +"%Y-%m-%dT%H:%MZ")
-
-        # Get CPU utilization for the last three months
-        cpuUtilization=$(az monitor metrics list --resource "$vmId" --resource-group "$resourceGroupName" --start-time "$startDate" --end-time "$endDate" --interval 1d --metric "Percentage CPU" --query "value[].timeseries[].data[].average" --output tsv | awk '{s+=$1} END {print s/NR}')
-
-        # Get memory utilization for the last three months
-        memoryUtilization=$(az monitor metrics list --resource "$vmId" --resource-group "$resourceGroupName" --start-time "$startDate" --end-time "$endDate" --interval 1d --metric "Available Memory Bytes" --query "value[].timeseries[].data[].average" --output tsv | awk '{s+=$1} END {print s/NR}')
-
-        # Check if the difference is over 40%
-        if (( $(echo "$cpuUtilization < 30" | bc -l) )) || (( $(echo "$memoryUtilization < 40" | bc -l) )); then
-           if [ "$output_added" = false ]; then
-                echo "************************** VMs Performance (Last 3 Months) ************************" >> $out_file
-                output_added=true
+            # Get current date in UTC
+            endDate=$(date -u +"%Y-%m-%dT%H:%MZ")
+    
+            # Calculate the start date as three months ago from the current date
+            startDate=$(date -u -d '3 months ago' +"%Y-%m-%dT%H:%MZ")
+    
+            # Get CPU utilization for the last three months
+            cpuUtilization=$(az monitor metrics list --resource "$vmId" --resource-group "$resourceGroupName" --start-time "$startDate" --end-time "$endDate" --interval 1d --metric "Percentage CPU" --query "value[].timeseries[].data[].average" --output tsv | awk '{s+=$1} END {print s/NR}')
+    
+            # Get memory utilization for the last three months
+            memoryUtilization=$(az monitor metrics list --resource "$vmId" --resource-group "$resourceGroupName" --start-time "$startDate" --end-time "$endDate" --interval 1d --metric "Available Memory Bytes" --query "value[].timeseries[].data[].average" --output tsv | awk '{s+=$1} END {print s/NR}')
+    
+            # Check if the difference is over 40%
+            if (( $(echo "$cpuUtilization < 30" | bc -l) )) || (( $(echo "$memoryUtilization < 40" | bc -l) )); then
+               if [ "$output_added" = false ]; then
+                    echo "************************** VMs Performance (Last 3 Months) ************************" >> $out_file
+                    output_added=true
+                fi
+                echo -e "[$subscription_name] - [Percentage CPU] $cpuUtilization% and [Percentage Memory] $memoryUtilization%" >> $out_file
+                echo -e "[warning] $vmId" >> $out_file
             fi
-            echo -e "[$subscription_name] - [Percentage CPU] $cpuUtilization% and [Percentage Memory] $memoryUtilization%" >> $out_file
-            echo -e "$vmId" >> $out_file
         fi
     done
     echo "*****************************************************************" >> $out_file
@@ -203,110 +241,113 @@ check_storage_account_size(){
     # Loop through each storage account
     for account in $storage_accounts; do
 
-        # Get the UsedCapacity metric data for the storage account
-        metric_data=$(az monitor metrics list --resource $account --metric "UsedCapacity" --interval PT1H --start-time $prev_working_day"T00:00:00Z" --end-time $current_date"T00:00:00Z" --output json)
+       if ! is_resource_exempted "$(echo $account | awk -F'/' '{print $(NF)}')"; then
 
-        # Extract the first non-empty "Average" value
-        first_value=$(echo $metric_data | jq -r '.value[0].timeseries[0].data[0].average')
-        
-        # Check if the value is empty, and if so, find the next non-empty value
-        while [ -z "$first_value" ]; do
-            metric_data=$(echo $metric_data | jq '.value[0].timeseries[0].data[1:]')
-            first_value=$(echo $metric_data | jq -r '.[0].average')
-        done
-
-        sa_name=$(echo $account | awk -F'/' '{print $(NF)}')
-
-        # Convert the value from bytes to gigabytes and terabytes
-        gigabytes=$(echo "scale=2; $first_value / 1073741824" | bc)
-        terabytes=$(echo "scale=2; $first_value / 1099511627776" | bc)
-  
-        # Check if the value is over 100 GB or 0 GB
-        if (( $(echo "$gigabytes > 100 || $gigabytes == 0" | bc -l) )); then
-           # Check if the subscription header has been printed
-           if [ "$output_added" = false ]; then
-               echo -e "[$subscription_name] - Storage Account Consumption:" >> "$out_file"
-               output_added=true
-            fi
-
-            echo -e "$sa_name" >> "$out_file"
-            echo -e "\t- Total GB: $gigabytes" >> "$out_file"
-
-            # Check if the value is over 1 TB
-            if (( $(echo "$terabytes > 1" | bc -l) )); then
-                echo -e "\t- Total TB: $terabytes" >> "$out_file"
+            # Get the UsedCapacity metric data for the storage account
+            metric_data=$(az monitor metrics list --resource $account --metric "UsedCapacity" --interval PT1H --start-time $prev_working_day"T00:00:00Z" --end-time $current_date"T00:00:00Z" --output json)
+    
+            # Extract the first non-empty "Average" value
+            first_value=$(echo $metric_data | jq -r '.value[0].timeseries[0].data[0].average')
+            
+            # Check if the value is empty, and if so, find the next non-empty value
+            while [ -z "$first_value" ]; do
+                metric_data=$(echo $metric_data | jq '.value[0].timeseries[0].data[1:]')
+                first_value=$(echo $metric_data | jq -r '.[0].average')
+            done
+    
+            sa_name=$(echo $account | awk -F'/' '{print $(NF)}')
+    
+            # Convert the value from bytes to gigabytes and terabytes
+            gigabytes=$(echo "scale=2; $first_value / 1073741824" | bc)
+            terabytes=$(echo "scale=2; $first_value / 1099511627776" | bc)
+      
+            # Check if the value is over 100 GB or 0 GB
+            if (( $(echo "$gigabytes > 100 || $gigabytes == 0" | bc -l) )); then
+               # Check if the subscription header has been printed
+               if [ "$output_added" = false ]; then
+                   echo -e "[$subscription_name] - Storage Account Consumption:" >> "$out_file"
+                   output_added=true
+                fi
+    
+                echo -e "[warning] $sa_name" >> "$out_file"
+                echo -e "\t\t- Total GB: $gigabytes" >> "$out_file"
+    
+                # Check if the value is over 1 TB
+                if (( $(echo "$terabytes > 1" | bc -l) )); then
+                    echo -e "\t\t- Total TB: $terabytes" >> "$out_file"
+                fi
             fi
         fi
     done
 }
 
-#check_storage_accounts() {
-#    local subscription_id=$1
-#    az account set --subscription=$subscription_id
-#
-#    # Get a list of storage accounts in the subscription
-#    storage_accounts=$(az storage account list --query '[].name' --output tsv)
-#
-#    for storage_account in $storage_accounts; do
-#        account_key=$(timeout 30 az storage account keys list --account-name $storage_account --query '[0].value' --output tsv)
-#        check_storage_account $storage_account $account_key $subscription_id
-#    done
-#    echo "*****************************************************************" >> $out_file
-#}
-#
-#check_storage_account() {
-#    local storage_account=$1
-#    local account_key=$2
-#    local subscription_id=$3
-#
-#    # Get the subscription by ID
-#    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
-#
-#    # Get a list of containers in the storage account
-#    containers=$(timeout 30 az storage container list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
-#
-#    for container in $containers; do
-#        total_size=$(timeout 30 az storage blob list --account-name $storage_account --container-name $container --account-key $account_key --query "[].properties.contentLength" --output tsv | paste -sd+ - | bc)
-#        total_size_gb=$(echo "scale=2; $total_size / (1024*1024*1024)" | bc)
-#        check_and_print $storage_account $container $total_size_gb "Blob" $subscription_id
-#    done
-#
-#    # Get the list of file shares in the storage account
-#    fileShares=$(timeout 30 az storage share list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
-#
-#    for share in $fileShares; do
-#        usedCapacity=$(timeout 30 az storage share stats --account-name $storage_account --account-key $account_key --name $share --query 'usageStats[0].usageInBytes' --output tsv)
-#        used_capacity_gb=$(echo "scale=2; $usedCapacity / (1024*1024*1024)" | bc)
-#        check_and_print $storage_account $share $used_capacity_gb "FileShare" $subscription_id
-#    done
-#}
-#
-#check_and_print() {
-#    local storage_account=$1
-#    local container_or_share=$2
-#    local total_size_gb=$3
-#    local type=$4
-#    local subscription_id=$5
-#
-#    # Get the subscription name by ID
-#    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
-#
-#    if (( $(echo "$total_size_gb > 100 || $total_size_gb == 0" | bc -l) )); then
-#        # Check if the subscription header has been printed
-#        if [[ "${processed_subscriptions["$subscription_name"]}" != "true" ]]; then
-#            echo -e "[$subscription_name] - Storage Account Consumption:" >> "$out_file"
-#            processed_subscriptions["$subscription_name"]="true"
-#        fi
-#        # Check if the storage account has been processed for this subscription
-#        if [[ "${processed_accounts["$storage_account"]}" != "true" ]]; then
-#            echo -e $storage_account >> $out_file
-#            # Mark the storage account as processed for this subscription
-#            processed_accounts["$storage_account"]="true"
-#        fi
-#
-#        echo -e "\t- $type: $container_or_share  Used Capacity: ${total_size_gb} GB" >> "$out_file"
-#    fi
-#}
+check_storage_accounts() {
+    local subscription_id=$1
+    az account set --subscription=$subscription_id
+
+    # Get a list of storage accounts in the subscription
+    storage_accounts=$(az storage account list --query '[].name' --output tsv)
+
+    for storage_account in $storage_accounts; do
+        account_key=$(timeout 30 az storage account keys list --account-name $storage_account --query '[0].value' --output tsv)
+        check_storage_account $storage_account $account_key $subscription_id
+    done
+    echo "*****************************************************************" >> $out_file
+}
+
+check_storage_account() {
+    local storage_account=$1
+    local account_key=$2
+    local subscription_id=$3
+
+    # Get the subscription by ID
+    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
+
+    # Get a list of containers in the storage account
+    containers=$(timeout 30 az storage container list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+
+    for container in $containers; do
+        total_size=$(timeout 30 az storage blob list --account-name $storage_account --container-name $container --account-key $account_key --query "[].properties.contentLength" --output tsv | paste -sd+ - | bc)
+        total_size_gb=$(echo "scale=2; $total_size / (1024*1024*1024)" | bc)
+        check_and_print $storage_account $container $total_size_gb "Blob" $subscription_id
+    done
+
+    # Get the list of file shares in the storage account
+    fileShares=$(timeout 30 az storage share list --account-name $storage_account --account-key $account_key --query '[].name' --output tsv)
+
+    for share in $fileShares; do
+        usedCapacity=$(timeout 30 az storage share stats --account-name $storage_account --account-key $account_key --name $share --query 'usageStats[0].usageInBytes' --output tsv)
+        used_capacity_gb=$(echo "scale=2; $usedCapacity / (1024*1024*1024)" | bc)
+        check_and_print $storage_account $share $used_capacity_gb "FileShare" $subscription_id
+    done
+}
+
+check_and_print() {
+    local storage_account=$1
+    local container_or_share=$2
+    local total_size_gb=$3
+    local type=$4
+    local subscription_id=$5
+
+    # Get the subscription name by ID
+    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
+
+    if (( $(echo "$total_size_gb > 100 || $total_size_gb == 0" | bc -l) )); then
+        # Check if the subscription header has been printed
+        if [[ "${processed_subscriptions["$subscription_name"]}" != "true" ]]; then
+            echo -e "[$subscription_name] - Storage Account Consumption:" >> "$out_file"
+            processed_subscriptions["$subscription_name"]="true"
+        fi
+        # Check if the storage account has been processed for this subscription
+        if [[ "${processed_accounts["$storage_account"]}" != "true" ]]; then
+            echo -e $storage_account >> $out_file
+            # Mark the storage account as processed for this subscription
+            processed_accounts["$storage_account"]="true"
+        fi
+
+        echo -e "\t- $type: $container_or_share  Used Capacity: ${total_size_gb} GB" >> "$out_file"
+    fi
+}
 
 # Function to send an email with the report attached
 send_email() {
@@ -314,9 +355,8 @@ send_email() {
     local attachment=$2
 
     # Use mail command to send the email with the attachment
-    mail -s "$email_subject" "$recipient" < "$attachment"
+    echo -e "$BODY" | mail -s "$email_subject" -a "$attachment" "$recipient" 
 }
-
 
 if [ -z "$subscription_id" ]; then
     # If subscription ID is not provided, get all subscription IDs
@@ -361,7 +401,8 @@ else
         #check_storage_accounts $subscription_id
 fi
 
-if grep -q "Orphaned" "$out_file"; then
+# Check if the report file is empty
+if grep -q "\[warning\]" "$out_file"; then
         # Send email to the specific owner_email
         send_email "$owner_email" "$out_file"
         echo "Orphaned resources check completed"

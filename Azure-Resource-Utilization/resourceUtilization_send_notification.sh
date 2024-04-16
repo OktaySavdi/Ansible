@@ -2,13 +2,39 @@
 
 ###############################################################
 ##  Name:  Oktay SAVDI
-##  Date:  01.02.2024
+##  Date:  15.04.2024
 ##  Call:  ./resourceUtilization_send_notification.sh
 ###############################################################
 
 # Set the output file
-output_dir="orphaned_resources_reports"
-email_subject="Orphaned Resources Report in Azure"
+output_dir="/opt/repos/Azure_orphan_resource"
+email_subject="[WARNING] Orphaned Resources Report in Azure"
+BODY=$(cat <<EOF
+Hello Team,
+
+Please find the attached Azure Cost Optimization report. This report includes details on the following:
+
+- Orphan Resources
+- Snapshots older than 7 days
+- VMs Performance (Last 3 Months)
+- Storage Account Consumptions
+
+Each team is requested to review the report and identify any resources that can be safely deleted or optimized. 
+
+If you identify resources that need action:
+1. You can delete them directly if they are no longer needed.
+2. If you prefer, you can open a ticket to us for deletion.
+3. If you wish to keep certain resources but do not want them included in future reports, please open a ticket to us for exemption.
+
+We encourage proactive review and management of resources to optimize costs and improve efficiency. 
+Your cooperation is greatly appreciated in this optimization process.
+
+If you have any questions or need assistance, please feel free to reach out.
+
+Thank you,
+Hybrid Cloud Engineering Team
+EOF
+)
 
 # Array to track processed storage accounts for each subscription
 declare -A processed_accounts
@@ -23,6 +49,19 @@ subscriptions=(
             "SUBSCRIPTION_NAME_3:team1@mydomain.com,team2@mydomain.comm"
             #"SUBSCRIPTION_NAME_3:owner3@example.com"
         )
+
+# Function to check if a resource is exempted
+is_resource_exempted() {
+    local orphaned_resource=$1
+    local exempted_file="/opt/repos/Azure_orphan_resource/exempted_resources.txt"
+
+    # Check if the resource_id is in the exempted resources list
+    if grep -qFx "$orphaned_resource" "$exempted_file"; then
+        return 0  # Resource is exempted
+    else
+        return 1  # Resource is not exempted
+    fi
+}
 
 # Function to create a report file for a subscription
 create_report_file() {
@@ -56,9 +95,11 @@ create_report_file() {
     find_orphaned_snapshot "snapshot" "[?timeCreated<='$(date -u -d '7 days ago' +'%Y-%m-%dT%H:%MZ')'].id" $subscription_id
     find_orphaned_resource_groups $subscription_id
     check_vm_utilization $subscription_id
-    check_storage_accounts $subscription_id
+    check_storage_account_size $subscription_id
+    #check_storage_accounts $subscription_id
 
-    if grep -q "Orphaned" "$report_file"; then
+    # Check if the report file is empty
+    if grep -q "\[warning\]" "$report_file"; then
         # Send email to the specific owner_email
         send_email "$owner_email" "$report_file"
         echo "Orphaned resources check completed for $subscription_name. Check $report_file for details."
@@ -71,7 +112,7 @@ send_email() {
     local attachment=$2
 
     # Use mail command to send the email with the attachment
-    mail -s "$email_subject" "$recipient" < "$attachment"
+    echo -e "$BODY" | mail -s "$email_subject" -a "$attachment" "$recipient"
 }
 
 # Function to find orphaned resources for a given resource type
@@ -88,7 +129,9 @@ find_orphaned_resources() {
     if [ ${#orphaned_resources[@]} -gt 0 ]; then
         echo "[$subscription_name] - Orphaned $resource_type" >> $report_file
         for orphaned_resource in "${orphaned_resources[@]}"; do
-            echo "$orphaned_resource" >> $report_file
+            if ! is_resource_exempted "$(echo $orphaned_resource | awk -F'/' '{print $(NF)}')"; then
+                echo "[warning] $orphaned_resource" >> $report_file
+            fi            
         done
         echo "*****************************************************************" >> $report_file
     fi
@@ -112,9 +155,11 @@ find_orphaned_snapshot() {
                 output_added=true
         fi
         echo "[$subscription_name] - Orphaned $resource_type" >> $report_file
-        
+
         for orphaned_resource in "${orphaned_resources[@]}"; do
-            echo "$orphaned_resource" >> $report_file
+            if ! is_resource_exempted "$(echo $orphaned_resource | awk -F'/' '{print $(NF)}')"; then
+                  echo "[warning] $orphaned_resource" >> $report_file
+            fi            
         done
         echo "*****************************************************************" >> $report_file
     fi
@@ -145,7 +190,9 @@ find_orphaned_subnets() {
             fi            
             for subnet in "${orphaned_subnets[@]}"; do
                 if [ -n "$subnet" ]; then
-                    echo "$subnet" >> $report_file
+                    if ! is_resource_exempted "$(echo $subnet | awk -F'/' '{print $(NF)}')"; then
+                       echo "[warning] $subnet" >> $report_file
+                    fi                     
                 fi
             done
         fi
@@ -173,7 +220,9 @@ find_orphaned_resource_groups() {
         # Print orphaned resource groups
         echo "[$subscription_name] - Orphaned Resource Groups:" >> $report_file
         for orphan_rg in "${orphans_rg[@]}"; do
-            echo "$orphan_rg" >> $report_file
+            if ! is_resource_exempted "$orphan_rg"; then
+               echo "[warning] $orphan_rg" >> $report_file
+            fi              
         done
         echo "*****************************************************************" >> $report_file
     fi
@@ -196,29 +245,94 @@ check_vm_utilization() {
         vmId=$(echo "$vm" | jq -r '.Id')
         resourceGroupName=$(echo "$vm" | jq -r '.ResourceGroup')
 
-        # Get current date in UTC
-        endDate=$(date -u +"%Y-%m-%dT%H:%MZ")
+        if ! is_resource_exempted "$(echo $vmId | awk -F'/' '{print $(NF)}')"; then
 
-        # Calculate the start date as three months ago from the current date
-        startDate=$(date -u -d '3 months ago' +"%Y-%m-%dT%H:%MZ")
-
-        # Get CPU utilization for the last three months
-        cpuUtilization=$(az monitor metrics list --resource "$vmId" --resource-group "$resourceGroupName" --start-time "$startDate" --end-time "$endDate" --interval 1d --metric "Percentage CPU" --query "value[].timeseries[].data[].average" --output tsv | awk '{s+=$1} END {print s/NR}')
-
-        # Get memory utilization for the last three months
-        memoryUtilization=$(az monitor metrics list --resource "$vmId" --resource-group "$resourceGroupName" --start-time "$startDate" --end-time "$endDate" --interval 1d --metric "Available Memory Bytes" --query "value[].timeseries[].data[].average" --output tsv | awk '{s+=$1} END {print s/NR}')
-
-        # Check if the difference is over 40%
-        if (( $(echo "$cpuUtilization < 30" | bc -l) )) || (( $(echo "$memoryUtilization < 40" | bc -l) )); then
-            if [ "$output_added" = false ]; then
-                echo "************************** VMs Performance (Last 3 Months) ************************" >> $report_file
-                output_added=true
+            # Get current date in UTC
+            endDate=$(date -u +"%Y-%m-%dT%H:%MZ")
+    
+            # Calculate the start date as three months ago from the current date
+            startDate=$(date -u -d '3 months ago' +"%Y-%m-%dT%H:%MZ")
+    
+            # Get CPU utilization for the last three months
+            cpuUtilization=$(az monitor metrics list --resource "$vmId" --resource-group "$resourceGroupName" --start-time "$startDate" --end-time "$endDate" --interval 1d --metric "Percentage CPU" --query "value[].timeseries[].data[].average" --output tsv | awk '{s+=$1} END {print s/NR}')
+    
+            # Get memory utilization for the last three months
+            memoryUtilization=$(az monitor metrics list --resource "$vmId" --resource-group "$resourceGroupName" --start-time "$startDate" --end-time "$endDate" --interval 1d --metric "Available Memory Bytes" --query "value[].timeseries[].data[].average" --output tsv | awk '{s+=$1} END {print s/NR}')
+    
+            # Check if the difference is over 40%
+            if (( $(echo "$cpuUtilization < 30" | bc -l) )) || (( $(echo "$memoryUtilization < 40" | bc -l) )); then
+               if [ "$output_added" = false ]; then
+                    echo "************************** VMs Performance (Last 3 Months) ************************" >> $report_file
+                    output_added=true
+                fi
+                echo -e "[$subscription_name] - [Percentage CPU] $cpuUtilization% and [Percentage Memory] $memoryUtilization%" >> $report_file
+                echo -e "[warning] $vmId" >> $report_file
             fi
-            echo -e "[$subscription_name] - [Percentage CPU] $cpuUtilization% and [Percentage Memory] $memoryUtilization%" >> $report_file
-            echo -e "$vmId" >> $report_file
         fi
     done
     echo "*****************************************************************" >> $report_file
+}
+
+check_storage_account_size() {
+    local subscription_id=$1
+    local output_added=false
+
+    # Get the current date
+    current_date=$(date -u +"%Y-%m-%d")
+
+    # Calculate the previous working day (assuming Mon-Fri are working days)
+    prev_working_day=$(date -u -d "yesterday" +"%Y-%m-%d")
+
+    # Set the subscription for Azure CLI commands
+    az account set --subscription $subscription_id
+
+    # Get the subscription by ID
+    local subscription_name=$(az account show --subscription $subscription_id --query "{Name:name}" --output tsv)
+
+    # Get the list of storage accounts in the subscription
+    storage_accounts=$(az storage account list --query "[].id" -o tsv)
+
+    # Loop through each storage account
+    for account in $storage_accounts; do
+
+       if ! is_resource_exempted "$(echo $account | awk -F'/' '{print $(NF)}')"; then
+
+            # Get the UsedCapacity metric data for the storage account
+            metric_data=$(az monitor metrics list --resource $account --metric "UsedCapacity" --interval PT1H --start-time $prev_working_day"T00:00:00Z" --end-time $current_date"T00:00:00Z" --output json)
+    
+            # Extract the first non-empty "Average" value
+            first_value=$(echo $metric_data | jq -r '.value[0].timeseries[0].data[0].average')
+            
+            # Check if the value is empty, and if so, find the next non-empty value
+            while [ -z "$first_value" ]; do
+                metric_data=$(echo $metric_data | jq '.value[0].timeseries[0].data[1:]')
+                first_value=$(echo $metric_data | jq -r '.[0].average')
+            done
+    
+            sa_name=$(echo $account | awk -F'/' '{print $(NF)}')
+    
+            # Convert the value from bytes to gigabytes and terabytes
+            gigabytes=$(echo "scale=2; $first_value / 1073741824" | bc)
+            terabytes=$(echo "scale=2; $first_value / 1099511627776" | bc)
+      
+            # Check if the value is over 100 GB or 0 GB
+            if (( $(echo "$gigabytes > 100 || $gigabytes == 0" | bc -l) )); then
+               # Check if the subscription header has been printed
+               if [ "$output_added" = false ]; then
+                   echo -e "[$subscription_name] - Storage Account Consumption:" >> "$report_file"
+                   output_added=true
+                fi
+    
+                echo -e "[warning] $sa_name" >> "$report_file"
+                echo -e "\t\t- Total GB: $gigabytes" >> "$report_file"
+    
+                # Check if the value is over 1 TB
+                if (( $(echo "$terabytes > 1" | bc -l) )); then
+                    echo -e "\t\t- Total TB: $terabytes" >> "$report_file"
+                fi
+            fi
+        fi
+    done
 }
 
 check_storage_accounts() {

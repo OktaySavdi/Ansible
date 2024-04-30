@@ -7,28 +7,32 @@
 ###############################################################
 
 # Set the output file
-output_dir="Reports_Folder"
+output_dir="/opt/repos/Depracated_Resources_K8S"
 email_subject="Deprecated Kubernetes APIs Found in Tanzu Kubernetes Cluster"
+BODY=$(cat <<EOF
 BODY=$(cat <<EOF
 Hi,
 
-I hope this message finds you well. I am writing to bring to your attention an important issue regarding the Kubernetes cluster under your responsibility.
+We are writing to bring to your attention an important issue regarding the Kubernetes cluster under your responsibility.
 
-Our automated system has detected the presence of deprecated APIs within the cluster. It is crucial to address these deprecated APIs promptly as they can lead to maintenance and upgrade failures, potentially causing disruptions to your services.
+Our automated system has detected the presence of deprecated APIs within the cluster. 
+It is crucial to address these deprecated APIs promptly as they can lead to maintenance and upgrade failures, potentially causing disruptions to your services.
 
-Attached to this email, you will find a detailed report outlining the deprecated APIs found and their respective recommendations for remediation. We kindly request that you review this report at your earliest convenience and take the necessary steps to update the affected resources.
+Attached to this email, you will find a detailed report outlining the deprecated APIs found and their respective recommendations for remediation. 
+We kindly request that you review this report at your earliest convenience and take the necessary steps to update the affected resources.
 
-If you require any assistance or further clarification on the identified issues, please do not hesitate to reach out to us. Ensuring the stability and security of our Kubernetes clusters is a top priority, and your swift action in this matter would be greatly appreciated.
+If you require any assistance or further clarification on the identified issues, please do not hesitate to reach out to us. 
+Ensuring the stability and security of our Kubernetes clusters is a top priority, and your swift action in this matter would be greatly appreciated.
 
 Thank you for your attention to this important issue.
 
 Best regards,
-Hybrid Cloud Engineering Team
+<My Team>
 EOF
 )
 
 # Login Azure via SP
-az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
+az login --service-principal --username $username --password $password --tenant $tenant
 
 subscriptions=(
     "SUBSCRIPTION_NAME_1:team1@mydomain.com,team2@mydomain.comm"
@@ -38,7 +42,7 @@ subscriptions=(
     #"SUBSCRIPTION_ID_3:owner3@example.com"
 )
 
-# Function to create a report file for a subscription
+ Function to create a report file for a subscription
 create_report_file() {
     local subscription_name=$1
     local owner_email=$2

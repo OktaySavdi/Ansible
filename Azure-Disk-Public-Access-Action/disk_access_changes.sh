@@ -12,7 +12,7 @@ exclude_lists=("subscription_name1" "subscription_name2" "subscription_name2")
 # Create or overwrite the log file with a header
 echo "********************* Public Disk General Report - $(date +'%Y-%m-%d') ******************" > "disk_access_changes.log"
 
-az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
+az login --service-principal --username $username --password $password --tenant $tenant
 
 # Function to log message with timestamp
 log_message() {

@@ -37,7 +37,7 @@ Thank you,
 EOF
 )
 
-az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
+az login --service-principal --username $username --password $password --tenant $tenant
 
 # Set the output file
 out_file="/opt/Azure_Resources_utilization/Azure_Resources_Utilization.txt"

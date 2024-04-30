@@ -21,6 +21,11 @@
 
     - name: Run AKS Deprecated Automation
       shell: "/opt/repos/Disable_Azure_Disk_Public_Access/disk_access_changes.sh"
+      environment:
+        username : "{{ username }}"
+        password : "{{  password }}"
+        tenant : "{{ tenant }}"
+      no_log: true
     
     - name: Read the contents of disk_access_changes.log
       slurp:

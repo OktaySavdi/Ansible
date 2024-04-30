@@ -1,0 +1,17 @@
+jumpserver:
+  hosts:    
+    my-jump-cluster:
+      ansible_host: 10.10.10.10
+      cluster_master1: 172.10.10.10
+      
+supervisor-prod:
+  hosts:    
+    prod-cluster:
+      ansible_host: 10.10.10.10
+      cluster_master1: 172.16.0.10
+
+supervisor-test:
+  hosts:
+    test-cluster:
+      ansible_host: 10.10.10.10
+      cluster_master1: 172.16.0.16

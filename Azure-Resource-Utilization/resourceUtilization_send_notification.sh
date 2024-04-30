@@ -41,7 +41,7 @@ declare -A processed_accounts
 declare -A processed_subscriptions
 
 # Login Azure via SP
-az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
+az login --service-principal --username $username --password $password --tenant $tenant
 
 subscriptions=(
             "SUBSCRIPTION_NAME_1:team1@mydomain.com,team2@mydomain.comm"

@@ -3,7 +3,7 @@
 ###############################################################
 ##  Name:  Oktay SAVDI
 ##  Date:  15.04.2024
-##  Call:  ./azure_storageaccount_public_access_control.sh
+##  Call:  ./azure_storageaccount_public_access_sendmail.sh
 ###############################################################
 
 # Set the output file

@@ -7,23 +7,26 @@
 ###############################################################
 
 # Set the output file
-output_dir="Reports_Folder"
+output_dir="/opt/repos/Depracated_Resources_K8S/Reports_Folder"
 email_subject="Deprecated Kubernetes APIs Found in Tanzu Kubernetes Cluster"
 BODY=$(cat <<EOF
 Hi,
 
-I hope this message finds you well. I am writing to bring to your attention an important issue regarding the Kubernetes cluster under your responsibility.
+We are writing to bring to your attention an important issue regarding the Kubernetes cluster under your responsibility.
 
-Our automated system has detected the presence of deprecated APIs within the cluster. It is crucial to address these deprecated APIs promptly as they can lead to maintenance and upgrade failures, potentially causing disruptions to your services.
+Our automated system has detected the presence of deprecated APIs within the cluster. 
+It is crucial to address these deprecated APIs promptly as they can lead to maintenance and upgrade failures, potentially causing disruptions to your services.
 
-Attached to this email, you will find a detailed report outlining the deprecated APIs found and their respective recommendations for remediation. We kindly request that you review this report at your earliest convenience and take the necessary steps to update the affected resources.
+Attached to this email, you will find a detailed report outlining the deprecated APIs found and their respective recommendations for remediation. 
+We kindly request that you review this report at your earliest convenience and take the necessary steps to update the affected resources.
 
-If you require any assistance or further clarification on the identified issues, please do not hesitate to reach out to us. Ensuring the stability and security of our Kubernetes clusters is a top priority, and your swift action in this matter would be greatly appreciated.
+If you require any assistance or further clarification on the identified issues, please do not hesitate to reach out to us. 
+Ensuring the stability and security of our Kubernetes clusters is a top priority, and your swift action in this matter would be greatly appreciated.
 
 Thank you for your attention to this important issue.
 
 Best regards,
-Hybrid Cloud Engineering Team
+<My Team>
 EOF
 )
 
@@ -45,13 +48,12 @@ create_report_file() {
     local owner_email=$4
     local report_file="$output_dir/${cluster_name}_deprecated_resources.txt"
 
-
     case "${env}" in
         test)
-            export KUBECTL_VSPHERE_PASSWORD={{ tkc_stg_pass }}
-            kubectl-vsphere login --server={{ tkc_stg_server }} --vsphere-username={{ tkc_stg_username }} --tanzu-kubernetes-cluster-namespace=$supervisor_namespace --tanzu-kubernetes-cluster-name=$cluster_name --insecure-skip-tls-verify > /dev/null 2>&1
+            export KUBECTL_VSPHERE_PASSWORD=$tkc_stg_pass
+            kubectl-vsphere login --server=$tkc_stg_server --vsphere-username=$tkc_stg_username --tanzu-kubernetes-cluster-namespace=$supervisor_namespace --tanzu-kubernetes-cluster-name=$cluster_name --insecure-skip-tls-verify > /dev/null 2>&1
             kubectx $cluster_name
-
+            
             # Check if the output contains more than just the header
             if [ $(kubent | grep -vE "vmware*|PodSecurityPolicy" | wc -l) -gt 4 ]
             then
@@ -63,8 +65,8 @@ create_report_file() {
             fi
         ;;
         prod)
-            export KUBECTL_VSPHERE_PASSWORD={{ tkc_prod_pass }}
-            kubectl-vsphere login --server={{ tkc_prod_server }} --vsphere-username={{ tkc_prod_username }} --tanzu-kubernetes-cluster-namespace=$supervisor_namespace --tanzu-kubernetes-cluster-name=$cluster_name --insecure-skip-tls-verify > /dev/null 2>&1
+            export KUBECTL_VSPHERE_PASSWORD=$tkc_prod_pass
+            kubectl-vsphere login --server=$tkc_prod_server --vsphere-username=$tkc_prod_username --tanzu-kubernetes-cluster-namespace=$supervisor_namespace --tanzu-kubernetes-cluster-name=$cluster_name --insecure-skip-tls-verify > /dev/null 2>&1
             kubectx $cluster_name
 
              # Check if the output contains more than just the header

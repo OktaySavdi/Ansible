@@ -1,0 +1,15 @@
+- name: K8S | Project | Check Certificate jumpserver prod controller environment
+  hosts: supervisor-prod
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: prod.yaml
+
+- name: K8S | Project | Check Certificate jumpserver test controller environment
+  hosts: supervisor-test
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: test.yaml

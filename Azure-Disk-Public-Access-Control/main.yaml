@@ -7,28 +7,28 @@
     - name: Get disk public access status
       no_log: True #disable output log in ansible (for password)
       shell: |
-        cat << 'EOF' > /opt/HCE/public_access_enabled_disks_check.sh
+        cat << 'EOF' > /opt/public_access_enabled_disks_check.sh
         #!/bin/bash
-        echo "################# List of Public Access Enabled Sisk #################" > /opt/HCE/public_access_enabled_disks.txt
+        echo "################# List of Public Access Enabled Sisk #################" > /opt/public_access_enabled_disks.txt
         
         az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
 
         for sub in $(az account list --all --query '[].name' -o tsv); do
           for rg in $(az group list --subscription $sub --query '[].name' -o tsv); do
               for disk in $(az disk list --resource-group $rg --subscription $sub --query '[].name' -o tsv); do
-                  echo "Subscription: $sub | RG: $rg | Disk: $disk | Disk Public Access: $(az disk show --name $disk --resource-group $rg --subscription $sub --query 'publicNetworkAccess' -o tsv)" | grep "Disk Public Access: Enabled"  >> /opt/HCE/public_access_enabled_disks.txt
+                  echo "Subscription: $sub | RG: $rg | Disk: $disk | Disk Public Access: $(az disk show --name $disk --resource-group $rg --subscription $sub --query 'publicNetworkAccess' -o tsv)" | grep "Disk Public Access: Enabled"  >> /opt/public_access_enabled_disks.txt
               done
           done
         done 2> /dev/null
         EOF
-        chmod +x /opt/HCE/public_access_enabled_disks_check.sh
+        chmod +x /opt/public_access_enabled_disks_check.sh
 
     - name: Save disk public access status to a file
-      shell: /opt/HCE/public_access_enabled_disks_check.sh
+      shell: /opt/public_access_enabled_disks_check.sh
     
     - name: Read the contents of public_access_enabled_disks.txt
       slurp:
-        src: /opt/HCE/public_access_enabled_disks.txt  # Replace with the actual path to your public_access_enabled_disks.txt file
+        src: /opt/public_access_enabled_disks.txt  # Replace with the actual path to your public_access_enabled_disks.txt file
       register: file_content
 
     - name: Check file contains 
@@ -43,7 +43,7 @@
         sender: ansible@mydomain.com
         to: myteam@mydomain.com
         subject: "[ Imported ] Check which disk is publicly accessible"
-        attach: /opt/HCE/public_access_enabled_disks.txt
+        attach: /opt/public_access_enabled_disks.txt
         body: |
             Public Access Enabled Disks List Report [ Weekly ]
     
@@ -51,4 +51,4 @@
       when: contains_enabled
 
     - name: delete result file
-      shell: rm -rf /opt/HCE/public_access_enabled*
+      shell: rm -rf /opt/public_access_enabled*

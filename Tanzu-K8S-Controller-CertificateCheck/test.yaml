@@ -1,0 +1,61 @@
+---
+- name: K8S | Certificate Shell Script
+  shell: |
+    #!/bin/bash
+
+    # Function to check certificates on a remote server
+    check_remote_certificates() {
+        local cluster_master="$1"
+        ssh -T -o StrictHostKeyChecking=no "root@$cluster_master" << 'EOF'
+            function check_certificate() {
+                local name="$1"
+                local cert="$2"
+                local now_epoch
+                local expiry_date
+                local expiry_epoch
+                local expiry_days
+                now_epoch=$(date +%s)
+                expiry_date="$cert"
+                expiry_epoch=$(date -d "$expiry_date" +%s)
+                expiry_days=$(( (expiry_epoch - now_epoch) / (3600 * 24) ))
+                if [[ expiry_days -le 60 ]]; then
+                    echo "[ $name ] certificate will expire after $expiry_days days"
+                fi
+            }
+    
+            # Certificate paths
+            apiserver_cert="/etc/kubernetes/pki/apiserver.crt"
+            etcd_cert="/etc/kubernetes/pki/etcd/server.crt"
+            kubelet_cert="/var/lib/kubelet/pki/kubelet.crt"
+            vip_cert="/etc/vmware/wcp/tls/vip.crt"
+            mgmt_cert="/etc/vmware/wcp/tls/mgmt.crt"
+    
+            # Check certificates
+            check_certificate "ApiServer" "$(openssl x509 -in "$apiserver_cert" -noout -enddate | cut -d "=" -f 2)"
+            check_certificate "Etcd" "$(openssl x509 -in "$etcd_cert" -noout -enddate | cut -d "=" -f 2)"
+            check_certificate "Kubelet" "$(openssl x509 -in "$kubelet_cert" -noout -enddate | cut -d "=" -f 2)"
+            check_certificate "VIP" "$(openssl x509 -in "$vip_cert" -noout -enddate | cut -d "=" -f 2)"
+            check_certificate "MGMT" "$(openssl x509 -in "$mgmt_cert" -noout -enddate | cut -d "=" -f 2)"
+    EOF
+    }
+    
+    # Call the function to check certificates on the remote server
+    check_remote_certificates '10.10.10.10(Supervisor_IP)'
+  register: cert_status
+    
+- name: Send result as mail
+  become: false
+  mail:
+    host: myhost.mydomain.com
+    port: 25
+    sender: ansible@mydomain.com
+    to: myteam@mydomain.com
+    subject: K8S Clusters Certificate Check [ IMPORTANT ]
+    body: |
+       Report Kubernetes Certificate Will Be Expire
+       Cluster : [ {{ inventory_hostname }} ]
+
+       {{ cert_status.stdout }} 
+  delegate_to: localhost
+  when: ("ApiServer" in cert_status.stdout) or ("Etcd" in cert_status.stdout) or ("Kubelet" in cert_status.stdout) or ("VIP" in cert_status.stdout) or ("MGMT" in cert_status.stdout)
+

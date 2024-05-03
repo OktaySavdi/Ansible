@@ -95,8 +95,8 @@ create_report_file() {
     find_orphaned_snapshot "snapshot" "[?timeCreated<='$(date -u -d '7 days ago' +'%Y-%m-%dT%H:%MZ')'].id" $subscription_id
     find_orphaned_resource_groups $subscription_id
     check_vm_utilization $subscription_id
-    check_storage_account_size $subscription_id
-    #check_storage_accounts $subscription_id
+    check_resource_size $subscription_id "storage_account"
+    check_resource_size $subscription_id "container_registry"
 
     # Check if the report file is empty
     if grep -q "\[warning\]" "$report_file"; then

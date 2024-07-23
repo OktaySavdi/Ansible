@@ -21,3 +21,8 @@
 
     - name: Run Automation Code
       shell: "/opt/repos/Azure-StorageAccount-Public-Access-Control/azure_storageaccount_public_access_control.sh"
+      environment:
+         username : "{{ username }}"
+         password : "{{  password }}"
+         tenant : "{{ tenant }}"
+      no_log: true

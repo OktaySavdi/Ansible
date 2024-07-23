@@ -4,51 +4,25 @@
   vars_files:
     - vault.yaml
   tasks:
-    - name: Get disk public access status
-      no_log: True #disable output log in ansible (for password)
-      shell: |
-        cat << 'EOF' > /opt/public_access_enabled_disks_check.sh
-        #!/bin/bash
-        echo "################# List of Public Access Enabled Sisk #################" > /opt/public_access_enabled_disks.txt
-        
-        az login --service-principal --username {{ username }} --password {{ password }} --tenant {{ tenant }}
-
-        for sub in $(az account list --all --query '[].name' -o tsv); do
-          for rg in $(az group list --subscription $sub --query '[].name' -o tsv); do
-              for disk in $(az disk list --resource-group $rg --subscription $sub --query '[].name' -o tsv); do
-                  echo "Subscription: $sub | RG: $rg | Disk: $disk | Disk Public Access: $(az disk show --name $disk --resource-group $rg --subscription $sub --query 'publicNetworkAccess' -o tsv)" | grep "Disk Public Access: Enabled"  >> /opt/public_access_enabled_disks.txt
-              done
-          done
-        done 2> /dev/null
-        EOF
-        chmod +x /opt/public_access_enabled_disks_check.sh
-
-    - name: Save disk public access status to a file
-      shell: /opt/public_access_enabled_disks_check.sh
+    - name: Clone Private Git Repo
+      git:
+        repo: "https://oauth2:{{ svc_token }}@amygitaddrese.com/repos/Script.git"
+        dest: "/opt/repos"
+        update: yes
+        force: yes
+        clone: yes
+      no_log: true
     
-    - name: Read the contents of public_access_enabled_disks.txt
-      slurp:
-        src: /opt/public_access_enabled_disks.txt  # Replace with the actual path to your public_access_enabled_disks.txt file
-      register: file_content
+    - name: Set Executable Mode for resources.sh
+      become: true
+      file:
+        path: "/opt/repos/Azure_Disks/azure_disks_public_access_sendmail.sh"
+        mode: "a+x"
 
-    - name: Check file contains 
-      set_fact:
-        contains_enabled: "{{ 'Disk Public Access: Enabled' in file_content.content | b64decode | string }}"
-    
-    - name: Sending an e-mail SMTP servers
-      become: false
-      mail:
-        host: myhost.mydomain.com
-        port: 25
-        sender: ansible@mydomain.com
-        to: myteam@mydomain.com
-        subject: "[ Imported ] Check which disk is publicly accessible"
-        attach: /opt/public_access_enabled_disks.txt
-        body: |
-            Public Access Enabled Disks List Report [ Weekly ]
-    
-            Please check the list and change the Disk Network!!
-      when: contains_enabled
-
-    - name: delete result file
-      shell: rm -rf /opt/public_access_enabled*
+    - name: Run Automation Code
+      shell: "/opt/repos/Azure_Disks/azure_disks_public_access_sendmail.sh"
+      environment:
+        username : "{{ username }}"
+        password : "{{  password }}"
+        tenant : "{{ tenant }}"
+      no_log: true

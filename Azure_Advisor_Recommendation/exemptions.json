@@ -1,0 +1,86 @@
+[
+    {
+        "problem": "Upgrade Azure CLI to the latest version"
+    },
+    {
+        "problem": "Upgrade Azure PowerShell to the latest version"
+    },
+    {
+        "problem": "VNet with more than 5 peerings should be managed using AVNM connectivity configuration"
+    },
+    {
+        "problem": "Guest Configuration extension should be installed on machines"
+    },
+    {
+        "problem": "Microsoft Defender for Resource Manager should be enabled"
+    },
+    {
+        "problem": "Virtual machines and virtual machine scale sets should have encryption at host enabled"
+    },
+    {
+        "problem": "Windows virtual machines should enable Azure Disk Encryption or EncryptionAtHost."
+    },
+    {
+        "problem": "Linux virtual machines should enable Azure Disk Encryption or EncryptionAtHost."
+    },
+    {
+        "problem": "Email notification to subscription owner for high severity alerts should be enabled"
+    },
+    {
+        "problem": "Enable Container Insights"
+    },
+    {
+        "problem": "Clusters with a Single Node Pool"
+    },
+    {
+        "problem": "Geo-redundant backup should be enabled for Azure Database for PostgreSQL"
+    },
+    {
+        "problem": "Enable Cross Region Restore for your recovery Services Vault"
+    },
+    {
+        "problem": "Use Availability zones for better resiliency and availability"
+    },
+    {
+        "problem": "Enable zone redundancy for Azure SQL Database to achieve high availability and resiliency."
+    },
+    {
+        "problem": "A minimum subnet size of /24 is recommended for Application Gateway v2 subnets."
+    },
+    {
+        "problem": "Microsoft Defender for Key Vault should be enabled"
+    },
+    {
+        "problem": "Microsoft Defender for App Service should be enabled"
+    },
+    {
+        "problem": "Microsoft Defender for Containers should be enabled"
+    },
+    {
+        "problem": "Machines should have a vulnerability assessment solution"
+    },
+    {
+        "problem": "Microsoft Defender for Storage plan should be enabled with Malware Scanning and Sensitive Data Threat Detection"
+    },
+    {
+        "problem": " Microsoft Defender for open-source relational databases should be enabled"
+    },
+    {
+        "problem": "Microsoft Defender for servers should be enabled"
+    },
+    {
+        "problem": "Microsoft Defender for Storage plan should be enabled with Malware Scanning and Sensitive Data Threat Detection"
+    },
+    {
+        "problem": "Microsoft Defender for SQL should be enabled for unprotected PostgreSQL flexible servers"
+    },
+    {
+        "problem": "Configure Connection Monitor for ExpressRoute"
+    },
+    {
+        "problem": "Consider virtual machine reserved instance to save over your on-demand costs"
+    },
+    {
+        "problem": "Purchasing a savings plan for compute could unlock lower prices"
+    }
+]

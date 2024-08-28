@@ -53,13 +53,16 @@ create_report_file() {
     
     echo "*****************************  $(date +'%d-%m-%Y') Azure Disks with Public Access Enabled  *****************************" > $report_file
 
-    # Loop through each resource
-    echo "$filtered_disks" | while IFS= read -r resource; do          
+    # Check if filtered_disks is not empty
+    if [ -n "$filtered_disks" ]; then
+       # Loop through each resource
+       echo "$filtered_disks" | while IFS= read -r resource; do          
           name=$(echo "$resource" | jq -r '.Name')
           ResourceGroup=$(echo "$resource" | jq -r '.ResourceGroup')
       
-          echo "[WARNING] Subscription: $subscription_name | RG: $ResourceGroup | Disk: $name | Disk Public Access: Enabled" >> $report_file
-    done
+          echo "[WARNING] Subscription: Australia-DataCenter | RG: $ResourceGroup | Disk: $name | Disk Public Access: Enabled"
+       done
+    fi
         
     # Send email notification if report file is not empty
     send_email "$owner_email" "$report_file"

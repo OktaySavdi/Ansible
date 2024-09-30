@@ -1,0 +1,29 @@
+- name: Check AKS cluster score
+  hosts: jumpserver  # Run the task on the Ansible control node
+  gather_facts: no  # We don't need facts for this task
+  vars_files:
+    - vault.yaml
+  tasks:
+    - name: Clone Private Git Repo
+      git:
+        repo: "https://oauth2:{{ svc_token }}@mygitaddress.com/repo/Script.git"
+        dest: "/opt/repos"
+        update: yes
+        force: yes
+        clone: yes
+      no_log: true
+    
+    - name: Set Executable Mode for resources.sh
+      become: true
+      file:
+        path: "/opt/repos/K8S_Cluster_Score/aks_k8s_cluster_score.sh"
+        mode: "a+x"
+
+    - name: Run Resource utilization Automation
+      shell: "/opt/repos/K8S_Cluster_Score/aks_k8s_cluster_score.sh"
+      environment:
+         username : "{{ username }}"
+         password : "{{  password }}"
+         tenant : "{{ tenant }}"
+         SUBSCRIPTION_ID : "{{ SUBSCRIPTION_ID }}"
+      no_log: true

@@ -672,10 +672,11 @@ send_email() {
     # Use mail command to send the email with the attachment
     echo -e "$BODY" | mail -s "$email_subject" -a "$attachment" "$recipient" 
 }
+
 if [ -z "$subscription_id" ]; then
     # If subscription ID is not provided, get all subscription IDs
     for subscription_id in $(az account list --query '[].id' --output tsv); do
-        # Call individual functions for each resource type
+        ## Call individual functions for each resource type
         find_orphaned_resources "appservice plan" "[?numberOfSites == \`0\`].id" $subscription_id
         find_orphaned_resources "vm availability-set" "[?length(virtualMachines) == \`0\`].id" $subscription_id
         find_orphaned_resources "disk" '[?managedBy==`null`].[id]' $subscription_id
@@ -690,12 +691,20 @@ if [ -z "$subscription_id" ]; then
         find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id
         find_orphaned_snapshot "snapshot" "[?timeCreated<='$(date -u -d '7 days ago' +'%Y-%m-%dT%H:%MZ')'].id" $subscription_id
         find_orphaned_resource_groups $subscription_id
-        check_vm_utilization $subscription_id
-        check_storage_account_size $subscription_id
+        #check_vm_utilization $subscription_id
         #check_storage_accounts $subscription_id
+        check_resource_size $subscription_id "storage_account"
+        check_resource_size $subscription_id "container_registry"
+        find_idle_sql_databases "sql db list" "[?status=='Online']" $subscription_id
+        find_idle_elastic_pools "sql elastic-pool list" $subscription_id
+        find_idle_private_dns_zones $subscription_id
+        find_idle_vnet_gateways $subscription_id
+        find_idle_backups "backup item list" $subscription_id
+        find_unused_synapse_workspaces "synapse sql pool list" $subscription_id
+        find_disconnected_private_endpoints "network private-endpoint list" $subscription_id
     done
 else
-        # Call individual functions for each resource type
+        ## Call individual functions for each resource type
         find_orphaned_resources "appservice plan" "[?numberOfSites == \`0\`].id" $subscription_id
         find_orphaned_resources "vm availability-set" "[?length(virtualMachines) == \`0\`].id" $subscription_id
         find_orphaned_resources "disk" '[?managedBy==`null`].[id]' $subscription_id
@@ -710,9 +719,17 @@ else
         find_orphaned_resources "network application-gateway" "[?backendAddressPools==null && frontendIpConfigurations==null].id" $subscription_id
         find_orphaned_snapshot "snapshot" "[?timeCreated<='$(date -u -d '7 days ago' +'%Y-%m-%dT%H:%MZ')'].id" $subscription_id
         find_orphaned_resource_groups $subscription_id
-        check_vm_utilization $subscription_id
-        check_storage_account_size $subscription_id
+        #check_vm_utilization $subscription_id
         #check_storage_accounts $subscription_id
+        check_resource_size $subscription_id "storage_account"
+        check_resource_size $subscription_id "container_registry"
+        find_idle_sql_databases "sql db list" "[?status=='Online']" $subscription_id
+        find_idle_elastic_pools "sql elastic-pool list" $subscription_id
+        find_idle_private_dns_zones $subscription_id
+        find_idle_vnet_gateways $subscription_id
+        find_idle_backups "backup item list" $subscription_id
+        find_unused_synapse_workspaces "synapse sql pool list" $subscription_id
+        find_disconnected_private_endpoints "network private-endpoint list" $subscription_id
 fi
 
 # Check if the report file is empty

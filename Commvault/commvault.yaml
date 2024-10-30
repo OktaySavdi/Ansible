@@ -7,11 +7,12 @@
   vars:
     webUrl: my-commvault-prod.com
     plan: MY-Prod-K8S-Default
+    clientName: MyClient1
     username: my-prod-sp@mydomain.com
   tasks:
     - name: K8S | Project | Launch playbook for environment
-      import_tasks: all.yaml
-      when: commvault_env == "prod"
+      import_tasks: prod.yaml
+      when: commvault_env == "tkg_prod"
 
 - name: K8S | Project | Commvault jumpserver stg environment
   hosts: jumpserver
@@ -22,9 +23,10 @@
   vars:
     webUrl: my-commvault-stg.com
     plan: MY-STG-K8S-Default
+    clientName: MyClient2
     username: my-stg-sp@mydomain.com
   tasks:
     - name: K8S | Project | Launch playbook for environment
-      import_tasks: all.yaml
-      when: commvault_env == "stg"
+      import_tasks: stg.yaml
+      when: commvault_env == "aks_prod"
 

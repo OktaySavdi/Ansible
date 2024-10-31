@@ -1,0 +1,60 @@
+- name: get cluster_ip
+  shell: |
+    az login --service-principal --username {{ aks_username }} --password {{ aks_password }} --tenant {{ aks_tenant }}
+    unset https_proxy http_proxy no_proxy
+    az account set --subscription {{ subscription }}
+    az aks get-credentials --resource-group {{ resource_group }} --name {{ cluster_name }} --overwrite-existing --admin
+    dig +short $(az aks show --resource-group {{ resource_group }} --name {{ cluster_name }} --query "privateFqdn" -o tsv)
+  register: Cluster_ip
+  ignore_errors: true
+  no_log: true
+  
+- name: get simpana_token
+  shell: |
+    az login --service-principal --username {{ aks_username }} --password {{ aks_password }} --tenant {{ aks_tenant }}
+    unset https_proxy http_proxy no_proxy
+    az account set --subscription {{ subscription }}
+    az aks get-credentials --resource-group {{ resource_group }} --name {{ cluster_name }} --overwrite-existing --admin
+    
+    # Create Service Account and Cluster Role Binding
+    kubectl create sa svc-simpana -n default
+    kubectl create clusterrolebinding backup --clusterrole=cluster-admin --serviceaccount=default:svc-simpana
+    # Apply Secret for the Service Account
+    kubectl apply -f - <<EOF
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: svc-simpana
+      annotations:
+        kubernetes.io/service-account.name: svc-simpana
+      namespace: default
+    type: kubernetes.io/service-account-token
+    EOF
+    
+    # Retrieve the Token
+    my_sa=$(kubectl get secret -n default | grep svc-simpana | awk '{print $1}')
+    kubectl get -n default secret $my_sa -o jsonpath='{.data.token}' | base64 -d
+  register: simpana_token
+  ignore_errors: true
+  no_log: true
+
+- name: start another ansible job_template
+  ansible.builtin.uri:
+    url: "https://<my_ansible_url>/api/v2/job_templates/88/launch/"
+    method: POST
+    validate_certs: no
+    return_content: true
+    status_code: 201
+    body_format: json
+    force_basic_auth: yes
+    user: svc_hce_tmc
+    password: "{{ tmc_svc_pwd }}"
+    headers:
+      Accept: application/json
+      Content-Type: "application/json"
+    body:
+      extra_vars:
+        commvault_env: "{{ commvault_env }}"
+        cluster_name: "{{ cluster_name }}"
+        cluster_ip: "{{ Cluster_ip.stdout_lines[-1] }}"
+        sa_token: "{{ simpana_token.stdout_lines[-1] }}"

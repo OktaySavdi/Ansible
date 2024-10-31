@@ -1,0 +1,9 @@
+- name: K8S | Project | Commvault jumpserver stg environment
+  hosts: jumpserver
+  gather_facts: no
+  serial: 1
+  vars_files:
+    - vault.yaml
+  tasks:
+    - name: K8S | Project | Launch playbook for environment
+      import_tasks: all.yaml

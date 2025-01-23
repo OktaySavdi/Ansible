@@ -141,6 +141,10 @@ Curl Command Example - https://docs.ansible.com/ansible-tower/3.2.5/html/adminis
 ```bash
 curl -f -k -H 'Content-Type: application/json' -XPOST \
 -d '{"extra_vars": "{\"user\": \"oktay\", \"lastname\": \"savdi\", \"country\": \"tr\" }"}' \
+--user myuser:mypassword https://myansible-srv/api/controller/v2/job_templates/{{template_id}}/launch/
+
+curl -f -k -H 'Content-Type: application/json' -XPOST \
+-d '{"extra_vars": "{\"user\": \"oktay\", \"lastname\": \"savdi\", \"country\": \"tr\" }"}' \
 --user myuser:mypassword https://myansible-srv/api/v2/job_templates/{{template_id}}/launch/
 
 curl -f -k -H 'Content-Type: application/json' -XPOST \

@@ -139,6 +139,24 @@ Curl Command Example - https://docs.ansible.com/ansible-tower/3.2.5/html/adminis
 
 ### Action Job
 ```bash
+# Construct JSON payload
+payload=$(jq -n \
+  --arg commvault_env "$commvault_environment" \
+  --arg cluster_name "$(resource_name)" \
+  --arg subscription "${{ parameters.subscription_id }}" \
+  --arg resource_group "${{ parameters.resource_group_name }}" \
+  '{extra_vars: {commvault_env: $commvault_env, cluster_name: $cluster_name, subscription: $subscription, resource_group: $resource_group}}')
+
+# Debug the payload (optional)
+echo "Payload: $payload"
+      
+# Execute curl with the fixed payload
+curl -f -k -H 'Content-Type: application/json' \
+     -XPOST \
+     -d "$payload" \
+     --user "myuser:mypassword" \
+     https://myansible-srv/api/controller/v2/job_templates/308/launch/
+
 curl -f -k -H 'Content-Type: application/json' -XPOST \
 -d '{"extra_vars": "{\"user\": \"oktay\", \"lastname\": \"savdi\", \"country\": \"tr\" }"}' \
 --user myuser:mypassword https://myansible-srv/api/controller/v2/job_templates/{{template_id}}/launch/
